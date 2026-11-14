@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HEALium – Emergency Flow Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f7; --panel:#ffffff; --panel2:#f6f8fb; --line:#e1e7ef; --line2:#cbd5e3;
+  --b:#0B3D91; --b2:#2E96F5; --bdim:rgba(11,61,145,.06); --bglow:rgba(11,61,145,.25);
+  --txt:#07173F; --mut:#55657e; --mut2:#8b98ac; --red:#FC3D21; --amber:#b86a00;
+  --mono:'JetBrains Mono',ui-monospace,monospace; --head:'Space Grotesk',Inter,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#d9e0ea;color:var(--txt);font-family:Inter,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{display:flex;align-items:center;justify-content:center}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+
+#app{position:relative;overflow:hidden;display:grid;grid-template-rows:3.6rem 1fr 4.2rem;
+  background:radial-gradient(120% 90% at 15% 0%,#ffffff 0%,var(--bg) 60%,#e6ebf3 100%)}
+#app::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.6;
+  background-image:linear-gradient(rgba(11,61,145,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(11,61,145,.045) 1px,transparent 1px);
+  background-size:2.5rem 2.5rem;mask-image:radial-gradient(80% 70% at 50% 40%,#000 0%,transparent 90%)}
+
+/* ---------- header ---------- */
+header{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:center;padding:0 1.5rem;background:rgba(255,255,255,.85);border-bottom:1px solid var(--line);z-index:2}
+.logo{display:flex;align-items:center;gap:.6rem;font-family:var(--head);font-weight:700;font-size:1.05rem;letter-spacing:.02em;color:var(--txt)}
+.logo svg{width:1.5rem;height:1.5rem}
+.logo span{color:var(--b2)}
+.stepper{justify-self:center;display:flex;align-items:center;gap:.3rem;white-space:nowrap;font-size:.72rem;font-family:var(--mono);color:var(--mut2)}
+.step{display:flex;align-items:center;gap:.45rem;padding:.3rem .6rem;border-radius:2rem;transition:.3s}
+.step i{font-style:normal;width:1.25rem;height:1.25rem;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:.62rem}
+.step.active{color:var(--b);background:var(--bdim)}
+.step.active i{border-color:var(--b);color:var(--b)}
+.step.done{color:var(--mut)}
+.step.done i{background:var(--b);border-color:var(--b);color:#fff}
+.sep{width:1rem;height:1px;background:var(--line2)}
+.hdr-r{white-space:nowrap;display:flex;justify-content:flex-end;align-items:center;gap:1.1rem;font-family:var(--mono);font-size:.68rem;color:var(--mut)}
+.crew{display:flex;flex-direction:column;align-items:flex-end;line-height:1.35}
+.crew b{color:var(--txt);font-weight:500;font-size:.75rem}
+.alarmbox{display:flex;flex-direction:column;align-items:flex-end;gap:.18rem}
+.alarm{display:flex;align-items:center;gap:.45rem;padding:.28rem .7rem;border-radius:2rem;color:#fff;background:var(--red);font-weight:500}
+.alarm::before{content:"";width:.42rem;height:.42rem;border-radius:50%;background:#fff;animation:pulse 1.2s infinite}
+.live{display:flex;align-items:center;gap:.35rem;font-size:.58rem;letter-spacing:.06em;color:var(--b)}
+.live::before{content:"";width:.36rem;height:.36rem;border-radius:50%;background:var(--b2);box-shadow:0 0 .4rem var(--b2);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.3}}
+
+/* ---------- screens ---------- */
+main{position:relative;z-index:1}
+.screen{position:absolute;inset:0;padding:1.6rem 1.8rem 1rem;opacity:0;visibility:hidden;transform:translateY(.6rem);transition:opacity .35s,transform .35s,visibility .35s}
+.screen.on{opacity:1;visibility:visible;transform:none}
+.kicker{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--b2)}
+h1{font-family:var(--head);font-weight:600;font-size:2rem;letter-spacing:-.01em;margin:.3rem 0 .35rem;display:flex;align-items:center;gap:.7rem}
+h2{font-family:var(--head);font-weight:600;font-size:.95rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:1rem;box-shadow:0 .4rem 1.4rem -1rem rgba(7,23,63,.18)}
+.lbl{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.hide{display:none!important}
+.ustrip{position:absolute;top:.35rem;left:50%;transform:translateX(-50%);z-index:4;background:var(--red);color:#fff;font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;padding:.22rem .8rem;border-radius:2rem;white-space:nowrap}
+
+/* screen 1 */
+#s1{display:flex;flex-direction:column;justify-content:center;padding:0 4rem}
+.uncon{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:.9rem 1.2rem;border-radius:1rem;border:2px solid rgba(252,61,33,.55);background:#fff;text-align:left;transition:.18s;width:100%;box-shadow:0 .4rem 1.4rem -1rem rgba(252,61,33,.5)}
+.uncon .cb{width:2rem;height:2rem;flex:none;border-radius:.5rem;border:2px solid var(--red);display:grid;place-items:center;color:transparent;font-size:1.3rem;font-weight:700;background:#fff;transition:.15s}
+.uncon b{font-family:var(--head);font-size:1.15rem;font-weight:600;display:block;color:var(--red)}
+.uncon small{color:var(--mut);font-size:.74rem}
+.uncon .st{margin-left:auto;font-family:var(--mono);font-size:.64rem;color:var(--mut2);letter-spacing:.08em;text-align:right}
+.uncon:hover{background:rgba(252,61,33,.04)}
+.uncon.on{background:var(--red);border-color:var(--red)}
+.uncon.on .cb{color:var(--red);border-color:#fff}
+.uncon.on b,.uncon.on small,.uncon.on .st{color:#fff}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:1rem}
+.tile{position:relative;height:10.6rem;border-radius:1.1rem;border:1px solid var(--line);background:var(--panel);box-shadow:0 .4rem 1.4rem -1rem rgba(7,23,63,.2);
+  display:flex;flex-direction:column;justify-content:space-between;padding:1.15rem 1.3rem;text-align:left;transition:.2s}
+.tile svg{width:2.2rem;height:2.2rem;stroke:var(--b);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tile b{display:block;font-family:var(--head);font-weight:600;font-size:1.2rem;margin-bottom:.25rem}
+.tile small{color:var(--mut);font-size:.72rem;line-height:1.4}
+.tile:hover{border-color:var(--b);transform:translateY(-3px);box-shadow:0 1rem 2rem -1rem var(--bglow)}
+.tile.sel{border-color:var(--b);background:linear-gradient(180deg,rgba(46,150,245,.12),#fff)}
+.tile .k{position:absolute;top:1.1rem;right:1.2rem;font-family:var(--mono);font-size:.62rem;color:var(--mut2)}
+.vitals{display:flex;gap:2.2rem;margin-top:1.4rem;align-items:center;font-family:var(--mono);font-size:.7rem;color:var(--mut)}
+.vitals b{display:block;font-size:1.05rem;color:var(--txt);font-weight:500;margin-top:.15rem}
+.vitals b.warn{color:var(--red)}
+.vitals .src{margin-left:auto;display:flex;align-items:center;gap:.4rem}
+.vitals .src::before{content:"";width:.4rem;height:.4rem;border-radius:50%;background:var(--b2);box-shadow:0 0 .5rem var(--b2)}
+
+/* screen 2 */
+.s2grid{position:absolute;inset:1.6rem 1.8rem 1rem;display:grid;grid-template-columns:1.45fr 1fr;gap:1.2rem}
+.viewport{position:relative;overflow:hidden;background:radial-gradient(70% 60% at 50% 45%,#ffffff 0%,#f1f4f9 70%,#e9eef5 100%)}
+#gl{position:absolute;inset:0;touch-action:none;cursor:grab}
+#gl.drag{cursor:grabbing}
+.vp-top{position:absolute;top:1.1rem;left:1.2rem;right:1.2rem;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.vp-top > *{pointer-events:auto}
+.vp-ctrl{display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
+.hint{font-size:.72rem;color:var(--mut);margin-top:.3rem}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:2rem;padding:.2rem;gap:.2rem;background:rgba(255,255,255,.85)}
+.seg button{padding:.35rem .8rem;border-radius:2rem;font-size:.66rem;font-family:var(--mono);color:var(--mut);transition:.2s}
+.seg button.on{background:var(--b);color:#fff}
+.vp-bot{position:absolute;left:1.2rem;bottom:1.1rem;right:1.2rem;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none;font-family:var(--mono);font-size:.62rem;color:var(--mut2)}
+#hover{position:absolute;pointer-events:none;padding:.3rem .55rem;border-radius:.4rem;background:var(--txt);font-size:.7rem;font-family:var(--mono);color:#fff;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:3}
+.side{display:flex;flex-direction:column;gap:1rem;min-height:0}
+.side .panel{padding:1.05rem 1.25rem}
+.side .panel:last-child{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem;min-height:2rem}
+.chip{display:inline-flex;align-items:center;gap:.45rem;padding:.38rem .45rem .38rem .75rem;border-radius:2rem;background:var(--bdim);border:1px solid rgba(11,61,145,.3);color:var(--b);font-size:.78rem;font-weight:500}
+.chip button{width:1.15rem;height:1.15rem;border-radius:50%;display:grid;place-items:center;color:var(--mut);font-size:.8rem;line-height:1}
+.chip button:hover{background:rgba(11,61,145,.12);color:var(--b)}
+.empty{color:var(--mut2);font-size:.78rem;padding:.4rem 0}
+.opts{display:grid;gap:.6rem;margin-top:.7rem;grid-template-columns:1fr 1fr}
+.opts.three{grid-template-columns:1fr 1fr 1fr}
+.opt{padding:.72rem 1rem;border-radius:.75rem;border:1px solid var(--line2);text-align:left;transition:.18s;display:flex;flex-direction:column;gap:.15rem;background:var(--panel2)}
+.opt b{font-weight:600;font-size:.9rem}
+.opt small{color:var(--mut);font-size:.67rem;line-height:1.35}
+.opt:hover{border-color:var(--b2)}
+.opt.sel{border-color:var(--b);background:linear-gradient(180deg,rgba(46,150,245,.14),rgba(46,150,245,.04))}
+.opt.sel b{color:var(--b)}
+.opt.soon{opacity:.55;cursor:default;border-style:dashed;flex-direction:row;align-items:center;justify-content:space-between}
+.opt.soon:hover{border-color:var(--line2)}
+.opt.soon i{font-style:normal;font-family:var(--mono);font-size:.56rem;color:var(--mut2);letter-spacing:.08em}
+.listpanel{padding:1.3rem 1.5rem;display:flex;flex-direction:column;min-height:0}
+.listpanel h2{font-size:1.5rem;margin:.3rem 0 .2rem}
+.listpanel .opts{margin-top:1rem}
+.listpanel .opts.one{grid-template-columns:1fr}
+.listpanel .opts.one .opt{padding:1.25rem 1.4rem}
+.listpanel .opts.one .opt b{font-size:1.15rem}
+.listpanel .opts.one .opt small{font-size:.76rem}
+.listpanel .sub{margin-top:1.1rem}
+
+/* info button + tooltip */
+.info{width:1.15rem;height:1.15rem;flex:none;border-radius:50%;border:1px solid var(--line2);display:inline-grid;place-items:center;font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--mut);cursor:help;transition:.15s;vertical-align:middle;background:#fff;letter-spacing:0}
+h1 .info{width:1.5rem;height:1.5rem;font-size:.8rem}
+.info:hover,.info.pin{border-color:var(--b);color:#fff;background:var(--b)}
+#tip{position:absolute;z-index:60;max-width:20rem;padding:.85rem 1rem;border-radius:.7rem;background:#fff;border:1px solid var(--line2);
+  box-shadow:0 1rem 2.5rem -.8rem rgba(7,23,63,.35);font-size:.74rem;line-height:1.5;color:var(--txt);opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s}
+#tip.on{opacity:1;transform:none}
+#tip h4{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--b);font-weight:500;margin-bottom:.4rem}
+#tip ul{padding-left:1rem;margin:.2rem 0}
+#tip li{margin:.1rem 0}
+#tip .m{color:var(--mut)}
+
+/* screen 3 */
+#s3{display:grid;grid-template-rows:auto 1fr;gap:.8rem;padding-top:1.1rem}
+.summary{display:flex;align-items:center;gap:.9rem}
+.summary h1{font-size:1.4rem;margin:0;white-space:nowrap}
+.tags{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;flex:1}
+.tag{padding:.28rem .65rem;border-radius:2rem;border:1px solid var(--line2);font-size:.7rem;font-family:var(--mono);color:var(--txt);background:#fff;white-space:nowrap}
+.tag.b{border-color:var(--b);background:var(--b);color:#fff}
+.tag.r{border-color:var(--red);background:var(--red);color:#fff}
+.vit{display:flex;align-items:stretch;gap:.4rem;background:#fff;border:1px solid var(--line);border-radius:.8rem;padding:.35rem .45rem;box-shadow:0 .4rem 1.4rem -1rem rgba(7,23,63,.18)}
+.vit .lv{display:flex;flex-direction:column;justify-content:center;font-family:var(--mono);font-size:.5rem;letter-spacing:.1em;color:var(--b);padding:0 .45rem 0 .3rem;line-height:1.5}
+.vit .lv::before{content:"";width:.4rem;height:.4rem;border-radius:50%;background:var(--red);animation:pulse 1s infinite;margin-bottom:.2rem}
+.v{min-width:4.6rem;padding:.25rem .6rem;border-radius:.5rem;background:var(--panel2);font-family:var(--mono);line-height:1.25}
+.v span{display:block;font-size:.5rem;letter-spacing:.08em;color:var(--mut);text-transform:uppercase}
+.v b{font-size:.95rem;font-weight:500}
+.v b u{text-decoration:none;font-size:.56rem;color:var(--mut);margin-left:.15rem;font-weight:400}
+.v.warn{background:rgba(184,106,0,.1)} .v.warn b{color:var(--amber)}
+.v.crit{background:var(--red)} .v.crit b,.v.crit span,.v.crit b u{color:#fff}
+.grid3{display:grid;grid-template-columns:1fr 1.3fr 1fr;grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"causes do side" "records cat cat";gap:.9rem;min-height:0}
+.grid3 > .panel{padding:.85rem 1.1rem;min-height:0;overflow:hidden}
+.a-causes{grid-area:causes}.a-do{grid-area:do}.a-side{grid-area:side;display:flex;flex-direction:column;gap:.9rem;min-height:0}.a-records{grid-area:records}.a-cat{grid-area:cat}
+.a-side .panel{padding:.8rem 1.1rem;flex:1;min-height:0;overflow:hidden}
+.a-side .panel.flags{flex:none}
+
+.rec{display:grid;grid-template-columns:1fr auto;gap:.26rem 1rem;margin-top:.55rem;font-size:.72rem}
+.rec span{color:var(--mut)}
+.rec b{font-weight:500;font-family:var(--mono);font-size:.68rem;text-align:right}
+.rec b.up{color:var(--amber)}
+.cause{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:.6rem;padding:.42rem 0;border-top:1px solid var(--line)}
+.cause:first-of-type{border-top:none}
+.cause b{font-weight:600;font-size:.8rem;display:block;line-height:1.25}
+.cause small{color:var(--mut);font-size:.65rem;line-height:1.35;display:block}
+.lvl{display:flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.58rem;color:var(--mut);justify-content:flex-end}
+.bars{display:flex;gap:2px}
+.bars i{width:.34rem;height:.8rem;border-radius:2px;background:#dfe6f0}
+.bars.l3 i,.bars.l2 i:nth-child(-n+2),.bars.l1 i:first-child{background:var(--b)}
+.bars.l3 i{background:var(--red)}
+.lvl.hi{color:var(--red);font-weight:500}
+.banner{padding:.3rem .7rem;border-radius:.55rem;background:var(--red);color:#fff;font-family:var(--head);font-weight:600;font-size:.8rem;letter-spacing:.01em}
+.banner.calm{background:var(--bdim);color:var(--b)}
+#recs{margin-top:.45rem;display:flex;flex-direction:column;gap:.28rem}
+.rrow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.65rem;padding:.2rem .7rem .2rem .4rem;border-radius:.6rem;border:1px solid var(--line2);background:var(--panel2);text-align:left;transition:.15s;width:100%}
+.rrow:hover{border-color:var(--b);background:#fff;box-shadow:0 .5rem 1.2rem -.8rem var(--bglow)}
+.rrow .num{width:1.35rem;height:1.35rem;border-radius:50%;background:var(--b);color:#fff;font-family:var(--mono);font-size:.68rem;display:grid;place-items:center}
+.rrow b{font-weight:600;font-size:.78rem;display:block;line-height:1.25}
+.rrow small{color:var(--mut);font-size:.62rem;line-height:1.3;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow > span:nth-child(2){min-width:0}
+.rrow .go{font-family:var(--mono);font-size:.58rem;color:var(--b);white-space:nowrap}
+.catgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.5rem}
+.citem{text-align:left;padding:.42rem .65rem;border:1px solid var(--line2);border-radius:.6rem;background:var(--panel2);transition:.15s;display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.citem:hover{border-color:var(--b);background:#fff}
+.citem b{font-size:.74rem;font-weight:600;color:var(--b)}
+.citem small{font-size:.6rem;color:var(--mut);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.citem .cl{font-family:var(--mono);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2)}
+.citem .c-life{color:var(--red)}
+.tx{display:flex;flex-direction:column;gap:.28rem;margin-top:.45rem;font-size:.71rem}
+.tx div{display:flex;gap:.5rem;align-items:flex-start;line-height:1.38}
+.tx div::before{content:"→";color:var(--b);font-family:var(--mono)}
+.flags{border-color:rgba(252,61,33,.35)!important;background:linear-gradient(180deg,rgba(252,61,33,.07),#fff)!important}
+.flags h2{color:var(--red);font-size:.82rem}
+.flags .tx div::before{content:"!";color:var(--red);font-weight:700}
+
+/* guide modal */
+#guide{position:absolute;inset:0;z-index:50;background:rgba(7,23,63,.45);backdrop-filter:blur(3px);display:grid;place-items:center;opacity:0;visibility:hidden;transition:.2s}
+#guide.on{opacity:1;visibility:visible}
+.gbox{width:70rem;height:41rem;display:grid;grid-template-columns:1fr 1.3fr;background:#fff;border-radius:1.1rem;overflow:hidden;box-shadow:0 2rem 4rem -1.5rem rgba(7,23,63,.5)}
+.gtext{padding:1.4rem 1.5rem 1.1rem;display:flex;flex-direction:column;min-height:0}
+.gtext h2{font-size:1.4rem;margin:.3rem 0 .15rem}
+.gtext .why{font-size:.76rem;color:var(--b);background:var(--bdim);padding:.45rem .7rem;border-radius:.5rem;margin:.55rem 0 0}
+.gtext .gneed{font-size:.72rem;color:var(--mut);margin:.5rem 0 0;line-height:1.45}
+.gsteps{list-style:none;position:relative;flex:1;min-height:0;overflow-y:auto;margin:.7rem -.5rem 0;padding:0 .5rem;scrollbar-width:thin}
+.gsteps li{display:flex;gap:.7rem;padding:.5rem .7rem;border-radius:.6rem;cursor:pointer;font-size:.78rem;line-height:1.45;color:var(--mut);border-left:3px solid transparent;transition:background .2s,opacity .2s}
+.gsteps li b{display:block;color:var(--txt);font-size:.84rem;font-weight:600;margin-bottom:.05rem}
+.gsteps li .gn{flex:none;width:1.5rem;height:1.5rem;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-family:var(--mono);font-size:.64rem;color:var(--mut);background:#fff}
+.gsteps li.past{opacity:.5}
+.gsteps li.past .gn{background:var(--bdim);border-color:transparent;color:var(--b)}
+.gsteps li.on{background:var(--bdim);border-left-color:var(--b);color:var(--txt)}
+.gsteps li.on .gn{background:var(--b);border-color:var(--b);color:#fff}
+.gsteps li:hover:not(.on){background:var(--panel2)}
+.gtext .note{font-size:.72rem;line-height:1.45;border-left:3px solid var(--b2);padding:.1rem 0 .1rem .7rem;margin:.6rem 0 0;color:var(--txt)}
+.gtext .note b{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--b2);display:block;font-weight:500}
+.gimg{background:var(--panel2);border-left:1px solid var(--line);display:flex;flex-direction:column;padding:1.2rem;gap:.75rem;min-height:0}
+.gframe{position:relative;flex:1;min-height:0;background:#fff;border:1px solid var(--line);border-radius:.8rem;overflow:hidden}
+.gframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:.6rem;animation:gin .25s ease-out}
+@keyframes gin{from{opacity:0;transform:translateX(.8rem)}to{opacity:1;transform:none}}
+.gframe .ph{position:absolute;inset:.8rem;border:2px dashed var(--line2);border-radius:.6rem;display:grid;place-items:center;text-align:center;color:var(--mut2);font-family:var(--mono);font-size:.66rem;line-height:1.7}
+.gframe .ph svg{width:2.4rem;height:2.4rem;stroke:var(--line2);fill:none;stroke-width:1.4;display:block;margin:0 auto .5rem}
+.gnav{display:flex;align-items:center;gap:.8rem}
+.garr{width:2.6rem;height:2.6rem;flex:none;border-radius:50%;background:var(--b);color:#fff;font-size:1.5rem;line-height:1;display:grid;place-items:center;transition:.15s}
+.garr:hover{background:#174fb3}
+.garr:disabled{background:#dde4ee;color:var(--mut2);cursor:default}
+.gcap{flex:1;text-align:center;min-width:0}
+.gcap span{display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;color:var(--mut)}
+.gcap b{display:block;font-family:var(--head);font-weight:600;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gbar{display:flex;gap:3px}
+.gbar i{flex:1;height:.32rem;border-radius:2px;background:#dfe6f0;cursor:pointer;transition:.2s}
+.gbar i.on{background:var(--b)}
+.gfoot{display:flex;justify-content:space-between;align-items:center}
+.kbd{font-family:var(--mono);font-size:.58rem;color:var(--mut2)}
+.kbd kbd{font-family:inherit;border:1px solid var(--line2);border-bottom-width:2px;border-radius:.25rem;padding:0 .3rem;background:#fff;color:var(--mut)}
+
+/* footer */
+footer{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:0 1.8rem;border-top:1px solid var(--line);background:rgba(255,255,255,.7)}
+.fl{display:flex;align-items:center;gap:1.2rem}
+.disc{font-family:var(--mono);font-size:.62rem;color:var(--mut2)}
+.link{font-family:var(--mono);font-size:.64rem;color:var(--b);text-decoration:underline;text-underline-offset:3px}
+.need{display:flex;gap:1rem;font-family:var(--mono);font-size:.66rem;color:var(--mut2);margin-right:1.2rem}
+.need span.ok{color:var(--b)}
+.need span::before{content:"○ "}
+.need span.ok::before{content:"● "}
+.btns{display:flex;align-items:center}
+.btn{padding:.75rem 1.4rem;border-radius:.7rem;font-weight:600;font-size:.85rem;transition:.18s;display:inline-flex;align-items:center;gap:.5rem}
+.btn.ghost{color:var(--mut);border:1px solid var(--line2);background:#fff}
+.btn.ghost:hover{color:var(--txt);border-color:var(--mut)}
+.btn.pri{background:var(--b);color:#fff;box-shadow:0 .5rem 1.6rem -.6rem var(--bglow);margin-left:.7rem}
+.btn.pri:hover{background:#174fb3}
+.btn.pri.red{background:var(--red)}
+.btn.pri:disabled{background:#dde4ee;color:var(--mut2);box-shadow:none;cursor:not-allowed}
+#toast{position:absolute;left:50%;bottom:5.2rem;transform:translate(-50%,1rem);padding:.65rem 1.1rem;border-radius:.6rem;background:var(--txt);color:#fff;font-size:.76rem;opacity:0;transition:.25s;z-index:70;pointer-events:none}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.fallback{position:absolute;inset:4rem 1.2rem 3rem;display:flex;flex-wrap:wrap;gap:.5rem;align-content:center;justify-content:center}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0B3D91" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M3 12h4l2-4 3 8 2-5 1.5 1H21" stroke="#2E96F5"/></svg>
+      <div>HEAL<span>ium</span></div>
+    </div>
+    <div class="stepper" id="stepper"></div>
+    <div class="hdr-r">
+      <div class="crew"><b>Bob · CM-2</b><span id="met">MET 143d 06:12:40</span></div>
+      <div class="alarmbox">
+        <div class="alarm">EMERGENCY <span id="elapsed">00:00</span></div>
+        <div class="live">LIVE · BEING SENT TO FLIGHT SURGEON</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- SCREEN 1 -->
+    <section class="screen on" id="s1">
+      <div class="kicker" id="s1kick">Triggered via wrist device · step 1 of 3</div>
+      <h1>What is the emergency? <span class="info" data-tip="s1">i</span></h1>
+      <button class="uncon" id="uncon" data-action="uncon" aria-pressed="false">
+        <span class="cb">✓</span>
+        <span><b>Person is unconscious / not responding</b><small>No reaction when you speak loudly and tap both shoulders</small></span>
+        <span class="st" id="unconSt">TAP TO CHECK</span>
+      </button>
+      <div class="tiles">
+        <button class="tile" data-action="type" data-v="pain"><span class="k">01</span>
+          <svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          <div><b>Pain</b><small>Localised pain anywhere in the body</small></div></button>
+        <button class="tile" data-action="type" data-v="bleeding"><span class="k">02</span>
+          <svg viewBox="0 0 24 24"><path d="M12 2.5s-6.5 7.2-6.5 11.8a6.5 6.5 0 0 0 13 0C18.5 9.7 12 2.5 12 2.5z"/></svg>
+          <div><b>Bleeding</b><small>Visible or suspected blood loss</small></div></button>
+        <button class="tile" data-action="type" data-v="breathing"><span class="k">03</span>
+          <svg viewBox="0 0 24 24"><path d="M12 4v8M12 12c-1.5 0-3-1-4-3-1.3-2.6-4-1.5-4 2v6c0 2 1.6 3 3.5 2.4L12 18M12 12c1.5 0 3-1 4-3 1.3-2.6 4-1.5 4 2v6c0 2-1.6 3-3.5 2.4L12 18"/></svg>
+          <div><b>Breathing trouble</b><small>Shortness of breath, choking, bad air</small></div></button>
+        <button class="tile" data-action="type" data-v="injury"><span class="k">04</span>
+          <svg viewBox="0 0 24 24"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M10.5 10.5h.01M13.5 13.5h.01M13.5 10.5h.01M10.5 13.5h.01"/></svg>
+          <div><b>Injury</b><small>Impact, cut, burn, sprain or fracture</small></div></button>
+        <button class="tile" data-action="type" data-v="other"><span class="k">05</span>
+          <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>
+          <div><b>Other</b><small>Digestive issues, dizziness, fatigue …</small></div></button>
+      </div>
+      <div class="vitals">
+        <div>Heart rate<b class="warn">112 bpm</b></div>
+        <div>SpO₂<b>97 %</b></div>
+        <div>Blood pressure<b>138/88</b></div>
+        <div>Skin temp.<b>36.9 °C</b></div>
+        <div class="src">Live · wrist device</div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2 -->
+    <section class="screen" id="s2">
+      <div class="ustrip hide" id="ustrip">UNCONSCIOUS · keep the airway open · re-check breathing every minute</div>
+      <div class="s2grid" id="s2body">
+        <div class="panel viewport" id="vp">
+          <canvas id="gl"></canvas>
+          <div class="vp-top">
+            <div><div class="kicker" id="vpTitle">Location</div><div class="hint">Drag to rotate · tap a body part to select</div></div>
+            <div class="vp-ctrl">
+              <div class="seg" id="view"><button class="on" data-action="view" data-v="front">FRONT</button><button data-action="view" data-v="back">BACK</button></div>
+              <div class="seg" id="zoom"><button class="on" data-action="zoom" data-v="body">BODY</button><button data-action="zoom" data-v="head">HEAD</button></div>
+            </div>
+          </div>
+          <div class="vp-bot"><span id="facing">VIEW · FRONT</span><span>Multiple areas allowed</span></div>
+          <div id="hover"></div>
+        </div>
+        <div class="side">
+          <div class="panel" style="flex:none">
+            <div class="row"><span class="lbl">Selected area</span><span class="info hide" id="anatInfo" data-tip="anat">i</span></div>
+            <div class="chips" id="chips"></div>
+          </div>
+          <div id="bodyGroups" style="display:contents"></div>
+        </div>
+      </div>
+      <div class="s2grid hide" id="s2list">
+        <div class="panel listpanel">
+          <div class="kicker" id="listKicker"></div>
+          <h2 id="listQ"></h2>
+          <div class="hint" id="listHint"></div>
+          <div class="opts" id="listOpts"></div>
+          <div class="sub hide" id="listSoon"></div>
+        </div>
+        <div class="side"><div id="listGroups" style="display:contents"></div></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3 -->
+    <section class="screen" id="s3">
+      <div class="summary">
+        <h1>Priors &amp; suggestions</h1>
+        <div class="tags" id="tags"></div>
+        <div class="vit" id="vit"></div>
+      </div>
+      <div class="grid3">
+        <div class="panel a-causes">
+          <div class="row"><span class="lbl" id="midTitle">Possible causes</span><span class="info" id="midInfo" data-tip="causes">i</span></div>
+          <div id="causes" style="margin-top:.3rem"></div>
+        </div>
+        <div class="panel a-do">
+          <div class="row"><span class="lbl" id="doLbl">Do now · suggested for this case</span><div id="banner" style="flex:1"></div><span class="info" data-tip="do">i</span></div>
+          <div id="recs"></div>
+        </div>
+        <div class="a-side">
+          <div class="panel flags"><h2>Alert flight surgeon now if</h2><div class="tx" id="flags"></div></div>
+          <div class="panel"><div class="row"><span class="lbl">Then · treatment</span><span class="info" data-tip="tx">i</span></div><div class="tx" id="tx"></div></div>
+        </div>
+        <div class="panel a-records">
+          <div class="row"><span class="lbl">Priors · judging by records</span><span class="info" data-tip="records">i</span></div>
+          <div class="rec" id="records"></div>
+        </div>
+        <div class="panel a-cat">
+          <div class="row"><span class="lbl">On board for this case · what to grab · tap for the guide</span><span class="info" data-tip="cat">i</span></div>
+          <div id="catalog"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="fl"><span class="disc">PROTOTYPE · not a medical device · demo data</span><button class="link hide" id="restart" data-action="restart">↺ Restart demo</button></div>
+    <div class="btns">
+      <div class="need hide" id="need"></div>
+      <button class="btn ghost hide" id="back" data-action="back">← Back</button>
+      <button class="btn pri" id="next" data-action="next" disabled>Continue →</button>
+    </div>
+  </footer>
+
+  <div id="guide"><div class="gbox" id="gbox"></div></div>
+  <div id="tip"></div>
+  <div id="toast"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script>
+/* =========================================================
+   BODY REGIONS + PAIN CAUSES (unchanged)
+   ========================================================= */
+const REGIONS = {
+  head:      {label:'Head',               g:'head',    anat:['Skull & scalp','Brain','Sinuses (forehead, cheeks)']},
+  eyeL:      {label:'Left eye',           g:'head',    anat:['Cornea & conjunctiva','Eyeball','Eyelid']},
+  eyeR:      {label:'Right eye',          g:'head',    anat:['Cornea & conjunctiva','Eyeball','Eyelid']},
+  earL:      {label:'Left ear',           g:'head',    anat:['Outer ear & ear canal','Eardrum','Middle ear']},
+  earR:      {label:'Right ear',          g:'head',    anat:['Outer ear & ear canal','Eardrum','Middle ear']},
+  mouth:     {label:'Mouth',              g:'head',    anat:['Teeth & gums','Tongue & mucosa','Jaw joint (TMJ)']},
+  neck:      {label:'Neck',               g:'head',    anat:['Cervical spine','Throat & airway','Jugular veins','Neck muscles']},
+  chestL:    {label:'Chest (left)',       g:'chest',   anat:['Heart (lies mostly left of centre)','Left lung','Ribs & chest muscles']},
+  chestR:    {label:'Chest (right)',      g:'chest',   anat:['Right lung','Ribs & chest muscles','Oesophagus (behind breastbone)']},
+  upperBack: {label:'Upper back',         g:'chest',   anat:['Thoracic spine','Shoulder blades & ribs','Lungs (from behind)','Back muscles']},
+  upperAbd:  {label:'Upper abdomen',      g:'abdomen', anat:['Stomach','Liver & gallbladder (right side)','Pancreas','Spleen (left side)']},
+  midBack:   {label:'Mid back',           g:'kidney',  anat:['Kidneys (upper part, behind the lower ribs)','Lower ribs','Spine','Back muscles']},
+  lowerAbd:  {label:'Lower abdomen',      g:'abdomen', anat:['Small & large intestine','Appendix (lower right)','Bladder (low, centre)']},
+  lowerBackL:{label:'Lower back (left)',  g:'kidney',  anat:['Left kidney & ureter','Large intestine (descending colon)','Lumbar spine','Back muscles']},
+  lowerBackR:{label:'Lower back (right)', g:'kidney',  anat:['Right kidney & ureter','Large intestine (ascending colon)','Lumbar spine','Back muscles']},
+  pelvis:    {label:'Pelvis / groin',     g:'pelvis',  anat:['Bladder','Lower ureters','Hip joints','Groin muscles']},
+  armL:      {label:'Left arm',           g:'limb',    anat:['Shoulder, elbow & wrist joints','Arm bones','Muscles & tendons','Hand & fingers']},
+  armR:      {label:'Right arm',          g:'limb',    anat:['Shoulder, elbow & wrist joints','Arm bones','Muscles & tendons','Hand & fingers']},
+  legL:      {label:'Left leg',           g:'limb',    anat:['Hip, knee & ankle joints','Leg bones','Muscles & tendons','Deep veins']},
+  legR:      {label:'Right leg',          g:'limb',    anat:['Hip, knee & ankle joints','Leg bones','Muscles & tendons','Deep veins']},
+};
+
+const C = {
+  stone:{n:'Kidney stone (renal colic)',w:'Sharp, deep flank pain in waves; may radiate to the groin',b:3,m:{inside:1,outside:-1,sharp:2,pulsating:1},
+    t:'<h4>Kidney stone</h4>A stone blocks the ureter → urine backs up → intense, colicky flank pain.<ul><li>Spaceflight raises the risk: bone loss → more calcium in urine</li><li>Records: urine calcium ↑, fluid intake ↓</li></ul>'},
+  kidneyInf:{n:'Kidney infection (pyelonephritis)',w:'Flank pain with fever and abnormal urine',b:2,m:{inside:1,dull:1},
+    t:'<h4>Kidney infection</h4>Bacteria ascend to the kidney. Usually duller pain plus <b>fever, chills</b>, painful urination.<br><span class="m">Check: temperature + urine strip.</span>'},
+  backMsk:{n:'Back muscle / spine pain',w:'Changes with movement or pressure; common early in flight',b:2,m:{outside:3,dull:1},
+    t:'<h4>Musculoskeletal</h4>The spine lengthens in microgravity — low back pain is common, especially in the first days of a mission. Usually <b>outside</b> and changes with movement.'},
+  bowel:{n:'Bowel (constipation, colon)',w:'With bloating or changed bowel habits',b:1,m:{inside:1,dull:1,other:1},
+    t:'<h4>Bowel</h4>The large intestine runs through this area. More likely with bloating, constipation or cramping.'},
+  appendix:{n:'Appendicitis',w:'Starts near the navel, moves to lower right; nausea, fever',b:2,m:{inside:1,sharp:1},
+    t:'<h4>Appendicitis</h4>Typical course: pain begins around the navel and moves to the <b>lower right</b> abdomen, with loss of appetite, nausea and fever. Needs surgery if confirmed → early flight-surgeon contact.'},
+  uti:{n:'Bladder infection (UTI)',w:'Burning when urinating, urgency, low belly pain',b:2,m:{inside:1,dull:1,other:1},
+    t:'<h4>Urinary tract infection</h4>Burning, frequent urge, pain above the pubic bone. Urinary infections have occurred in spaceflight. A urine strip (leukocytes, nitrite) gives a fast answer.'},
+  retention:{n:'Urinary retention',w:'Full bladder that won’t empty; reported early in flight',b:1,m:{inside:1,dull:1},
+    t:'<h4>Urinary retention</h4>Difficulty emptying the bladder has been reported in microgravity, mostly early in flight. Ultrasound shows bladder volume; a catheter may be needed.'},
+  stoneRad:{n:'Kidney stone (radiating pain)',w:'A stone lower in the ureter refers pain to belly / groin',b:2,m:{inside:1,sharp:2,pulsating:1},
+    t:'<h4>Kidney stone, lower ureter</h4>The lower a stone travels, the more the pain moves from the flank toward the <b>lower belly and groin</b>. Blood in urine supports it.'},
+  groinStrain:{n:'Groin strain / hernia',w:'Outside; worse with movement, coughing or exercise',b:1,m:{outside:3,sharp:1},
+    t:'<h4>Groin strain / hernia</h4>Muscle strain or a bulge in the groin; worse with exercise, coughing or straining.'},
+  reflux:{n:'Reflux / gastritis',w:'Burning upper belly or behind the breastbone, meal-related',b:2,m:{inside:1,other:2,dull:1},
+    t:'<h4>Reflux / gastritis</h4>Stomach acid irritates the stomach or oesophagus → <b>burning</b> pain, often after meals or lying flat.'},
+  gallbladder:{n:'Gallbladder (biliary colic)',w:'Right upper belly, often after fatty meals',b:1,m:{inside:1,sharp:1,pulsating:1},
+    t:'<h4>Gallbladder</h4>Gallstones block the bile duct → cramping pain in the <b>right upper</b> abdomen, often after fatty food, may radiate to the right shoulder blade.'},
+  pancreas:{n:'Pancreatitis',w:'Severe upper belly pain radiating to the back; rare',b:0,m:{inside:1,dull:1},
+    t:'<h4>Pancreatitis</h4>Inflamed pancreas: severe, constant upper belly pain that radiates to the back, with vomiting. Rare, but serious.'},
+  abdWall:{n:'Abdominal wall strain',w:'Outside; worse when tensing the muscles',b:1,m:{outside:3},
+    t:'<h4>Abdominal wall</h4>Muscle strain, e.g. after exercise. Pain gets worse when tensing the abdomen or pressing on it.'},
+  cardiac:{n:'Heart (angina / heart attack)',w:'Pressure or tightness, may spread to arm or jaw',b:2,m:{inside:2,dull:2,sharp:-1},
+    t:'<h4>Heart</h4>Cardiovascular events are a recognised spaceflight risk. Typical: <b>pressure / tightness</b>, sweating, shortness of breath, spreading to arm or jaw. Treat as urgent until ruled out.'},
+  chestWall:{n:'Chest wall / muscle pain',w:'Outside; reproducible by pressing or moving',b:2,m:{outside:3,sharp:1},
+    t:'<h4>Chest wall</h4>Muscles, ribs or cartilage. Pain can be triggered by pressing on the spot or by moving — that points away from the heart.'},
+  lung:{n:'Lung (pneumothorax, pleurisy, infection)',w:'Sharp, worse when breathing in',b:1,m:{inside:1,sharp:2},
+    t:'<h4>Lung</h4>Sharp pain that gets worse on breathing in suggests the lung lining (pleura) or a collapsed lung. Ultrasound can detect a pneumothorax.'},
+  backUp:{n:'Upper back muscle strain',w:'Outside; posture, exercise, sleeping position',b:2,m:{outside:3,dull:1},
+    t:'<h4>Muscle strain</h4>Most common cause of upper back pain; changes with posture and movement.'},
+  spineUp:{n:'Thoracic spine',w:'Pain along the spine; changes with movement',b:1,m:{outside:1,sharp:1},
+    t:'<h4>Thoracic spine</h4>Joints and discs of the mid spine. Pain right on the spine, changes with bending or twisting.'},
+  cardiacRef:{n:'Referred from heart or lungs',w:'Inside pain felt in the back; rule out with chest symptoms',b:1,m:{inside:2},
+    t:'<h4>Referred pain</h4>Heart and lung problems can be felt between the shoulder blades. Consider if there is also breathlessness or chest pressure.'},
+  headache:{n:'Headache (tension / space headache)',w:'Common in flight; linked to motion sickness and cabin CO₂',b:3,m:{inside:1,dull:2,pulsating:1},
+    t:'<h4>Headache</h4>One of the most frequent complaints in spaceflight. Associated with space motion sickness, elevated cabin CO₂, poor sleep and dehydration.'},
+  sinus:{n:'Sinus congestion',w:'Pressure in forehead / face from fluid shift to the head',b:2,m:{inside:1,dull:2},
+    t:'<h4>Sinus congestion</h4>In microgravity body fluids shift toward the head → stuffy nose, facial fullness, sinus pressure.'},
+  headInjury:{n:'Head bump / injury',w:'Impact with hardware; watch for warning signs',b:1,m:{outside:3,sharp:1},
+    t:'<h4>Head injury</h4>Bumps against hardware happen easily in confined modules. Warning signs: vomiting, drowsiness, confusion, unequal pupils.'},
+  eyeFB:{n:'Foreign body / corneal scratch',w:'Floating particles; sharp pain, tearing, gritty feeling',b:3,m:{outside:1,sharp:2},
+    t:'<h4>Foreign body</h4>Particles don’t settle in microgravity, they float. Foreign bodies and corneal abrasions are among the most common eye problems in spaceflight.'},
+  dryEye:{n:'Dry / irritated eye',w:'Dry cabin air; burning, gritty',b:2,m:{other:2,dull:1},
+    t:'<h4>Dry eye</h4>Low humidity and air flow in the cabin dry the eye surface → burning, gritty feeling.'},
+  conjunct:{n:'Eye infection (conjunctivitis)',w:'Redness, discharge, itching',b:1,m:{other:1,dull:1},
+    t:'<h4>Conjunctivitis</h4>Inflamed outer layer of the eye: red, sticky, itchy. Usually not severe.'},
+  baro:{n:'Ear pressure (barotrauma)',w:'After pressure changes, e.g. airlock or suit',b:2,m:{inside:1,sharp:1,dull:1},
+    t:'<h4>Barotrauma</h4>Pressure changes (airlock, spacesuit) that the ear can’t equalise strain the eardrum / middle ear → pain, muffled hearing.'},
+  otitis:{n:'Ear infection',w:'Pain, reduced hearing, sometimes fever',b:2,m:{inside:1,pulsating:1,dull:1},
+    t:'<h4>Ear infection</h4>Middle- or outer-ear infection: throbbing pain, reduced hearing, possibly fever or discharge.'},
+  earCanal:{n:'Outer ear irritation',w:'Outside; pressure from headset or earplugs',b:1,m:{outside:3},
+    t:'<h4>Outer ear</h4>Long headset or earplug use can irritate the ear and ear canal.'},
+  dental:{n:'Tooth problem (caries, broken filling)',w:'Toothache, sensitive to hot / cold or biting',b:3,m:{inside:1,sharp:1,pulsating:2},
+    t:'<h4>Dental</h4>Dental emergencies are a known risk on long missions — there is no dentist on board. Throbbing pain can mean an abscess.'},
+  oralUlcer:{n:'Mouth ulcer / gum inflammation',w:'Burning, sore spot, bleeding gums',b:2,m:{outside:2,other:2},
+    t:'<h4>Mouth / gums</h4>Small painful ulcers or inflamed gums. Usually harmless, heals in 1–2 weeks.'},
+  tmj:{n:'Jaw joint (TMJ)',w:'Pain when chewing or opening the mouth',b:1,m:{dull:1,outside:1},
+    t:'<h4>Jaw joint</h4>Overload of the jaw joint or chewing muscles (e.g. teeth grinding under stress).'},
+  neckStrain:{n:'Neck muscle strain',w:'Stiff, worse when turning the head',b:3,m:{outside:2,dull:1},
+    t:'<h4>Neck strain</h4>Most common cause of neck pain: muscle tension from posture or sleeping position.'},
+  jugular:{n:'Jugular vein clot',w:'One-sided neck pain or swelling; found in ISS crew',b:1,m:{inside:1,dull:1},
+    t:'<h4>Jugular vein thrombosis</h4>A NASA study found blood-flow stasis in the internal jugular vein of ISS crew and a clot in one crew member. Neck ultrasound checks this.'},
+  throat:{n:'Throat infection',w:'Pain on swallowing, fever',b:1,m:{inside:1,other:1},
+    t:'<h4>Throat infection</h4>Sore throat with painful swallowing, often with fever.'},
+  muscle:{n:'Muscle strain',w:'From exercise or work; worse with use',b:3,m:{outside:2,dull:1},
+    t:'<h4>Muscle strain</h4>Daily exercise on board (treadmill, resistance device) loads muscles heavily. Pain on use, tender to touch.'},
+  joint:{n:'Joint / tendon injury',w:'Pain at a joint, swelling, limited movement',b:2,m:{inside:1,sharp:1},
+    t:'<h4>Joint / tendon</h4>Sprain or tendon irritation — pain localised at a joint, worse with specific movements.'},
+  handEVA:{n:'Hand / finger injury (EVA gloves)',w:'Pressure points, fingernail damage after spacewalks',b:1,m:{outside:2},
+    t:'<h4>EVA glove injury</h4>Pressurised spacesuit gloves can cause pressure points and fingernail damage after spacewalks.'},
+  dvt:{n:'Blood clot (deep vein thrombosis)',w:'One-sided swelling, warmth, tight calf',b:1,m:{inside:1,dull:1},
+    t:'<h4>Deep vein thrombosis</h4>A clot in a deep vein; dangerous if it travels to the lungs. Compression ultrasound can detect it.'},
+  fracture:{n:'Fracture',w:'After impact; deformity, can’t use the limb',b:0,m:{inside:1,sharp:2},
+    t:'<h4>Fracture</h4>Bone density decreases in microgravity, so bones can break more easily after an impact.'},
+};
+const CAUSES_BY_REGION = {
+  lowerBackL:['stone','kidneyInf','backMsk','bowel'], lowerBackR:['stone','kidneyInf','backMsk','bowel'],
+  midBack:['stone','kidneyInf','backMsk'],
+  upperAbd:['reflux','gallbladder','pancreas','abdWall'], lowerAbd:['appendix','uti','bowel','stoneRad','abdWall'],
+  pelvis:['uti','retention','stoneRad','groinStrain'],
+  chestL:['cardiac','chestWall','lung','reflux'], chestR:['chestWall','lung','reflux','cardiac'],
+  upperBack:['backUp','spineUp','cardiacRef'],
+  head:['headache','sinus','headInjury'], eyeL:['eyeFB','dryEye','conjunct'], eyeR:['eyeFB','dryEye','conjunct'],
+  earL:['baro','otitis','earCanal'], earR:['baro','otitis','earCanal'], mouth:['dental','oralUlcer','tmj'],
+  neck:['neckStrain','jugular','throat'],
+  armL:['muscle','joint','handEVA','fracture'], armR:['muscle','joint','handEVA','fracture'],
+  legL:['muscle','joint','dvt','fracture'], legR:['muscle','joint','dvt','fracture'],
+};
+
+
+const REC = {
+  kidney: [['Urine calcium (MD 130)','elevated ↑',1],['Fluid intake, last 3 days','below target ↓',1],['Bone density trend','decreasing',0],['Kidney stones before','none',0]],
+  abdomen:[['Last meal','2 h ago',0],['Last bowel movement','2 days ago',1],['Fluid intake, last 3 days','below target ↓',1],['Abdominal surgery','none',0]],
+  pelvis: [['Fluid intake, last 3 days','below target ↓',1],['Urine calcium (MD 130)','elevated ↑',1],['Urinary infections before','none',0]],
+  chest:  [['Resting ECG (MD 120)','normal',0],['Blood pressure trend','slightly rising ↑',1],['Exercise, last 24 h','90 min',0],['Smoker','no',0]],
+  head:   [['Cabin CO₂, last 24 h','elevated ↑',1],['Sleep, last 3 nights','5.2 h ↓',1],['Eye exam (MD 120)','normal',0],['Dental check','pre-flight, OK',0]],
+  limb:   [['Exercise, last 24 h','2 h',0],['Bone density trend','decreasing',1],['Previous injuries','none',0]],
+};
+
+
+/* =========================================================
+   FLOWS — what screen 2 asks
+   ========================================================= */
+const O=(v,b,s)=>({v,b,s});
+const FLOWS = {
+  pain:{label:'Pain',step:'Location & pain',mode:'body',main:'Location',vp:'Where is the pain?',groups:[
+    {k:'pos',label:'Position',tip:'pos',o:[O('inside','Inside','Deep, within the body'),O('outside','Outside','Skin, muscle, surface')]},
+    {k:'kind',label:'Kind of pain',tip:'kind',o:[O('sharp','Sharp','Stabbing, cutting'),O('dull','Dull','Aching, pressure'),O('pulsating','Pulsating','Throbbing, in waves'),O('other','Other','Burning, cramping …')]}]},
+  bleeding:{label:'Bleeding',step:'Location & bleeding',mode:'body',main:'Location',vp:'Where is the bleeding?',groups:[
+    {k:'btype',label:'How is it bleeding?',tip:'btype',o:[O('spurt','Spurting','Bright red, pulsing'),O('flow','Flowing','Steady stream, soaks dressings'),O('ooze','Oozing','Slow, small amount'),O('none','No open wound','Swelling / bruise — internal bleeding?')]},
+    {k:'obj',label:'Object stuck in the wound?',tip:'obj',def:'no',o:[O('no','No','Wound is free'),O('yes','Yes','Splinter, metal, glass …')]}]},
+  injury:{label:'Injury',step:'Location & injury',mode:'body',main:'Location',vp:'Where is the injury?',groups:[
+    {k:'itype',label:'Type of injury',tip:'itype',o:[O('blunt','Impact / blow','Hit against hardware, crushed'),O('cut','Cut / open wound','Skin is open'),O('twist','Twist / sprain','Joint or muscle overstretched'),O('burn','Burn','Heat, chemical, electrical')]},
+    {k:'func',label:'Movement & feeling',tip:'func',o:[O('ok','Works normally','Hurts, but full function'),O('pain','Painful to move','Limited by pain'),O('lost','Can’t move / use it','No load possible'),O('numb','Numb or tingling','Changed feeling beyond the injury')]}]},
+  breathing:{label:'Breathing trouble',step:'Situation',mode:'list',main:'Situation',q:'What fits best?',hint:'Pick the closest situation — it sets the first actions.',list:[
+    O('choke','Choking','While eating or drinking; object in the mouth'),
+    O('smoke','Smoke or chemical smell','Fire, burnt smell, leak, burning eyes'),
+    O('stale','Stale air / CO₂ alarm','Headache, tired; others feel it too'),
+    O('allergy','Allergic reaction','After food or medication; swelling, rash'),
+    O('pressure','After a pressure change','Spacewalk, airlock, cabin pressure drop'),
+    O('trauma','After a blow to the chest','Impact, fall against hardware'),
+    O('chest','With chest pain or pressure','Tightness, sweating, racing heart'),
+    O('exert','During / after exercise','On the exercise device'),
+    O('infect','With cough or fever','Developed over hours to days'),
+    O('panic','Fear / panic','Fast breathing, tingling hands'),
+    O('unknown','None of these / don’t know','Came on by itself')],
+    groups:[
+    {k:'look',label:'Breathing looks like',tip:'look',o:[O('silent','Can’t speak','Silent, hands at the throat'),O('wheeze','Noisy','Wheeze, whistling, cough'),O('fast','Fast & shallow','Short of breath, can still talk'),O('gasp','Slow / gasping','Irregular, long pauses')]},
+    {k:'onset',label:'Started',tip:'onset',o:[O('sudden','Suddenly','Seconds to minutes'),O('gradual','Gradually','Hours to days')]}]},
+  other:{label:'Other',step:'Symptom',mode:'list',main:'Symptom',q:'What is the main problem?',hint:'Most frequent problems first.',one:true,list:[
+    O('digest','Digestive issue','Nausea, vomiting, diarrhoea, constipation, belly cramps'),
+    O('dizzy','Dizziness / feeling faint','Light-headed, spinning, unsteady, blacking out'),
+    O('fatigue','Fatigue / weakness','Exhausted, can’t concentrate, no strength')],
+    soon:['Fever / infection','Vision change','Rash / allergic reaction','Mood / sleep problem','Urinary problem','Seizure'],
+    groups:[
+    {k:'dur',label:'Since when?',tip:'dur',o:[O('now','Just now','Minutes'),O('today','Today','Hours'),O('days','Several days','Getting worse or constant'),O('onoff','Comes and goes','Repeated episodes')]},
+    {k:'sev',label:'How bad?',tip:'sev',cols:3,o:[O('mild','Mild','Can work'),O('mod','Moderate','Work limited'),O('severe','Severe','Can’t work')]}]},
+  unconscious:{label:'Unconscious',step:'Quick check',mode:'list',main:'Breathing',kick:'Unresponsive person · 10-second check',q:'Is the person breathing normally?',hint:'Open the airway (head back, chin up). Look at the chest, listen and feel at the mouth — no longer than 10 seconds.',one:true,list:[
+    O('yes','Yes — breathing normally','Chest rises regularly, air flow at the mouth'),
+    O('no','No — not breathing or only gasping','No movement, or single noisy gasps'),
+    O('unsure','Not sure','Treated as “not breathing” — when in doubt, start CPR')],
+    groups:[
+    {k:'ubleed',label:'Severe bleeding visible?',tip:'ubleed',o:[O('no','No',''),O('yes','Yes','Blood spurting or pooling')]},
+    {k:'trig',label:'What happened?',tip:'trig',o:[O('sudden','Sudden collapse','No warning'),O('injury','After injury / impact','Hit, fall, crush'),O('choke','Choking / breathing problem','Before collapsing'),O('air','Bad air suspected','Smoke, smell, CO₂ alarm'),O('seizure','Seizure seen','Jerking, stiff'),O('unknown','Unknown','Found like this')]}]},
+};
+
+/* =========================================================
+   ON-BOARD PROCEDURES — catalogue + step-by-step guides
+   c: life | assess | test | treat
+   ========================================================= */
+const UG='Microgravity', G1='With gravity (Moon / Mars base)';
+const P = {
+  help:{n:'Alert crew & flight surgeon',c:'life',d:'Second rescuer, medical kit, voice loop',need:'Crew call, voice loop to ground',s:['Call out loudly for the nearest crew member.','This report is already streaming to the flight surgeon — open the voice loop.','One person stays with the patient, one fetches the medical kit and the defibrillator.','No ground contact (comm gap / signal delay): follow the steps shown here.']},
+  restrain:{n:'Restrain the patient',c:'life',d:'Fix patient and yourself before treating',need:'Crew medical restraint (rigid board fixed to the structure), straps',s:['Move the patient to the medical restraint.','Fasten the straps across chest, hips and legs; pad the head.','Anchor yourself too (foot loops, strap). Otherwise every push moves you, not the patient.','Keep airway, chest and arms accessible.'],note:[G1,'Lay the patient flat on a firm surface instead.']},
+  airway:{n:'Open the airway',c:'life',d:'Head back, chin up, look inside the mouth',need:'Gloves, suction or gauze',s:['Look into the mouth. Remove visible objects or fluid (suction, gauze).','One hand on the forehead, two fingers under the chin: tilt the head back and lift the chin.','Look, listen and feel for normal breathing — 10 seconds at most.','Breathing normally → keep the airway open and monitor.','Not normal, only gasping, or unsure → start CPR.'],note:['Neck injury suspected','Push the jaw forward with both hands instead of tilting the head.']},
+  recovery:{n:'Airway watch / recovery position',c:'life',d:'Unresponsive but breathing normally',need:'Restraint, suction, pulse oximeter',s:['Confirm normal breathing (10 seconds).',UG+': keep the patient restrained, head tilted back, chin lifted. Fluids do not drain by themselves — clear the mouth with suction or gauze.',G1+': roll the person onto the side, upper knee bent, head tilted back, mouth pointing down so fluids run out.','Attach the pulse oximeter. Re-check breathing at least every minute.','Breathing stops or turns into gasping → CPR immediately.'],note:['Why','The side position relies on gravity to keep the airway clear. Without gravity you have to hold it open and clear it actively.']},
+  cpr:{n:'CPR',c:'life',d:'30 compressions : 2 breaths, 100–120 per minute',need:'Medical restraint, defibrillator, second rescuer if possible',s:['No normal breathing → start at once. Send someone for the defibrillator.','Alone, patient not yet restrained: wrap your legs around the patient’s torso (one leg over a shoulder, the other under the opposite arm) and compress the centre of the chest with both hands.','Patient on the medical restraint: handstand method — feet against the opposite wall, arms straight on the breastbone, push with your legs.','Same rhythm as on Earth: 30 compressions, then 2 rescue breaths. 100–120 per minute, 5–6 cm deep.','Change rescuer every 2 minutes. Continue until the defibrillator is ready or the person breathes normally.'],note:[G1,'Kneel beside the patient and use your body weight, as on Earth.']},
+  aed:{n:'Defibrillator (AED)',c:'life',d:'Switch on and follow the voice prompts',need:'Defibrillator, pads, razor / towel',s:['Switch on. Continue CPR while a second person attaches the pads.','Bare and dry the chest. One pad below the right collarbone, one on the left side under the armpit.','Analysis and shock: nobody touches the patient. In microgravity also check floating contact — straps, cables, your legs.','Shock advised → press the button, then continue CPR at once for 2 minutes.','Follow each new prompt.']},
+  choke:{n:'Choking relief',c:'life',d:'5 back blows, then 5 abdominal thrusts',need:'Hand-hold or foot restraint for the rescuer',s:['Can cough or speak → encourage coughing. Nothing else.','Cannot speak, cough or breathe: 5 firm blows between the shoulder blades. Hold the chest with your other arm.','No success: 5 abdominal thrusts — fist just above the navel, pull sharply inwards and upwards.','Alternate 5 blows and 5 thrusts until the object comes out.','Person becomes unresponsive → CPR.'],note:[UG,'Hook your legs or hold a handrail so the force goes into the patient and not into your own drift.']},
+  o2:{n:'Mask & oxygen',c:'life',d:'Own mask first, clean air, then oxygen',need:'Emergency breathing mask, oxygen, pulse oximeter',s:['Bad air suspected: put on your own mask first, then the patient’s.','Leave the module and close the hatch behind you.','Give oxygen by mask. Attach the pulse oximeter.','Target: SpO₂ 94–98 %.','No improvement or SpO₂ below 90 % → flight surgeon now.'],note:['Caution','Oxygen enriches the cabin air and raises the fire risk. Use it only as long as needed.']},
+
+  vitals:{n:'Vital signs',c:'assess',d:'Heart rate, blood pressure, SpO₂, breathing rate',need:'Wrist device, blood-pressure cuff, pulse oximeter',s:['Heart rate and SpO₂ stream from the wrist device — see top right.','Blood pressure: cuff on the upper arm, arm relaxed.','Breathing rate: count breaths for 30 seconds, double it.','Repeat every 5 minutes while unstable, then every 15 minutes.'],note:['Report at once','Heart rate under 50 or over 120 · upper blood pressure under 90 · SpO₂ under 94 % · fewer than 10 or more than 24 breaths per minute.']},
+  temp:{n:'Temperature',c:'assess',d:'Fever means infection or inflammation',need:'Thermometer',s:['Wait 15 minutes after exercise, eating or drinking.','Measure as described on the device (ear, forehead or mouth).','Log the value; repeat after 1 hour.'],note:['Reading','38.0 °C or more = fever. Under 35 °C = too cold.']},
+  neuro:{n:'Neuro check',c:'assess',d:'Responsiveness, pupils, face, strength, speech',need:'Penlight',s:['Responsiveness: awake · reacts to voice · reacts only to pain · no reaction.','Pupils: same size? Both get smaller in light?','Face: ask for a smile. Does one side hang?','Strength: “Squeeze both my hands” and “push against my hands”. Same on both sides?','Speech: clear and sensible, or slurred and confused?'],note:['Report at once','Any new weakness, unequal pupils, confusion or falling responsiveness.']},
+  bodycheck:{n:'Head-to-toe check',c:'assess',d:'Look and feel for hidden injuries',need:'Gloves, scissors, light',s:['Start at the head and work down: head, neck, chest, belly, pelvis, legs, arms, back.','Look for wounds, swelling, deformity, discolouration.','Press gently: where does it hurt?','Compare left and right.']},
+  pain:{n:'Pain score',c:'assess',d:'0–10, track the trend',need:'—',s:['Ask: “0 is no pain, 10 the worst imaginable. Where are you now?”','Note where it is, where it spreads, and what makes it better or worse.','Repeat every 15–30 minutes and after each medication.'],note:['Reading','A rising score despite medication is a warning sign.']},
+  air:{n:'Cabin air check',c:'assess',d:'CO₂, oxygen, pressure, smoke, chemicals',need:'Module readouts, portable gas analyser',s:['Read CO₂, oxygen and pressure for this module.','Smell, smoke or alarm: use the portable analyser.','Ask the others: same symptoms? Then the air is the likely cause.','Move the patient to a module with good air; increase ventilation.'],note:[UG,'Warm air does not rise. CO₂ can collect in a pocket wherever air is not moving, for example around a sleeping person.']},
+
+  ecg:{n:'ECG (12-lead)',c:'test',d:'Heart rhythm and signs of a heart attack',need:'ECG device, 10 electrodes, razor',s:['Restrain the patient; ask them to relax and stay still.','Dry / shave the skin. Place 4 limb and 6 chest electrodes as shown on the device.','Record 10 seconds without moving or speaking.','Send to the flight surgeon; repeat if symptoms change.'],note:['Reading','The device’s automatic reading is only a hint — the flight surgeon interprets.']},
+  sound:{n:'Listen to the chest',c:'test',d:'Stethoscope: both lungs, heart',need:'Stethoscope (electronic if available)',s:['Find the quietest spot — fans are loud.','Compare left and right at 4 points on the front and 4 on the back.','Note: no sound on one side, whistling, crackling.'],note:['Reading','One side silent plus sharp pain or breathlessness → possible collapsed lung.']},
+  us:{n:'Ultrasound',c:'test',d:'Guided live by an expert on the ground',need:'Ultrasound device, gel, wipes, video link',s:[
+    {t:'Apply gel',d:'Restrain the patient and yourself. Switch on and choose the preset the ground names. Put a generous line of gel on the probe and on the skin over the area.',img:'img/us/01.jpg'},
+    {t:'Scan',d:'Open the video link — the expert tells you where to place the probe and how to tilt it. Hold each view still for 5 seconds and save the clip. No link: use the on-screen reference images.',img:'img/us/02.jpg'},
+    {t:'Clean up',d:'Wipe the gel off the skin and the probe. Disinfect the probe, bag the used wipes, stow the device.',img:'img/us/03.jpg'}],
+    note:['Looks for','Urine backing up in the kidney · bladder volume · free fluid in the belly · collapsed lung · heart pumping · clots in veins · eye injury.']},
+  blood:{n:'Blood draw & analysis',c:'test',d:'Venous sample from the inside of the elbow',need:'Tourniquet, alcohol swab, needle + holder, vacuum tubes, gauze, plaster, sharps container, labels, sample bag',s:[
+    {t:'Examine the arm',d:'Pick the arm without injury or IV line. Look at the inside of the elbow for a straight vein. Ask about problems with earlier blood draws.',img:'img/blood/01.jpg'},
+    {t:'Apply the tourniquet loosely',d:'Place it a hand’s width above the elbow crease, still loose. It helps the veins show while you prepare.',img:'img/blood/02.jpg'},
+    {t:'Position and secure the arm',d:'Arm straight, palm up, on the arm rest. In microgravity strap the arm down and anchor the patient and yourself — otherwise the arm drifts.',img:'img/blood/03.jpg'},
+    {t:'Clean hands, put on gloves',d:'Disinfect your hands, then gloves. Lay out tubes, needle, holder, swabs, gauze, plaster and sharps container — fix everything with Velcro so nothing floats away.',img:'img/blood/04.jpg'},
+    {t:'Tighten the tourniquet',d:'Pull it firm so the veins fill. The pulse at the wrist must stay palpable. Leave it on no longer than about 1 minute before the needle is in.',img:'img/blood/05.jpg'},
+    {t:'Feel for the vein',d:'With two fingers find a vein that feels soft and springs back. The patient may make a fist — no pumping.',img:'img/blood/06.jpg'},
+    {t:'Attach needle to holder',d:'Screw the needle firmly onto the holder. Keep the cap on. Have the first tube ready.',img:'img/blood/07.jpg'},
+    {t:'Disinfect the site',d:'Wipe the puncture site with an alcohol swab and let it dry for 30 seconds. Do not touch it again.',img:'img/blood/07A.jpg'},
+    {t:'Insert the needle',d:'Hold the skin taut below the site with your other thumb. Bevel up, angle about 15–30°, one smooth movement into the vein. Keep the holder still.',img:'img/blood/08.jpg'},
+    {t:'Fill the tubes',d:'Push a tube onto the needle inside the holder — the vacuum draws the blood, gravity is not needed. Fill to the line; change tubes in the order on the kit card.',img:'img/blood/09.jpg'},
+    {t:'Mix each tube',d:'Right after filling, turn each tube gently upside down and back 5–10 times (as printed on the tube). Do not shake.',img:'img/blood/10.jpg'},
+    {t:'Release the tourniquet',d:'Open the tourniquet while the last tube fills. The patient opens the fist.',img:'img/blood/11.jpg'},
+    {t:'Remove the last tube',d:'Pull the last tube out of the holder before the needle comes out — otherwise blood leaks from the needle.',img:'img/blood/12.jpg'},
+    {t:'Gauze on, needle out',d:'Lay gauze over the site without pressing, withdraw the needle in one movement, then press. Activate the safety cap.',img:'img/blood/13.jpg'},
+    {t:'Dispose of the needle',d:'Needle and holder straight into the sharps container. Never recap by hand. Close the lid at once.',img:'img/blood/14.jpg'},
+    {t:'Patient presses',d:'The patient presses the gauze for 2–3 minutes with the arm straight — do not bend it. Catch any floating drop with gauze.',img:'img/blood/15.jpg'},
+    {t:'Label the samples',d:'Label every tube next to the patient: ID, date, time. Put them in the sample bag; analyse on board or store as instructed.',img:'img/blood/16.jpg'},
+    {t:'Check the site',d:'Bleeding stopped and no swelling → plaster on. Large bruise, numbness or tingling in the hand → report.',img:'img/blood/17.jpg'}],
+    note:['Microgravity','Strap the arm and anchor yourself. Every loose item — caps, swabs, tubes — needs Velcro or a bag. Blood does not drip: drops float, catch them with gauze.']},
+  urine:{n:'Urine test strip',c:'test',d:'Blood, infection signs, hydration',need:'Collection device, test strips',s:['Collect a sample with the collection device.','Wet the strip completely, then wait the time printed on the pack.','Compare the colour fields with the chart.'],note:['Reading','Blood → stone or injury · leukocytes / nitrite → infection · very concentrated → dehydration.']},
+  eye:{n:'Eye exam',c:'test',d:'Vision, pupil, foreign body',need:'Light, reading card, wet swab, eye shield',s:['Compare both eyes: redness, pupil shape, visible particle.','Test vision separately for each eye with the reading card.','Pull the lower lid down and look for a particle; turn the upper lid if you have learned how.','Cut or puncture suspected: do not press, do not rinse — cover with a rigid shield.']},
+  ent:{n:'Ear, mouth & throat exam',c:'test',d:'Otoscope and light',need:'Otoscope, tongue depressor, light',s:['Ear: pull the ear gently up and back; look at the canal and eardrum.','Mouth: teeth, gums, tongue, inside of the cheeks.','Throat: red, swollen, coating?','Note blood, fluid or pus and from where.']},
+
+  press:{n:'Direct pressure',c:'treat',d:'First action for every external bleed',need:'Gloves, gauze, pressure bandage, eye protection',s:['Gloves on. Press gauze firmly straight onto the bleeding point.','Hold for 10 minutes without lifting. Anchor yourself so you can keep pushing.','Soaked through: do not remove. Add gauze on top and press harder.','Bleeding controlled: wrap a firm pressure bandage; check warmth and feeling beyond it.'],note:[UG,'Blood does not drip. It clings to the wound as a growing dome and breaks off as floating drops. Cover with towels and protect your eyes.']},
+  pack:{n:'Wound packing',c:'treat',d:'Where a tourniquet cannot go: neck, armpit, groin',need:'Gauze (haemostatic if on board), gloves',s:['Find the point deep in the wound where the blood comes from.','Push gauze into the wound, layer by layer, until it is tightly filled.','Press on it with both hands for 10 minutes.','Fix with a pressure bandage. Do not pull the gauze out again.'],note:['Not for','Wounds of the chest or belly cavity.']},
+  tq:{n:'Tourniquet',c:'treat',d:'Arm or leg, when pressure does not stop it',need:'Tourniquet, pen',s:['Only for life-threatening bleeding on an arm or leg.','Place it a hand’s width above the wound, never on a joint.','Tighten until the bleeding stops. It hurts — that is expected.','Write down the time.','Do not loosen. The flight surgeon decides when.']},
+  wound:{n:'Wound cleaning & closure',c:'treat',d:'After the bleeding is controlled',need:'Saline, syringe, gauze, disinfectant, adhesive strips / skin glue, dressing',s:['Rinse with sterile saline from a syringe. Catch the fluid with gauze.','Remove loose dirt. Disinfect the wound edges.','Small clean cut: close with adhesive strips or skin glue.','Deep, dirty or gaping: cover sterile and ask the flight surgeon (stitches, staples).','Check daily: redness, warmth, swelling, pus.']},
+  burn:{n:'Burn care',c:'treat',d:'Stop, cool 20 minutes, cover loosely',need:'Water, gauze, non-stick dressing',s:['Stop the burning. Remove hot or soaked clothing and jewellery — not if stuck to the skin.','Cool for 20 minutes with water-soaked gauze; renew often.','Chemical: wipe and rinse off with plenty of water. Protect yourself.','Cover loosely with a sterile non-stick dressing.','Leave blisters closed.'],note:[UG,'Running water is not available — use soaked compresses or a water bag around the area.']},
+  splint:{n:'Splint & immobilise',c:'treat',d:'Fracture, dislocation, bad sprain',need:'Mouldable splint, padding, elastic bandage, cold pack',s:['Before: check feeling, movement and warmth beyond the injury.','Pad and splint in the position found. Include the joint above and below.','After: check feeling and warmth again. Loosen if worse.','Cold pack over cloth for 15–20 minutes, if on board.']},
+  cspine:{n:'Protect neck & spine',c:'treat',d:'After a blow to head, neck or back',need:'Restraint board, padding, tape',s:['Ask the patient not to move the head.','Hold the head in the neutral position with both hands.','Fix the patient to the board; pad both sides of the head.','Check feeling and movement in hands and feet. Repeat every 15 minutes.']},
+  eyewash:{n:'Eye rinse',c:'treat',d:'Chemical or particle in the eye',need:'Emergency eye-wash, gauze',s:['Do not rub.','Chemical: rinse for at least 15 minutes with the emergency eye-wash. Dust: rinse briefly.','Hold the lids open; the patient looks in all directions.','Particle still stuck on the clear front of the eye: leave it, cover, flight surgeon.'],note:['Never','Rinse or press on an eye that may be cut or punctured.']},
+  iv:{n:'IV line & fluids',c:'treat',d:'Only when the flight surgeon orders it',need:'IV set, fluid bag, pressure cuff or pump',s:['Flight surgeon names the fluid and the rate.','Band on the upper arm, disinfect, insert the cannula, fix it.','Remove all air from the line first — bubbles do not rise without gravity.','Nothing drips without gravity: use the pressure cuff or the pump.']},
+  meds:{n:'Medication from the kit',c:'treat',d:'Drug and dose confirmed by the flight surgeon',need:'Medical kit, records',s:['Check allergies and current medication in the records.','Flight surgeon confirms drug and dose.','Check label and expiry date; second person cross-checks.','Log time and dose.','Watch for side effects for 30 minutes.']},
+  epi:{n:'Adrenaline injection',c:'treat',d:'Severe allergic reaction',need:'Auto-injector or ampoule from the kit',s:['Signs: swelling of lips, tongue or throat, wheeze, rash, feeling faint.','Press the injector firmly into the outer mid-thigh — through clothing is fine. Hold as printed on the device.','Give oxygen; measure vital signs.','No improvement after 5 minutes: second dose, if available.']},
+  fluids:{n:'Drinking & rehydration',c:'treat',d:'Small sips, often',need:'Drink bag, rehydration salts',s:['Small sips every few minutes rather than a lot at once.','Vomiting or diarrhoea: add rehydration salts.','Check the urine: pale = enough, dark = more.'],note:['Not if','Drowsy, vomiting repeatedly, or a procedure may be needed.']},
+  cath:{n:'Urinary catheter',c:'treat',d:'Full bladder that cannot be emptied',need:'Catheter kit; only with the flight surgeon',s:['Confirm with ultrasound: bladder full.','Flight surgeon guides every step over the video link.','Work sterile; log the drained volume.']},
+  dental:{n:'Dental care',c:'treat',d:'Temporary filling, lost crown, toothache',need:'Dental kit',s:['Rinse; find the tooth that hurts when tapped.','Lost filling or crown: dry the tooth, press in temporary filling material.','Swelling of cheek or fever → flight surgeon (infection).']},
+  calm:{n:'Calm-breathing coaching',c:'treat',d:'When fear drives the breathing',need:'—',s:['First rule out a physical cause: SpO₂ normal? Air readouts normal?','Eye contact, calm voice, hold the person steady.','Breathe together: in through the nose for 4 seconds, out through pursed lips for 6.','Continue for 5 minutes; re-check vital signs.']},
+};
+const CATS=[['life','Life support'],['assess','Assess'],['test','Tests'],['treat','Treat']];
+
+/* =========================================================
+   BLEEDING — what lies under each zone
+   ========================================================= */
+const D=(n,w,l)=>({n,w,l});
+const VESSELS = {
+  head:[D('Scalp arteries','Very rich blood supply — scalp wounds bleed heavily but stop with pressure',2),D('Skull and brain beneath','After an impact: no pressure on a soft or dented spot — press around it',2),D('Nose','Nosebleed: pinch the soft part of the nose for 10–15 minutes',1)],
+  eye:[D('Eyeball','Never press on the eye. Cover with a rigid shield',3),D('Eyelid and brow','Bleed freely; gentle pressure on the bone edge only',1)],
+  ear:[D('Skull base','Blood or clear fluid from the ear after a head impact = possible skull fracture. Do not plug',3),D('Ear canal and eardrum','Small bleed after pressure change or scratch',1)],
+  mouth:[D('Airway','Blood does not drain in microgravity — it can be inhaled. Suction, spit into gauze',3),D('Tongue, lips, gums','Bleed heavily; press with gauze or bite on it for 10 minutes',2),D('Tooth socket','Bite firmly on rolled gauze',1)],
+  neck:[D('Carotid artery','Main supply to the brain. Press on the wound, one side only',3),D('Jugular vein','Large vein; air can be sucked in — cover and press at once',3),D('Windpipe','Never press on the front of the throat. No tourniquet, no circular bandage',3)],
+  chestL:[D('Heart and great vessels','Behind and left of the breastbone. Bleeding here is internal and cannot be pressed',3),D('Lung','Air can enter the chest → collapsed lung. Watch breathing',3),D('Armpit artery','High in the armpit: tourniquet impossible — pack and press',2)],
+  chestR:[D('Lung','Air can enter the chest → collapsed lung. Watch breathing',3),D('Great vessels','Behind the breastbone. Internal bleeding cannot be pressed',3),D('Armpit artery','High in the armpit: tourniquet impossible — pack and press',2)],
+  upperBack:[D('Lungs','Deep wound can let air into the chest. Watch breathing',3),D('Aorta along the spine','Deep in front of the spine; internal',2),D('Back muscles','Bleed steadily; press firmly',1)],
+  upperAbd:[D('Liver (right) and spleen (left)','Bleed heavily inside the belly — invisible from outside',3),D('Aorta','Deep in the midline; cannot be compressed',3),D('Abdominal wall','Outer vessels: stop with pressure',1)],
+  lowerAbd:[D('Pelvic arteries','Large vessels deep in the pelvis; internal',3),D('Bowel and bladder','Leak into the belly; cover, do not push anything back',2),D('Abdominal wall','Outer vessels: stop with pressure',1)],
+  pelvis:[D('Femoral artery in the groin','Largest leg artery. Too high for a tourniquet — pack and press hard',3),D('Pelvic vessels','A broken pelvis can bleed litres internally',3),D('Bladder','Blood in the urine after injury',1)],
+  midBack:[D('Kidneys','Left and right of the spine under the lower ribs; bleed internally',3),D('Aorta and vena cava','Deep in front of the spine; cannot be compressed',3),D('Back muscles','Bleed steadily; press firmly',1)],
+  lowerBack:[D('Kidney and its vessels','Flank wound: internal bleeding, blood in the urine',3),D('Aorta and vena cava','Deep in front of the spine; cannot be compressed',2),D('Back muscles','Bleed steadily; press firmly',1)],
+  arm:[D('Brachial artery','Inner side of the upper arm — spurting bleed. Tourniquet works here',3),D('Wrist arteries','Thumb side and little-finger side of the wrist',2),D('Armpit artery','Too high for a tourniquet — pack and press',2)],
+  leg:[D('Femoral artery','Inner thigh — can be fatal within minutes. Tourniquet high on the thigh',3),D('Artery behind the knee','Deep in the knee hollow; hard to press — tourniquet on the thigh',3),D('Lower-leg arteries','Front and back of the shin; pressure is usually enough',2)],
+};
+const VKEY = r => ({eyeL:'eye',eyeR:'eye',earL:'ear',earR:'ear',lowerBackL:'lowerBack',lowerBackR:'lowerBack',armL:'arm',armR:'arm',legL:'leg',legR:'leg'}[r]||r);
+const BCLASS = r => { const k=VKEY(r); return k==='arm'||k==='leg'?'limb':k==='neck'||k==='pelvis'?'junction':['eye','ear','mouth','head'].includes(k)?k:'torso'; };
+
+/* =========================================================
+   INJURY — likely injuries by type and zone
+   ========================================================= */
+const I = {
+  bruise:{n:'Bruise (contusion)',w:'Swelling, tender, skin discoloured',b:3,m:{ok:1,pain:1,lost:-1}},
+  fracture:{n:'Fracture',w:'Deformity, can’t bear load, grinding feeling',b:1,m:{lost:3,pain:1,numb:1},t:'Bone density falls in microgravity, so bones break more easily after an impact.'},
+  jointinj:{n:'Dislocation / joint injury',w:'Joint out of shape or locked',b:1,m:{lost:2}},
+  sprain:{n:'Sprain (overstretched ligament)',w:'Swelling around a joint; painful but usable',b:3,m:{pain:1,ok:1}},
+  tear:{n:'Ligament or tendon tear',w:'Felt a pop; joint unstable or movement lost',b:1,m:{lost:3}},
+  nerve:{n:'Nerve or vessel damage',w:'Numb, tingling, pale or cold beyond the injury',b:0,m:{numb:5}},
+  cutS:{n:'Superficial cut',w:'Skin only; edges lie together',b:3,m:{ok:1}},
+  cutD:{n:'Deep cut (tendon, nerve, vessel)',w:'Gaping, heavy bleeding, lost movement or feeling',b:1,m:{lost:3,numb:3,pain:1}},
+  fb:{n:'Foreign body in the wound',w:'Metal or glass splinter — do not probe blindly',b:1,m:{}},
+  burn1:{n:'Superficial burn',w:'Red, dry, painful — like sunburn',b:3,m:{ok:1,pain:1}},
+  burn2:{n:'Partial-thickness burn',w:'Blisters, wet, very painful',b:2,m:{pain:1}},
+  burn3:{n:'Full-thickness burn',w:'White, leathery or charred; hardly any pain',b:0,m:{numb:4}},
+  airburn:{n:'Airway burn / smoke inhalation',w:'Burn on face or neck, hoarse voice, soot in the mouth',b:2,m:{}},
+  concuss:{n:'Concussion',w:'Headache, nausea, dazed, memory gap',b:3,m:{pain:1}},
+  scalp:{n:'Scalp bruise or wound',w:'Local swelling; scalp wounds bleed heavily',b:3,m:{ok:1}},
+  skull:{n:'Skull fracture / bleeding inside the head',w:'Worsening headache, vomiting, drowsy, unequal pupils',b:1,m:{numb:2,lost:2}},
+  eyeAbr:{n:'Scratch or particle on the eye',w:'Sharp pain, tearing, gritty feeling',b:3,m:{}},
+  eyeChem:{n:'Chemical or heat injury to the eye',w:'Burning, redness, blurred vision — rinse at once',b:3,m:{}},
+  eyePen:{n:'Penetrating eye injury',w:'Misshapen pupil, fluid leaking, vision loss',b:1,m:{lost:3,numb:1}},
+  eardrum:{n:'Eardrum / ear injury',w:'Pain, muffled hearing, ringing',b:3,m:{}},
+  tooth:{n:'Broken or knocked-out tooth',w:'Keep the tooth moist; do not touch the root',b:3,m:{}},
+  jaw:{n:'Jaw fracture',w:'Teeth no longer fit together; can’t open the mouth',b:1,m:{lost:3}},
+  whiplash:{n:'Neck strain',w:'Stiff, painful to turn',b:3,m:{pain:1,ok:1}},
+  cspineI:{n:'Neck spine injury',w:'Pain in the midline; tingling or weakness in arms or legs',b:1,m:{numb:4,lost:3}},
+  ribs:{n:'Rib bruise / fracture',w:'Sharp pain when breathing in or pressing',b:3,m:{pain:1}},
+  pneumoI:{n:'Collapsed lung',w:'Breathless, sharp pain on one side',b:1,m:{lost:1}},
+  penchest:{n:'Penetrating chest wound',w:'Air or bubbling at the wound, breathless',b:1,m:{}},
+  abdwall:{n:'Abdominal wall bruise',w:'Hurts when tensing the belly muscles',b:3,m:{ok:1}},
+  organ:{n:'Internal organ injury (spleen, liver, bladder)',w:'Increasing pain, hard belly, pale, fast pulse',b:1,m:{lost:2,pain:1}},
+  penabd:{n:'Penetrating abdominal wound',w:'Cover moist and sterile; push nothing back',b:1,m:{}},
+  backm:{n:'Back muscle bruise / strain',w:'Local pain, worse with movement',b:3,m:{ok:1,pain:1}},
+  spineI:{n:'Spinal injury',w:'Midline pain; numbness or weakness in the legs',b:1,m:{numb:4,lost:3}},
+  kidneyI:{n:'Kidney injury',w:'Flank pain, blood in the urine',b:1,m:{}},
+  strain:{n:'Muscle strain',w:'Pain on use, tender to touch',b:3,m:{}},
+};
+const ICLASS = r => { const k=VKEY(r); return k==='arm'||k==='leg'?'limb':['head','eye','ear','mouth','neck'].includes(k)?k:['chestL','chestR','upperBack'].includes(k)?'chest':['upperAbd','lowerAbd','pelvis'].includes(k)?'abdomen':'back'; };
+const IKEYS = {
+  blunt:{head:['scalp','concuss','skull'],eye:['eyeAbr','eyePen'],ear:['eardrum','concuss'],mouth:['tooth','jaw'],neck:['whiplash','cspineI'],chest:['ribs','pneumoI','bruise'],abdomen:['abdwall','organ'],back:['backm','spineI','kidneyI'],limb:['bruise','fracture','jointinj','nerve']},
+  cut:{_:['cutS','cutD','fb'],eye:['eyePen','eyeAbr'],chest:['cutS','cutD','penchest'],abdomen:['cutS','cutD','penabd']},
+  twist:{_:['strain'],limb:['sprain','tear','fracture','jointinj'],neck:['whiplash','cspineI'],back:['backm','spineI']},
+  burn:{_:['burn1','burn2','burn3'],head:['burn1','burn2','burn3','airburn'],mouth:['airburn','burn2','burn1'],neck:['burn1','burn2','burn3','airburn'],eye:['eyeChem','burn1']},
+};
+const IREC = {
+  blunt:{head:[['neuro','Concussion or bleeding inside the head?'],['cspine','A blow to the head can also injure the neck'],['vitals'],['pain']],eye:[['eye','Vision, pupil shape, particle'],['neuro']],ear:[['ent','Blood or fluid in the ear canal?'],['neuro']],mouth:[['ent','Teeth, jaw, bleeding'],['dental'],['airway','Loose tooth or blood can block the airway']],neck:[['cspine','Keep the head still until cleared'],['neuro','Feeling and strength in arms and legs'],['vitals']],chest:[['vitals','SpO₂ and breathing rate'],['sound','Both lungs ventilated?'],['us','Collapsed lung, blood in the chest'],['o2','If SpO₂ is under 94 %'],['pain']],abdomen:[['vitals','Pulse up, pressure down = internal bleeding'],['us','Free fluid in the belly'],['urine','Blood → kidney or bladder injured'],['pain']],back:[['cspine','Keep the spine still until cleared'],['neuro','Feeling and strength in the legs'],['urine','Blood → kidney injured'],['us']],limb:[['splint','Check feeling and warmth first, then immobilise'],['us','Fracture line, tendon, joint fluid'],['pain'],['vitals']]},
+  cut:{_:[['press','Stop the bleeding first'],['wound','Clean, close, cover'],['bodycheck','Feeling and movement beyond the cut'],['vitals']],eye:[['eye','No pressure, no rinsing — rigid shield'],['neuro']],chest:[['press','On the outer wound only'],['vitals','SpO₂ and breathing rate'],['sound','Both lungs ventilated?'],['us','Collapsed lung, blood in the chest'],['o2']],abdomen:[['press','Cover; push nothing back'],['vitals','Pulse up, pressure down = internal bleeding'],['us','Free fluid in the belly']]},
+  twist:{_:[['pain'],['vitals']],limb:[['splint','Check feeling and warmth first, then immobilise'],['us','Tendon, ligament, joint fluid'],['pain']],neck:[['cspine','Keep the head still until cleared'],['neuro','Feeling and strength in arms and legs'],['pain']],back:[['neuro','Feeling and strength in the legs'],['pain'],['urine']]},
+  burn:{_:[['burn','Cool for 20 minutes, cover loosely'],['pain'],['vitals'],['fluids','Burns lose fluid']],head:[['burn','Cool for 20 minutes, cover loosely'],['airway','Hoarse voice or soot = airway at risk'],['o2'],['sound'],['vitals']],mouth:[['airway','Swelling can close the airway'],['o2'],['ent'],['vitals']],neck:[['burn','Cool for 20 minutes, cover loosely'],['airway','Hoarse voice or soot = airway at risk'],['o2'],['vitals']],eye:[['eyewash','At once — at least 15 minutes for chemicals'],['eye','After rinsing'],['pain']]},
+};
+const ITX = {
+  blunt:['Rest and protect the area','Cold pack over cloth, 15–20 minutes, if on board','Pain relief as confirmed by the flight surgeon'],
+  cut:['Keep the dressing clean and dry','Check daily: redness, warmth, pus','Antibiotics only if the flight surgeon orders them'],
+  twist:['Rest, elastic bandage, immobilise','Cold pack over cloth, 15–20 minutes, if on board','No load until the flight surgeon clears it'],
+  burn:['Loose sterile dressing; do not open blisters','Drink more','Pain relief as confirmed by the flight surgeon'],
+};
+const IFLAGS = {
+  head:['Vomiting or worsening headache','Drowsy, confused, memory gap','Unequal pupils or a seizure','Blood or clear fluid from ear or nose'],
+  eye:['Vision loss or double vision','Misshapen pupil','Chemical in the eye'],
+  ear:['Blood or clear fluid from the ear','Sudden hearing loss or spinning'],
+  mouth:['Swelling of tongue or throat','Teeth no longer fit together','Bleeding that does not stop'],
+  neck:['Numbness or weakness in arms or legs','Severe pain in the midline','Trouble swallowing or breathing'],
+  chest:['Shortness of breath','SpO₂ under 94 %','Coughing blood'],
+  abdomen:['Hard, rigid belly','Pale, fast pulse, falling blood pressure','Blood in the urine'],
+  back:['Numbness or weakness in the legs','Loss of bladder control','Blood in the urine'],
+  limb:['Numb, pale or cold beyond the injury','Visible deformity or bone in the wound','Pain out of proportion, tight swollen muscle'],
+  burn:['Blistered area larger than the patient’s palm','Burn on face, hands, groin or all around a limb','Hoarse voice or breathing trouble','White or charred skin'],
+};
+
+/* =========================================================
+   BREATHING — causes per situation
+   ========================================================= */
+const B = {
+  obstruct:{n:'Airway blocked by food or an object',w:'Sudden; can’t speak or cough, hands at the throat',b:3,m:{silent:3,sudden:1},t:'Food and small parts float in microgravity and can be breathed in while eating or working.'},
+  aspir:{n:'Something inhaled into the lung',w:'Coughing fit, wheeze on one side',b:2,m:{wheeze:2}},
+  smoke:{n:'Smoke / combustion gases',w:'After fire or overheated equipment; cough, headache',b:3,m:{wheeze:1},t:'Fire is one of the three classic spacecraft emergencies. Smoke contains carbon monoxide, which blocks oxygen transport in the blood.'},
+  toxic:{n:'Toxic chemical in the air',w:'Burning eyes, nose and throat; sharp smell (e.g. ammonia coolant)',b:3,m:{wheeze:1,sudden:1},t:'A toxic release is one of the three classic spacecraft emergencies. On the ISS the reference case is ammonia from the cooling loops.'},
+  co2:{n:'High CO₂ / low oxygen in the cabin',w:'Headache, tiredness, fast breathing; others affected too',b:3,m:{fast:1,gradual:2},t:'CO₂ is removed by machines. If they fail, or air does not circulate, CO₂ builds up — in microgravity even as a local pocket.'},
+  anaph:{n:'Severe allergic reaction (anaphylaxis)',w:'Swelling of lips or throat, rash, wheeze, feeling faint',b:3,m:{wheeze:1,silent:2,sudden:1}},
+  asthma:{n:'Airway spasm (asthma-like)',w:'Wheeze, tight chest, long breath out',b:2,m:{wheeze:3}},
+  dcs:{n:'Decompression sickness',w:'After a pressure drop: chest pain, cough, joint pain, tingling',b:3,m:{},t:'When pressure falls quickly, dissolved nitrogen forms bubbles in blood and tissue — the same mechanism as in divers.'},
+  baro:{n:'Lung overpressure injury / collapsed lung',w:'Sharp one-sided chest pain after the pressure change',b:2,m:{fast:1,sudden:1}},
+  hypox:{n:'Too little oxygen (pressure loss)',w:'Light-headed, tingling, poor judgement',b:2,m:{fast:1}},
+  pneumo:{n:'Collapsed lung (pneumothorax)',w:'Sharp pain on one side, worse when breathing in',b:3,m:{fast:1,sudden:1},t:'Air between lung and chest wall. Ultrasound can show it; one side sounds silent with the stethoscope.'},
+  rib:{n:'Rib injury',w:'Pain stops deep breaths; one tender spot',b:3,m:{fast:1}},
+  hemo:{n:'Bleeding into the chest',w:'Breathless and pale with a fast pulse after a hard impact',b:1,m:{}},
+  mi:{n:'Heart attack / heart failure',w:'Pressure in the chest, sweating, spreads to arm or jaw',b:3,m:{sudden:1},t:'Cardiovascular events are a recognised spaceflight risk. ECG and heart-muscle marker in the blood help to confirm.'},
+  pe:{n:'Clot in the lung (pulmonary embolism)',w:'Sudden breathlessness, sharp pain, fast pulse',b:2,m:{sudden:2,fast:1},t:'A clot travels from a vein into the lung. A clot in a neck vein has been found in an ISS crew member.'},
+  rhythm:{n:'Heart rhythm problem',w:'Racing or irregular pulse, dizziness',b:2,m:{}},
+  exertion:{n:'Overexertion',w:'Settles within minutes of rest',b:2,m:{fast:2}},
+  pneum:{n:'Lung infection (pneumonia / bronchitis)',w:'Cough, fever, coloured sputum',b:3,m:{gradual:2}},
+  uri:{n:'Upper airway infection',w:'Blocked nose, sore throat',b:2,m:{gradual:1},t:'The fluid shift toward the head in microgravity makes nasal congestion worse.'},
+  panic:{n:'Panic / hyperventilation',w:'Fast breathing, tingling hands and lips, fear',b:3,m:{fast:2},t:'Only assume this after physical causes are ruled out: SpO₂ normal, air readouts normal.'},
+};
+const BSCEN = {
+  choke:{k:['obstruct','aspir','anaph'],rec:[['choke','Only if they cannot speak or cough'],['airway','Look for the object'],['o2','After the airway is clear'],['vitals'],['sound','Wheeze on one side = something went deeper']],tx:['Let the person cough in a position they choose','Keep watching for 24 hours: cough, fever → flight surgeon','Nothing to eat or drink until the flight surgeon clears it']},
+  smoke:{k:['smoke','toxic','co2'],rec:[['o2','Your own mask first, then leave the module'],['air','Find and isolate the source'],['vitals','SpO₂ may read falsely normal after smoke'],['eyewash','If the eyes burn'],['sound','Wheeze = airways irritated']],tx:['Stay in the clean module until the air readouts are normal','Remove contaminated clothing','Symptoms can worsen hours later — watch for 24 hours']},
+  stale:{k:['co2','hypox'],rec:[['air','CO₂, oxygen, pressure in this module'],['o2','Move to good air first'],['vitals'],['neuro','Confusion = urgent']],tx:['Increase ventilation; do not sleep in dead-air corners','Symptoms should clear within an hour in good air','Report CO₂ scrubber status to the ground']},
+  allergy:{k:['anaph','asthma'],rec:[['epi','If throat swelling, wheeze or faintness'],['o2'],['vitals','Falling blood pressure = shock'],['airway','Swelling can close the throat'],['meds','Antihistamine as confirmed']],tx:['Stop the suspected food or drug','Symptoms can return after hours — monitor for at least 6 hours','Note the trigger in the records']},
+  pressure:{k:['dcs','baro','hypox'],rec:[['o2','100 % oxygen at once'],['vitals'],['neuro','Tingling, weakness, confusion'],['us','Collapsed lung'],['sound']],tx:['Restore full cabin pressure','Keep the patient at rest and on oxygen','Further treatment is decided by the flight surgeon']},
+  trauma:{k:['pneumo','rib','hemo'],rec:[['vitals','SpO₂ and breathing rate'],['sound','One side silent?'],['us','Collapsed lung, blood in the chest'],['o2','If SpO₂ is under 94 %'],['pain','Pain relief allows deep breaths']],tx:['Position that makes breathing easiest','Pain relief as confirmed, so deep breaths are possible','No exercise until cleared']},
+  chest:{k:['mi','pe','rhythm','pneumo'],rec:[['ecg','Heart attack or rhythm problem'],['vitals'],['o2','If SpO₂ is under 94 %'],['blood','Heart-muscle marker'],['us','Heart pumping, lung']],tx:['Absolute rest','Medication only as ordered by the flight surgeon','Keep the defibrillator next to the patient']},
+  exert:{k:['asthma','exertion','co2','rhythm'],rec:[['vitals','Recovering within 5–10 minutes?'],['sound','Wheeze'],['air','CO₂ near the exercise device'],['ecg','If pulse is irregular or chest hurts']],tx:['Stop exercising; rest upright','Resume only when free of symptoms','Wheeze: inhaler from the kit as confirmed']},
+  infect:{k:['pneum','uri','asthma'],rec:[['temp'],['vitals','SpO₂'],['sound','Crackling over one area'],['blood','White blood cells'],['us','Lung']],tx:['Rest, drink more','Antibiotics only if the flight surgeon orders them','Hygiene: mask, wipe surfaces — protect the crew']},
+  panic:{k:['panic','co2','pe'],rec:[['vitals','SpO₂ must be normal'],['air','Rule out bad air'],['calm','Only after the two checks above'],['ecg','If the pulse stays high']],tx:['Quiet place, one calm person stays','Talk with the flight surgeon about triggers','Sleep and workload review']},
+  unknown:{k:['co2','pe','mi','anaph'],rec:[['vitals'],['air','Others affected?'],['sound'],['ecg'],['us','Lung and heart']],tx:['Rest upright','Oxygen if SpO₂ is under 94 %','Flight surgeon decides on medication']},
+};
+const BFLAGS=['SpO₂ under 90 % despite oxygen','Blue lips; can’t finish a sentence','Breathing slows or turns into gasping','Drowsy or confused','Several crew affected → cabin air emergency'];
+
+/* =========================================================
+   OTHER — top three
+   ========================================================= */
+const OT = {
+  constip:{n:'Constipation',w:'No bowel movement for days, bloating, cramps',b:2,m:{days:2,onoff:1}},
+  gastro:{n:'Stomach / bowel infection or food-related',w:'Nausea, vomiting, diarrhoea; others affected?',b:2,m:{now:1,today:2}},
+  reflux:{n:'Reflux',w:'Burning behind the breastbone, worse after meals',b:2,m:{onoff:2},t:'Without gravity, stomach contents are not held down.'},
+  sms:{n:'Space motion sickness',w:'Typical in the first days of flight — unlikely on mission day 143',b:0,m:{},t:'Affects many crew members in the first days in microgravity and again after returning to gravity.'},
+  medfx:{n:'Medication side effect',w:'New drug in the last days?',b:1,m:{days:1}},
+  dehyd:{n:'Dehydration / low blood pressure',w:'Dark urine, dry mouth, fast pulse',b:3,m:{today:1,days:1},t:'Records show fluid intake below target for 3 days.'},
+  badair:{n:'High CO₂ / low oxygen',w:'Headache, tired; others affected too',b:3,m:{today:1,days:1},t:'Records show elevated cabin CO₂ in the last 24 hours.'},
+  sugar:{n:'Low blood sugar',w:'Shaky, sweaty, hungry; better after eating',b:1,m:{now:1,onoff:1}},
+  vestib:{n:'Inner ear / balance',w:'Spinning, worse with head movement',b:1,m:{onoff:1}},
+  rhythmO:{n:'Heart rhythm problem',w:'Racing or irregular pulse, near-fainting',b:1,m:{now:1,onoff:1,severe:2}},
+  sleep:{n:'Sleep loss / shifted body clock',w:'Short nights, shifted schedule',b:3,m:{days:2},t:'Records show 5.2 hours of sleep on average over the last 3 nights.'},
+  intake:{n:'Too little food or fluid',w:'Missed meals, weight loss',b:2,m:{days:1}},
+  infectO:{n:'Infection starting',w:'Fever, aching, sore throat',b:1,m:{today:1,severe:1}},
+  mood:{n:'Stress / low mood',w:'Isolation and workload over months',b:2,m:{days:1,onoff:1},t:'Isolation and confinement are one of the five hazards of human spaceflight.'},
+};
+const OSCEN = {
+  digest:{k:['constip','gastro','reflux','medfx','sms'],rec:[['vitals'],['temp','Fever → infection'],['urine','How concentrated? → dehydration'],['pain','Where exactly, and how strong'],['fluids','Small sips'],['us','If the pain is severe or localised']],tx:['Small sips of fluid with rehydration salts','Light food when the nausea settles','Medication from the kit as confirmed by the flight surgeon'],flags:['Severe, constant belly pain or a hard belly','Blood in vomit or stool','No urine for 8 hours','Fever of 38 °C or more']},
+  dizzy:{k:['dehyd','badair','sugar','vestib','rhythmO'],rec:[['vitals','Pulse and blood pressure'],['air','CO₂ and oxygen'],['blood','Blood sugar, electrolytes'],['ecg','Rhythm'],['neuro','Rule out stroke signs'],['fluids']],tx:['Restrain and rest; no hazardous tasks','Drink and eat something sweet','Move to a well-ventilated module'],flags:['Fainting or near-fainting','Chest pain or irregular pulse','New weakness, slurred speech, double vision','Not better after 30 minutes of rest']},
+  fatigue:{k:['sleep','badair','intake','mood','infectO'],rec:[['vitals'],['temp','Infection starting?'],['air','CO₂ over the last days'],['urine','Hydration'],['blood','Blood count, blood sugar']],tx:['Protected sleep period; adjust the work schedule','Regular meals and fluid target','Talk with the flight surgeon — also about mood'],flags:['Confusion or can’t stay awake','Breathless at rest','Fever of 38 °C or more','Thoughts of hopelessness']},
+};
+
+/* =========================================================
+   UNCONSCIOUS — causes
+   ========================================================= */
+const U = {
+  arrest:{n:'Cardiac arrest',w:'Not breathing normally = treat as cardiac arrest',b:2,m:{br_no:4,br_unsure:3,tr_sudden:1,ty_pain:1},t:'Unresponsive and not breathing normally is treated as cardiac arrest until proven otherwise. Gasping is not normal breathing.'},
+  hypoxia:{n:'Lack of oxygen / bad cabin air',w:'Smoke, toxic gas, CO₂ build-up or pressure loss',b:1,m:{tr_air:4,ty_breathing:2,br_no:1},t:'Protect yourself first: your own mask, then move the patient to clean air.'},
+  chokeU:{n:'Blocked airway',w:'Collapsed while choking; object may be visible in the mouth',b:0,m:{tr_choke:4,ty_breathing:1,br_no:1}},
+  syncope:{n:'Fainting (brief drop in blood pressure)',w:'Wakes up within 1–2 minutes',b:2,m:{br_yes:2,tr_sudden:1}},
+  headinj:{n:'Head injury',w:'After impact; look for wounds, check pupils',b:0,m:{tr_injury:4,ty_injury:2},t:'Assume the neck is injured too: keep head and neck still.'},
+  bloodloss:{n:'Severe blood loss / shock',w:'Pale, cold, fast weak pulse',b:0,m:{bl_yes:5,ty_bleeding:2},t:'Stop the bleeding with direct pressure in parallel to everything else.'},
+  postict:{n:'After a seizure',w:'Slowly waking, confused, may have bitten the tongue',b:0,m:{tr_seizure:5,br_yes:1},t:'A short seizure-like jerking can also be the first sign of cardiac arrest — check breathing as soon as it stops.'},
+  sugarU:{n:'Low blood sugar',w:'Sweaty, pale; blood test shows it in a minute',b:1,m:{br_yes:1}},
+  medsU:{n:'Medication effect',w:'Records: sleep aid taken in the last 24 hours',b:1,m:{br_yes:1}},
+  stroke:{n:'Stroke',w:'Face droops on one side, unequal pupils',b:1,m:{br_yes:1}},
+};
+
+/* =========================================================
+   TOOLTIPS
+   ========================================================= */
+const TIPS = {
+  s1:`<h4>How it works</h4>Choose the category that fits best. One tap — no typing needed.<br><span class="m">If the person does not react, tick the red box first.</span>`,
+  pos:`<h4>Position</h4><b>Inside</b> = deep pain you can't press on directly (organs).<br><b>Outside</b> = skin, muscle or bone — usually worse when you press or move.`,
+  kind:`<h4>Kind of pain</h4><ul><li><b>Sharp</b> – stabbing; stones, injuries, foreign bodies</li><li><b>Dull</b> – aching, pressure; inflammation, muscles, heart</li><li><b>Pulsating</b> – in waves (colic) or throbbing (tooth, ear)</li><li><b>Other</b> – burning, cramping</li></ul>`,
+  btype:`<h4>Bleeding type</h4><b>Spurting or flowing without pause</b> = life-threatening. Act within seconds.<br><b>Oozing</b> usually stops with a few minutes of pressure.<br><span class="m">Rule of thumb: about half a drinks can of blood is already dangerous.</span>`,
+  obj:`<h4>Object in the wound</h4>Never pull it out — it may be plugging a vessel. Press on both sides and pad around it.`,
+  itype:`<h4>Type of injury</h4>Sets which injuries are likely and what to check first.`,
+  func:`<h4>Movement & feeling</h4>Lost movement points to fracture or tear. Numbness or tingling points to nerve or vessel damage — more urgent.`,
+  look:`<h4>Breathing</h4><b>Can't speak</b> = airway blocked.<br><b>Noisy</b> = airways narrowed.<br><b>Slow / gasping</b> = about to stop: prepare CPR.`,
+  onset:`<h4>Onset</h4>Sudden: blockage, collapsed lung, clot, allergy. Gradual: infection, cabin air.`,
+  dur:`<h4>Duration</h4>Separates acute causes from slow ones such as sleep loss or dehydration.`,
+  sev:`<h4>Severity</h4>“Severe” moves heart, infection and other serious causes up the list.`,
+  ubleed:`<h4>Severe bleeding</h4>Life-threatening bleeding is stopped at once, in parallel to airway and breathing.`,
+  trig:`<h4>What happened</h4>Changes the likely cause — and your own safety: with bad air, put on your mask first.`,
+  records:`<h4>Why records matter</h4>The crew member's records shift the priors — e.g. bone loss in microgravity raises both kidney-stone and fracture risk.<br><span class="m">Values shown are demo data.</span>`,
+  causes:`<h4>How this list is built</h4>Rule-based: typical causes for the selection, ranked by your answers. Uses general medical knowledge and known spaceflight risks.<br><span class="m">Supports — never replaces — the flight surgeon.</span>`,
+  danger:`<h4>What lies here</h4>Structures under the selected area that make a bleed dangerous, and what that means for stopping it.`,
+  do:`<h4>Do now</h4>The most useful steps for this case, in order. Tap a row for the step-by-step guide.`,
+  cat:`<h4>What to grab</h4>Only the procedures suggested for this case, with the equipment each needs. Tap one for its step-by-step guide.`,
+  tx:`<h4>Treatment</h4>Drugs and doses are always confirmed by the flight surgeon, who receives this report live.`,
+};
+
+/* =========================================================
+   STATE + LAYOUT
+   ========================================================= */
+const S = {route:['emergency','assess'], idx:0, sig:null, type:null, uncon:false, flow:null, regions:[], sel:{}, items:{}};
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const app = $('#app');
+const enc = s => encodeURIComponent(s);
+
+function fit(){
+  const w = Math.min(innerWidth, innerHeight*16/9), h = w*9/16;
+  app.style.width = w+'px'; app.style.height = h+'px';
+  document.documentElement.style.fontSize = (w/80)+'px';
+}
+addEventListener('resize', fit); fit();
+
+const t0 = Date.now(), met0 = ((143*24+6)*60+12)*60+40;
+const p2 = n => String(n).padStart(2,'0');
+setInterval(()=>{
+  const s = Math.floor((Date.now()-t0)/1000), m = met0+s;
+  $('#elapsed').textContent = p2(Math.floor(s/60))+':'+p2(s%60);
+  $('#met').textContent = `MET ${Math.floor(m/86400)}d ${p2(Math.floor(m%86400/3600))}:${p2(Math.floor(m%3600/60))}:${p2(m%60)}`;
+},1000);
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('on'),2200); }
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+function planRoute(){ return ['emergency'].concat(S.uncon?['unconscious']:[], S.type?[S.type]:[], ['assess']); }
+const stepLabel = k => k==='emergency'?'Emergency':k==='assess'?'Assessment':FLOWS[k].step;
+function renderStepper(){
+  const r = S.idx===0 ? planRoute() : S.route, labels=r.map(stepLabel);
+  if(S.idx===0 && !S.type && !S.uncon) labels.splice(1,0,'Details');
+  $('#stepper').innerHTML = labels.map((l,k)=>`<div class="step ${k===S.idx?'active':''} ${k<S.idx?'done':''}"><i>${k<S.idx?'✓':k+1}</i>${l}</div>`).join('<div class="sep"></div>');
+  $('#s1kick').textContent = `Triggered via wrist device · step 1 of ${labels.length}`;
+}
+function startRoute(){
+  S.route=planRoute();
+  const sig=S.uncon+'|'+S.type;
+  if(sig!==S.sig){
+    S.sig=sig; S.regions=[]; S.sel={}; S.items={};
+    S.route.forEach(k=>{ if(FLOWS[k]) FLOWS[k].groups.forEach(g=>{ if(g.def) S.sel[g.k]=g.def; }); });
+    if(S.uncon){ S.sel.ubleed = S.type==='bleeding'?'yes':'no'; S.sel.trig = {injury:'injury',breathing:'choke'}[S.type]||'unknown'; }
+  }
+}
+const curKey = () => S.route[S.idx]||'emergency';
+function go(n){
+  S.idx=n; const key=curKey(), scr = key==='emergency'?1:key==='assess'?3:2;
+  $$('.screen').forEach((s,i)=>s.classList.toggle('on', i+1===scr));
+  if(scr===2){ renderS2(key); setTimeout(()=>{ if(typeof resize3D==='function') resize3D(); },50); }
+  if(scr===3) renderAssessment(); else stopVitals();
+  renderStepper(); closeGuide(); hideTip(); updateFooter();
+}
+function s2state(){
+  const F=FLOWS[S.flow];
+  return [[F.main, F.mode==='body' ? S.regions.length>0 : !!S.items[S.flow]]].concat(F.groups.map(g=>[g.label.replace('?',''), !!S.sel[g.k]]));
+}
+function updateFooter(){
+  const next=$('#next'), key=curKey();
+  $('#back').classList.toggle('hide', key==='emergency');
+  $('#restart').classList.toggle('hide', key==='emergency');
+  $('#need').classList.toggle('hide', !FLOWS[key]);
+  next.classList.toggle('hide', key==='assess');
+  next.classList.toggle('red', S.uncon);
+  if(key==='emergency'){ next.textContent = S.uncon ? 'Unresponsive protocol →' : 'Continue →'; next.disabled = !(S.type||S.uncon); }
+  else if(FLOWS[key]){
+    const st=s2state();
+    $('#need').innerHTML = st.map(([l,ok])=>`<span class="${ok?'ok':''}">${l}</span>`).join('');
+    next.textContent = S.idx===S.route.length-2 ? 'Get suggestions →' : 'Next: '+stepLabel(S.route[S.idx+1])+' →';
+    next.disabled=!st.every(x=>x[1]);
+  }
+}
+
+/* =========================================================
+   SCREEN 2
+   ========================================================= */
+function groupsHtml(F){
+  return F.groups.map(g=>`<div class="panel"><div class="row"><span class="lbl">${g.label}</span><span class="info" data-tip="${g.tip}">i</span></div>
+    <div class="opts ${g.cols===3?'three':''}">${g.o.map(o=>`<button class="opt ${S.sel[g.k]===o.v?'sel':''}" data-action="grp" data-g="${g.k}" data-v="${o.v}"><b>${o.b}</b>${o.s?`<small>${o.s}</small>`:''}</button>`).join('')}</div></div>`).join('');
+}
+function renderS2(flow){
+  S.flow=flow; const F=FLOWS[flow];
+  $('#ustrip').classList.toggle('hide', !(S.uncon && flow!=='unconscious')), body=F.mode==='body';
+  $('#s2body').classList.toggle('hide',!body); $('#s2list').classList.toggle('hide',body);
+  if(body){
+    $('#vpTitle').textContent=F.vp; $('#bodyGroups').innerHTML=groupsHtml(F); $('#listGroups').innerHTML='';
+    renderChips();
+  } else {
+    $('#bodyGroups').innerHTML='';
+    $('#listKicker').textContent=(F.kick||F.label)+' · step '+(S.idx+1)+' of '+S.route.length; $('#listQ').textContent=F.q; $('#listHint').textContent=F.hint;
+    const lo=$('#listOpts'); lo.className='opts'+(F.one?' one':'');
+    lo.innerHTML=F.list.map(o=>`<button class="opt ${S.items[flow]===o.v?'sel':''}" data-action="item" data-v="${o.v}"><b>${o.b}</b><small>${o.s}</small></button>`).join('');
+    const soon=$('#listSoon'); soon.classList.toggle('hide',!F.soon);
+    if(F.soon) soon.innerHTML=`<span class="lbl">More conditions · from the medical database</span><div class="opts three" style="margin-top:.6rem">${F.soon.map(x=>`<div class="opt soon"><b>${x}</b><i>SOON</i></div>`).join('')}</div>`;
+    $('#listGroups').innerHTML=groupsHtml(F);
+  }
+  updateFooter();
+}
+function renderChips(){
+  $('#chips').innerHTML = S.regions.length
+    ? S.regions.map(id=>`<span class="chip">${REGIONS[id].label}<button data-action="rm" data-v="${id}" aria-label="remove">×</button></span>`).join('')
+    : '<div class="empty">Nothing selected yet — tap the body.</div>';
+  $('#anatInfo').classList.toggle('hide', !S.regions.length);
+  if(typeof paint3D==='function') paint3D();
+  updateFooter();
+}
+function toggleRegion(id){
+  const i=S.regions.indexOf(id);
+  i>=0 ? S.regions.splice(i,1) : S.regions.push(id);
+  renderChips();
+}
+const anatTip = () => `<h4>What's in this area</h4>` + S.regions.map(id=>`<b>${REGIONS[id].label}</b><ul>${REGIONS[id].anat.map(a=>`<li>${a}</li>`).join('')}</ul>`).join('');
+
+/* =========================================================
+   SCREEN 3 — assessment per flow
+   returns {tags, records, midTitle, midTip, mid[], banner, rec[[id,why]], tx[], flags[], vit{}}
+   ========================================================= */
+const lvl = s => s>=5?3:s>=3?2:1;
+function rank(keys,dict,mods,max=4){
+  const seen=new Set();
+  return keys.filter(k=>!seen.has(k)&&seen.add(k)).map(k=>{ const c=dict[k]; let s=c.b; mods.forEach(m=>{ s+=(c.m&&c.m[m])||0; }); return {...c,s,l:lvl(s)}; }).sort((a,b)=>b.s-a.s).slice(0,max);
+}
+const optLabel=(flow,k,v)=>{ const g=FLOWS[flow].groups.find(g=>g.k===k); const o=g&&g.o.find(o=>o.v===v); return o?o.b:v; };
+const regionTags=()=>{ const r=S.regions.map(x=>REGIONS[x].label); return r.length>2 ? r.slice(0,2).concat('+'+(r.length-2)) : r; };
+const uniq=a=>[...new Set(a)];
+const mergeRec=(lists,max=6)=>{ const seen=new Set(), out=[]; lists.forEach(l=>l.forEach(r=>{ if(r[0]!=='temp'&&!seen.has(r[0])){ seen.add(r[0]); out.push(r); } })); return out.slice(0,max); };
+
+const PAIN_REC = {
+  kidney:[['urine','Blood → stone · leukocytes / nitrite → infection'],['us','Urine backing up in the kidney; stone visible?'],['temp','Stone plus fever = emergency'],['blood','Kidney function, infection markers'],['pain','Colic comes in waves — track the trend'],['fluids']],
+  abdomen:[['vitals'],['temp','Fever → inflammation'],['us','Gallbladder, appendix, free fluid'],['blood','Inflammation, liver and pancreas values'],['urine','Rules urinary causes in or out'],['pain']],
+  pelvis:[['urine','Leukocytes / nitrite → infection · blood → stone'],['us','How full is the bladder?'],['temp'],['blood'],['cath','Only if the bladder is full and cannot be emptied']],
+  chest:[['ecg','Heart attack or rhythm problem'],['vitals'],['sound','Both lungs ventilated?'],['us','Collapsed lung, heart pumping'],['blood','Heart-muscle marker'],['o2','If SpO₂ is under 94 %']],
+  head:[['neuro','Rule out stroke and pressure signs'],['air','CO₂ is a frequent headache trigger'],['vitals'],['temp'],['fluids']],
+  eye:[['eye','Particle, redness, vision'],['eyewash','Particle or irritant'],['pain']],
+  ear:[['ent','Ear canal and eardrum'],['temp'],['pain']],
+  mouth:[['ent','Teeth, gums, mucosa'],['dental'],['temp','Fever + swelling = abscess']],
+  neck:[['us','Neck veins: clot?'],['neuro'],['temp'],['ent','Throat']],
+  limb:[['bodycheck','Swelling, warmth, colour — compare both sides'],['us','Veins (clot), muscle, tendon'],['splint','If movement hurts'],['temp'],['pain']],
+};
+const PAIN_TX = {
+  kidney:{tx:['Pain relief from the medical kit as confirmed','Drink more fluids','Antibiotics only if there are signs of infection'],flags:['Fever of 38 °C or more, or chills','Little or no urine','Repeated vomiting','Pain not controlled by medication']},
+  abdomen:{tx:['Rest; small sips of fluid','Pain relief as confirmed by the flight surgeon','Nothing to eat until the cause is clearer'],flags:['Pain moves to the lower right, with fever','Hard, rigid belly','Vomiting blood or black stool','Fever of 38 °C or more']},
+  pelvis:{tx:['Drink more fluids','Pain relief as confirmed by the flight surgeon','Catheter only if the flight surgeon orders it'],flags:['Unable to urinate','Fever of 38 °C or more, or chills','Blood in the urine with fever']},
+  chest:{tx:['Stop all exercise; rest','Keep the wrist device on (continuous heart rate)','Medication only as ordered by the flight surgeon'],flags:['Pressure with sweating or breathlessness','Pain spreading to arm, jaw or back','Sudden shortness of breath','Irregular or very fast pulse']},
+  head:{tx:['Eye: do not rub; rinse','Pain relief as confirmed by the flight surgeon','Drink; rest in a quiet, well-ventilated place'],flags:['Sudden, very severe headache','Vision change or loss','Vomiting or drowsiness after a head bump','One-sided swelling of neck or face']},
+  limb:{tx:['Rest and immobilise','Cold pack / compression, if on board','Pain relief as confirmed by the flight surgeon'],flags:['One-sided swelling with pain (clot)','Numb, pale or cold limb','Visible deformity','Can’t move or load the limb']},
+};
+const VIT0={hr:112,spo2:97,sys:138,dia:88,rr:20,temp:36.9};
+
+function assessFlow(f){
+  const sel=S.sel, r0=S.regions[0], ITEM=S.items[f];
+  if(f==='pain'){
+    const g=REGIONS[r0].g, sub=PAIN_REC[VKEY(r0)]?VKEY(r0):g;
+    const keys=[]; S.regions.forEach(r=>keys.push(...CAUSES_BY_REGION[r]));
+    return {tags:[...regionTags(),optLabel(f,'pos',sel.pos),optLabel(f,'kind',sel.kind)], anat:true,
+      records:REC[g], midTitle:'Possible causes', midTip:'causes', mid:rank(keys,C,[sel.pos,sel.kind]),
+      rec:mergeRec(uniq(S.regions.map(r=>PAIN_REC[VKEY(r)]?VKEY(r):REGIONS[r].g)).map(k=>PAIN_REC[k])), tx:PAIN_TX[g].tx, flags:PAIN_TX[g].flags, vit:VIT0};
+  }
+  if(f==='bleeding'){
+    const cls=BCLASS(r0), severe=sel.btype==='spurt'||sel.btype==='flow', hidden=sel.btype==='none';
+    const mid=[]; const seen=new Set(); S.regions.forEach(r=>VESSELS[VKEY(r)].forEach(v=>{ if(!seen.has(v.n)){ seen.add(v.n); mid.push({...v,t:`<h4>${v.n}</h4>${v.w}`}); } }));
+    mid.sort((a,b)=>b.l-a.l);
+    const objWhy = sel.obj==='yes' ? 'Object stays in! Press on both sides, pad around it' : null;
+    let rec;
+    if(hidden) rec=[['vitals','Pulse up, pressure down = internal bleeding'],['us','Free fluid, blood in chest or belly'],['restrain','Keep still — movement increases bleeding'],['o2','If SpO₂ is under 94 %'],['iv','When the flight surgeon orders it']];
+    else if(cls==='limb') rec=severe?[['press',objWhy||'Now — hard, with both hands'],['tq','If pressure does not stop it within a minute'],['pack','If no tourniquet, or the wound is in the armpit / groin'],['vitals','Watch for shock'],['iv','When the flight surgeon orders it'],['wound','Only after the bleeding is controlled']]:[['press',objWhy||'10 minutes without lifting'],['wound','Clean, close, cover'],['vitals']];
+    else if(cls==='junction') rec=[['press',objWhy||(VKEY(r0)==='neck'?'On the wound, one side only — never on the windpipe':'Hard, with your full strength')],['pack','A tourniquet cannot be used here'],['vitals','Watch for shock'],['o2'],['iv','When the flight surgeon orders it']];
+    else if(cls==='torso') rec=[['press',objWhy||'On the outer wound; internal bleeding cannot be pressed'],['vitals','Pulse up, pressure down = internal bleeding'],['us','Free fluid, collapsed lung'],['o2','If SpO₂ is under 94 %'],['iv','When the flight surgeon orders it'],['wound','Only after the bleeding is controlled']];
+    else if(cls==='eye') rec=[['eye','No pressure, no rinsing — rigid shield'],['neuro','After a blow: check the other eye and pupils'],['vitals']];
+    else if(cls==='ear') rec=[['neuro','Fluid from the ear after an impact = skull fracture?'],['ent','Where does it come from?'],['cspine','If there was a blow to the head'],['vitals']];
+    else if(cls==='mouth') rec=[['press','Gauze on the spot; bite on it for 10 minutes'],['airway','Suction — blood does not drain by itself'],['ent','Find the source'],['vitals']];
+    else rec=[['press',objWhy||'Firm; around the edges if the skull feels soft or dented'],['neuro','Blow to the head?'],['vitals'],['wound','Scalp: after the bleeding is controlled']];
+    const noTq = cls!=='limb' && !hidden;
+    return {tags:[...regionTags(),optLabel(f,'btype',sel.btype)].concat(sel.obj==='yes'?['Object in wound']:[]), anat:true,
+      records:[['Blood group','A+',0],['Blood-thinning medication','none',0],['Haemoglobin (MD 120)','normal',0],['Tetanus vaccination','up to date',0]],
+      midTitle:'What lies here · danger zones', midTip:'danger', mid:mid.slice(0,4),
+      banner: hidden?['Suspected internal bleeding — keep still, monitor','calm']:severe?['LIFE-THREATENING BLEEDING — press now','']:null,
+      rec, tx:['Keep the patient restrained, warm and calm','Contain the blood: floating drops endanger eyes and equipment','Fluids into the vein and medication only as ordered'].concat(noTq?['Tourniquet is not an option at this site']:[]),
+      flags:['Blood soaks through despite pressure','Pale, cold, sweaty skin','Fast weak pulse, falling blood pressure','Confused or drowsy'],
+      vit: severe||hidden?{hr:126,spo2:96,sys:96,dia:60,rr:24,temp:36.4}:{hr:98,spo2:98,sys:128,dia:82,rr:17,temp:36.8}};
+  }
+  if(f==='injury'){
+    const t=sel.itype, classes=uniq(S.regions.map(ICLASS)), cls=classes[0];
+    const keys=[]; classes.forEach(c=>keys.push(...(IKEYS[t][c]||IKEYS[t]._||['bruise'])));
+    const mid=rank(keys,I,[sel.func]).map(c=>({...c,t:`<h4>${c.n}</h4>${c.w}${c.t?'<br><span class="m">'+c.t+'</span>':''}`}));
+    const flags = t==='burn' ? IFLAGS.burn : uniq([].concat(...classes.map(c=>IFLAGS[c]))).slice(0,5);
+    return {tags:[...regionTags(),optLabel(f,'itype',t),optLabel(f,'func',sel.func)], anat:true,
+      records:[['Bone density trend','decreasing',1],['Exercise, last 24 h','2 h',0],['Previous injuries','none',0],['Tetanus vaccination','up to date',0]],
+      midTitle:'Likely injuries', midTip:'causes', mid,
+      banner: sel.func==='numb'?['Numbness beyond the injury — nerve or vessel may be affected','']:null,
+      rec:mergeRec(classes.map(c=>IREC[t][c]||IREC[t]._)), tx:ITX[t], flags,
+      vit:{hr:108,spo2:97,sys:134,dia:86,rr:18,temp:36.8}};
+  }
+  if(f==='breathing'){
+    const sc=BSCEN[ITEM], gasp=sel.look==='gasp', silent=sel.look==='silent';
+    let rec=sc.rec.slice();
+    if(gasp) rec=mergeRec([[['airway','Slow or gasping breathing can stop any second'],['cpr','Be ready — start if breathing stops'],['o2']],rec]);
+    else if(silent && ITEM!=='choke') rec=mergeRec([[['airway','No voice = airway blocked or swollen shut'],['choke','If an object could be the cause']],rec]);
+    return {tags:[optLabel2('breathing',ITEM),optLabel(f,'look',sel.look),optLabel(f,'onset',sel.onset)],
+      records:[['Asthma / lung disease','none',0],['Known allergies','none recorded',0],['Cabin CO₂, last 24 h','elevated ↑',1],['Last spacewalk','2 days ago',0]],
+      midTitle:'Possible causes', midTip:'causes', mid:rank(sc.k,B,[sel.look,sel.onset]).map(c=>({...c,t:`<h4>${c.n}</h4>${c.w}${c.t?'<br><span class="m">'+c.t+'</span>':''}`})),
+      banner: gasp?['BREATHING IS FAILING — open the airway, prepare CPR','']:silent?['AIRWAY BLOCKED — act now','']:null,
+      rec, tx:sc.tx, flags:BFLAGS,
+      vit: gasp?{hr:132,spo2:82,sys:104,dia:66,rr:7,temp:36.9}:{hr:118,spo2:silent?86:91,sys:136,dia:86,rr:28,temp:ITEM==='infect'?38.4:37.0}};
+  }
+  if(f==='other'){
+    const sc=OSCEN[ITEM], sev=sel.sev==='severe';
+    return {tags:[optLabel2('other',ITEM),optLabel(f,'dur',sel.dur),optLabel(f,'sev',sel.sev)],
+      records:[['Sleep, last 3 nights','5.2 h ↓',1],['Cabin CO₂, last 24 h','elevated ↑',1],['Fluid intake, last 3 days','below target ↓',1],['Last bowel movement','2 days ago',ITEM==='digest'?1:0]],
+      midTitle:'Possible causes', midTip:'causes', mid:rank(sc.k,OT,[sel.dur,sel.sev]).map(c=>({...c,t:`<h4>${c.n}</h4>${c.w}${c.t?'<br><span class="m">'+c.t+'</span>':''}`})),
+      banner: sev?['Severe symptoms — the flight surgeon is reviewing live','calm']:null,
+      rec:sc.rec, tx:sc.tx, flags:sc.flags,
+      vit: ITEM==='dizzy'?{hr:104,spo2:96,sys:96,dia:58,rr:18,temp:36.7}:ITEM==='digest'?{hr:98,spo2:97,sys:118,dia:76,rr:17,temp:sev?38.1:37.2}:{hr:74,spo2:96,sys:122,dia:80,rr:15,temp:36.8}};
+  }
+  // unconscious
+  const br=ITEM, noBr=br!=='yes', bleed=sel.ubleed==='yes', tr=sel.trig;
+  let rec;
+  if(noBr){
+    rec=[['help','You need a second rescuer and the defibrillator'],['cpr',tr==='choke'?'Start now. Look into the mouth for the object before each breath':'Start now — do not wait for anything'],['aed','As soon as it arrives'],['restrain','When the second rescuer is there: handstand method'],['airway','Before each pair of rescue breaths']];
+    if(bleed) rec.splice(2,0,['press','Second rescuer presses on the bleed']);
+    if(tr==='air') rec.unshift(['o2','Your own mask first — then move the patient to clean air']);
+  } else {
+    rec=[['help','Second rescuer and medical kit']];
+    if(tr==='air') rec.unshift(['o2','Your own mask first — then move the patient to clean air']);
+    if(bleed) rec.push(['press','Stop the bleeding now']);
+    rec.push(['recovery','Keep the airway open; re-check breathing every minute']);
+    if(tr==='injury') rec.push(['cspine','Blow to the head: keep the neck still']);
+    rec.push(['vitals','Pulse oximeter and blood pressure'],['neuro','Pupils, reaction to voice and touch'],['blood','Blood sugar in one minute']);
+  }
+  return {tags:[noBr?'Not breathing normally':'Breathing normally',optLabel(f,'trig',tr)].concat(bleed?['Severe bleeding']:[]).concat(S.type?['Reported: '+FLOWS[S.type].label]:[]),
+    records:[['Resting ECG (MD 120)','normal',0],['Medication, last 24 h','sleep aid',1],['Cabin CO₂, last 24 h','elevated ↑',1],['Diabetes','no',0]],
+    midTitle:'Possible causes', midTip:'causes', mid:rank(Object.keys(U),U,['br_'+br,'tr_'+tr,'bl_'+sel.ubleed,'ty_'+S.type]).map(c=>({...c,t:`<h4>${c.n}</h4>${c.w}${c.t?'<br><span class="m">'+c.t+'</span>':''}`})),
+    banner: noBr?['NOT BREATHING NORMALLY — START CPR NOW','']:['Breathing — keep the airway open and stay with the person','calm'],
+    rec:rec.slice(0,6),
+    tx:['Never leave the person alone','Nothing by mouth','Keep warm','Note the time of collapse and every change'],
+    flags: noBr?['No sign of life after the first shock','Defibrillator repeats “no shock advised”','Rescuers are getting exhausted','Breathing or movement returns']:['Breathing stops or turns into gasping → CPR','Not awake after 2 minutes','Seizure lasting more than 5 minutes','Unequal pupils'],
+    vit: noBr?{hr:0,spo2:71,sys:0,dia:0,rr:0,temp:36.5}:{hr:56,spo2:93,sys:92,dia:56,rr:10,temp:36.5}};
+}
+const optLabel2=(flow,v)=>{ const o=FLOWS[flow].list.find(o=>o.v===v); return o?o.b:v; };
+function assess(){
+  if(!S.uncon) return assessFlow(S.type);
+  const U=assessFlow('unconscious'); if(!S.type) return U;
+  const Cc=assessFlow(S.type), noBr=S.items.unconscious!=='yes';
+  U.tags=[U.tags[0]].concat(Cc.tags);
+  U.anat=Cc.anat;
+  const cr=Cc.rec.filter(r=>!['vitals','pain','help','temp'].includes(r[0]));
+  if(S.type==='bleeding'){
+    const ur=U.rec.filter(r=>r[0]!=='press');
+    let k=ur.findIndex(r=>r[0]==='cpr'); if(k<0) k=ur.findIndex(r=>r[0]==='help');
+    U.rec=mergeRec([ur.slice(0,k+1),cr.slice(0,2),ur.slice(k+1)]);
+    U.mid=Cc.mid; U.midTitle=Cc.midTitle; U.midTip=Cc.midTip;
+  } else U.rec=mergeRec([U.rec.slice(0,4),cr.slice(0,2),U.rec.slice(4)]);
+  if(!noBr) U.flags=uniq(U.flags.concat(Cc.flags.slice(0,1)));
+  return U;
+}
+
+let A=null;
+function renderAssessment(){
+  A=assess(); A.rec=A.rec.filter(r=>r[0]!=='temp').slice(0,6);
+  $('#tags').innerHTML = (S.uncon?'<span class="tag r">Unconscious</span>':'')+(S.type?`<span class="tag b">${FLOWS[S.type].label}</span>`:'')
+    + A.tags.slice(0,5).map(t=>`<span class="tag">${t}</span>`).join('') + (A.tags.length>5?`<span class="tag" title="${A.tags.slice(5).join(', ')}">+${A.tags.length-5}</span>`:'') + (A.anat?'<span class="info" data-tip="anat">i</span>':'');
+  $('#records').innerHTML = `<span>Crew member</span><b>Bob · 41 y · MD 143</b>` + A.records.map(([k,v,up])=>`<span>${k}</span><b class="${up?'up':''}">${v}</b>`).join('');
+  $('#midTitle').textContent=A.midTitle; $('#midInfo').dataset.tip=A.midTip;
+  $('#causes').innerHTML = A.mid.map(c=>`<div class="cause"><div><b>${c.n}</b><small>${c.w}</small></div>
+      <div class="lvl ${c.l===3?'hi':''}">${['','Low','Medium','High'][c.l]}<span class="bars l${c.l}"><i></i><i></i><i></i></span></div>
+      <span class="info" data-tip-html="${enc(c.t||`<h4>${c.n}</h4>${c.w}`)}">i</span></div>`).join('');
+  $('#banner').innerHTML = A.banner ? `<div class="banner ${A.banner[1]}">${A.banner[0]}</div>` : ''; $('#doLbl').classList.toggle('hide',!!A.banner);
+  $('#recs').innerHTML = A.rec.map(([id,why],i)=>`<button class="rrow" data-action="guide" data-v="${id}" data-i="${i}"><span class="num">${i+1}</span><span><b>${P[id].n}</b><small>${why||P[id].d}</small></span><span class="go">GUIDE ›</span></button>`).join('');
+  $('#catalog').innerHTML = '<div class="catgrid">'+A.rec.map(([k])=>`<button class="citem" data-action="guide" data-v="${k}"><span class="cl c-${P[k].c}">${CATS.find(c=>c[0]===P[k].c)[1]}</span><b>${P[k].n}</b><small>${P[k].need}</small></button>`).join('')+'</div>';
+  $('#tx').innerHTML = A.tx.map(x=>`<div>${x}</div>`).join('');
+  $('#flags').innerHTML = A.flags.map(x=>`<div>${x}</div>`).join('');
+  startVitals(A.vit);
+}
+
+/* live vitals strip */
+let vitTimer=null;
+function vitHtml(v){
+  const cls=(k,x)=>{ if(k==='hr') return x<=0||x<45||x>125?'crit':x>100||x<55?'warn':''; if(k==='spo2') return x<90?'crit':x<94?'warn':''; if(k==='sys') return x<=0||x<90?'crit':x<100||x>140?'warn':''; if(k==='rr') return x<8||x>26?'crit':x>20||x<11?'warn':''; return x>=39||x<35?'crit':x>=38?'warn':''; };
+  const box=(k,l,val,u)=>`<div class="v ${cls(k,v[k])}"><span>${l}</span><b>${val}<u>${u}</u></b></div>`;
+  return `<div class="lv">LIVE<br>VITALS</div>`+box('hr','Heart rate',v.hr>0?v.hr:'—','bpm')+box('spo2','SpO₂',v.spo2,'%')+box('sys','Blood pressure',v.sys>0?v.sys+'/'+v.dia:'—','')+box('rr','Breathing',v.rr,'/min')+box('temp','Temp.',v.temp.toFixed(1),'°C');
+}
+function startVitals(base){
+  stopVitals();
+  const j=(x,d)=>x>0?x+Math.round((Math.random()*2-1)*d):x;
+  const tick=()=>{ $('#vit').innerHTML=vitHtml({hr:j(base.hr,2),spo2:Math.min(100,j(base.spo2,1)),sys:j(base.sys,2),dia:base.dia,rr:j(base.rr,1),temp:base.temp}); };
+  tick(); vitTimer=setInterval(tick,1600);
+}
+function stopVitals(){ if(vitTimer){ clearInterval(vitTimer); vitTimer=null; } }
+
+/* guide modal: step list + image, arrow keys */
+let G=null;
+const stp = x => typeof x==='string' ? {d:x} : x;
+const PH = '<div class="ph"><div><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4 4 3 3-2 4 3"/></svg>ILLUSTRATION<br>FOLLOWS</div></div>';
+function openGuide(id,i){
+  const p=P[id], why = i!=null && A && A.rec[i] && A.rec[i][1], steps=p.s.map(stp);
+  G={steps,k:-1};
+  steps.forEach(s=>{ if(s.img){ const im=new Image(); im.src=s.img; } });
+  $('#gbox').innerHTML = `<div class="gtext">
+      <div class="kicker">${CATS.find(c=>c[0]===p.c)[1]} · step-by-step guide</div>
+      <h2>${p.n}</h2><div class="hint">${p.d}</div>
+      ${why?`<div class="why"><b>In this case:</b> ${why}</div>`:''}
+      <div class="gneed"><b>You need:</b> ${p.need}</div>
+      <ol class="gsteps" id="gsteps">${steps.map((s,k)=>`<li data-action="gstep" data-v="${k}"><span class="gn">${k+1}</span><div>${s.t?`<b>${s.t}</b>`:''}<span>${s.d}</span></div></li>`).join('')}</ol>
+      ${p.note?`<div class="note"><b>${p.note[0]}</b>${p.note[1]}</div>`:''}
+    </div>
+    <div class="gimg">
+      <div class="gframe" id="gframe"></div>
+      <div class="gnav"><button class="garr" id="gprev" data-action="gprev" aria-label="Previous step">‹</button><div class="gcap" id="gcap"></div><button class="garr" id="gnext" data-action="gnext" aria-label="Next step">›</button></div>
+      <div class="gbar" id="gbar">${steps.map((_,k)=>`<i data-action="gstep" data-v="${k}"></i>`).join('')}</div>
+      <div class="gfoot"><span class="kbd"><kbd>←</kbd> <kbd>→</kbd> switch steps</span><button class="btn ghost" data-action="closeguide">Close</button></div>
+    </div>`;
+  $('#guide').classList.add('on'); setGStep(0,true);
+}
+function setGStep(k,instant){
+  if(!G) return; const n=G.steps.length; k=Math.max(0,Math.min(n-1,k)); if(k===G.k) return; G.k=k;
+  const s=G.steps[k];
+  $$('#gsteps li').forEach((li,j)=>{ li.classList.toggle('on',j===k); li.classList.toggle('past',j<k); });
+  $$('#gbar i').forEach((b,j)=>b.classList.toggle('on',j<=k));
+  $('#gframe').innerHTML = s.img ? `<img src="${s.img}" alt="${s.t||'Step '+(k+1)}" onerror="this.parentNode.innerHTML=PH">` : PH;
+  $('#gcap').innerHTML = `<span>STEP ${k+1} / ${n}</span><b>${s.t||G.steps[k].d.split(/[.:—]/)[0]}</b>`;
+  $('#gprev').disabled = k===0; $('#gnext').disabled = k===n-1;
+  const ol=$('#gsteps'), li=ol.children[k];
+  ol.scrollTo({top: li.offsetTop - ol.clientHeight/2 + li.offsetHeight/2, behavior: instant?'auto':'smooth'});
+}
+function closeGuide(){ $('#guide').classList.remove('on'); G=null; }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeGuide(); hideTip(); return; }
+  if(!G) return;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){ e.preventDefault(); setGStep(G.k+1); }
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); setGStep(G.k-1); }
+});
+
+/* =========================================================
+   CLICK DELEGATION + TOOLTIP
+   ========================================================= */
+const tip=$('#tip'); let pinned=null;
+function tipHtml(el){ if(el.dataset.tipHtml) return decodeURIComponent(el.dataset.tipHtml); return el.dataset.tip==='anat' ? anatTip() : TIPS[el.dataset.tip]; }
+function showTip(el){
+  tip.innerHTML=tipHtml(el); tip.classList.add('on');
+  const a=app.getBoundingClientRect(), r=el.getBoundingClientRect(), t=tip.getBoundingClientRect();
+  let x=r.left-a.left+r.width/2-t.width/2, y=r.bottom-a.top+8;
+  x=Math.max(8,Math.min(x,a.width-t.width-8));
+  if(y+t.height>a.height-8) y=r.top-a.top-t.height-8;
+  tip.style.left=x+'px'; tip.style.top=Math.max(8,y)+'px';
+}
+function hideTip(){ tip.classList.remove('on'); if(pinned) pinned.classList.remove('pin'); pinned=null; }
+document.addEventListener('mouseover',e=>{ const el=e.target.closest('.info'); if(el&&!pinned) showTip(el); });
+document.addEventListener('mouseout',e=>{ const el=e.target.closest('.info'); if(el&&!pinned&&!el.contains(e.relatedTarget)) tip.classList.remove('on'); });
+
+function resetAll(){
+  Object.assign(S,{type:null,uncon:false,flow:null,sig:null,route:['emergency','assess'],regions:[],sel:{},items:{}});
+  $$('.tile').forEach(b=>b.classList.remove('sel')); setUncon(false);
+  if(typeof setView==='function'){ setView('front'); setZoom('body'); }
+  go(0);
+}
+function setUncon(v){
+  S.uncon=v; const b=$('#uncon'); b.classList.toggle('on',v); b.setAttribute('aria-pressed',v);
+  $('#unconSt').innerHTML = v ? 'CHECKED<br>also choose a category, or continue' : 'TAP TO CHECK';
+  renderStepper(); updateFooter();
+}
+document.addEventListener('click',e=>{
+  const info=e.target.closest('.info');
+  if(info){ e.stopPropagation(); if(pinned===info){hideTip();return;} hideTip(); pinned=info; info.classList.add('pin'); showTip(info); return; }
+  if(pinned && !e.target.closest('#tip')) hideTip();
+  if(e.target.id==='guide'){ closeGuide(); return; }
+  const el=e.target.closest('[data-action]'); if(!el) return;
+  const v=el.dataset.v;
+  switch(el.dataset.action){
+    case 'uncon': setUncon(!S.uncon); break;
+    case 'type': S.type=v; $$('.tile').forEach(t=>t.classList.toggle('sel',t===el)); updateFooter(); setTimeout(()=>{ startRoute(); go(1); },220); break;
+    case 'grp': S.sel[el.dataset.g]=v; $$(`[data-action=grp][data-g=${el.dataset.g}]`).forEach(b=>b.classList.toggle('sel',b===el)); updateFooter(); break;
+    case 'item': S.items[S.flow]=v; $$('[data-action=item]').forEach(b=>b.classList.toggle('sel',b===el)); updateFooter(); break;
+    case 'rm': toggleRegion(v); break;
+    case 'view': setView(v); break;
+    case 'zoom': setZoom(v); break;
+    case 'guide': openGuide(v, el.dataset.i!=null ? +el.dataset.i : null); break;
+    case 'closeguide': closeGuide(); break;
+    case 'gstep': setGStep(+v); break;
+    case 'gprev': setGStep(G.k-1); break;
+    case 'gnext': setGStep(G.k+1); break;
+    case 'next': if(S.idx===0) startRoute(); go(S.idx+1); break;
+    case 'back': go(S.idx-1); break;
+    case 'restart': resetAll(); break;
+  }
+});
+
+/* =========================================================
+   3D BODY  — procedural, continuous surface split into zones
+   ========================================================= */
+let renderer, scene, camera, pivot, pickables=[], regionMat={}, hovered=null;
+let rotY=0, rotX=0, tgtY=0, tgtX=0, look=.9, tgtLook=.9, dist=4.4, tgtDist=4.4, zoomMode='body';
+const SKIN=0xd9dfe7, FEAT=0xb4bfcd, HOV=0xb5cbef, SEL=0x2a6fdb;
+const FEATURES=new Set(['eyeL','eyeR','earL','earR','mouth']);
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const se=(s,n)=>Math.sign(s)*Math.pow(Math.abs(s),2/n);   // superellipse
+
+// smooth 1-D profile through keys [[x, v1, v2, ...]] (monotone-ish Hermite)
+function prof(keys){
+  const n=keys.length;
+  return x=>{
+    if(x<=keys[0][0]) return keys[0].slice(1);
+    if(x>=keys[n-1][0]) return keys[n-1].slice(1);
+    let i=0; while(x>keys[i+1][0]) i++;
+    const k0=keys[Math.max(i-1,0)],k1=keys[i],k2=keys[i+1],k3=keys[Math.min(i+2,n-1)];
+    const h=k2[0]-k1[0], t=(x-k1[0])/h, t2=t*t, t3=t2*t;
+    return k1.slice(1).map((_,j)=>{
+      const p1=k1[j+1],p2=k2[j+1];
+      const m1=(k2[j+1]-k0[j+1])/(k2[0]-k0[0]||h), m2=(k3[j+1]-k1[j+1])/(k3[0]-k1[0]||h);
+      return (2*t3-3*t2+1)*p1+(t3-2*t2+t)*h*m1+(-2*t3+3*t2)*p2+(t3-t2)*h*m2;
+    });
+  };
+}
+
+// build a smooth surface patch from fn(u,v) with analytic-ish normals (finite differences)
+function surf(fn,center,u0,u1,v0,v1,nu,nv){
+  const pos=[],nor=[],idx=[],e=1e-4;
+  for(let i=0;i<=nu;i++){ const u=u0+(u1-u0)*i/nu;
+    for(let j=0;j<=nv;j++){ const v=v0+(v1-v0)*j/nv;
+      const P=fn(u,v), Pu=fn(u+e,v).sub(fn(u-e,v)), Pv=fn(u,v+e).sub(fn(u,v-e));
+      const out=P.clone().sub(center(u,v));
+      let N=new THREE.Vector3().crossVectors(Pv,Pu);
+      if(N.lengthSq()<1e-16) N=out.clone();
+      if(N.dot(out)<0) N.negate();
+      N.normalize(); pos.push(P.x,P.y,P.z); nor.push(N.x,N.y,N.z);
+    }}
+  for(let i=0;i<nu;i++) for(let j=0;j<nv;j++){
+    const a=i*(nv+1)+j,b=a+nv+1; idx.push(a,b,a+1,b,b+1,a+1);
+  }
+  // make triangle winding agree with the outward normals (front faces outside)
+  const tri=Math.floor(idx.length/6/2)*6, ia=idx[tri]*3, ib=idx[tri+1]*3, ic=idx[tri+2]*3;
+  const A=V3(pos[ia],pos[ia+1],pos[ia+2]), Bv=V3(pos[ib],pos[ib+1],pos[ib+2]), Cv=V3(pos[ic],pos[ic+1],pos[ic+2]);
+  const gn=new THREE.Vector3().crossVectors(Bv.sub(A),Cv.sub(A));
+  if(gn.dot(V3(nor[ia],nor[ia+1],nor[ia+2]))<0) for(let k=0;k<idx.length;k+=3){ const t=idx[k+1]; idx[k+1]=idx[k+2]; idx[k+2]=t; }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setIndex(idx); return g;
+}
+
+/* ---- torso: superellipse rings, front/back depth separate ---- */
+const TORSO=prof([ //  y     half-width  front-depth  back-depth
+  [0.77,.150,.085,.095],[0.81,.165,.095,.108],[0.86,.170,.098,.115],[0.93,.158,.098,.100],
+  [1.00,.140,.094,.086],[1.06,.136,.094,.080],[1.14,.148,.100,.084],[1.22,.164,.112,.090],
+  [1.30,.178,.122,.095],[1.36,.186,.124,.096],[1.42,.190,.108,.092],[1.46,.178,.088,.086],
+  [1.49,.140,.068,.072],[1.52,.085,.052,.058],[1.55,.052,.045,.048]]);
+function torsoFn(y,th){
+  const [a,bf,bb]=TORSO(y), f=y<0.81?Math.max(.03,Math.sqrt(clamp((y-0.77)/0.04,0,1))):1;
+  const s=Math.sin(th), c=Math.cos(th);
+  return V3(a*f*se(s,2.0), y, (c>=0?bf:bb)*f*se(c,2.0));
+}
+/* ---- head ---- */
+const HEAD=prof([ // y  half-width  z-front  z-back
+  [1.572,.014,.070,.050],[1.59,.046,.087,.004],[1.61,.061,.092,-.045],[1.635,.067,.095,-.070],
+  [1.66,.071,.099,-.085],[1.69,.076,.097,-.098],[1.72,.078,.094,-.104],[1.75,.077,.088,-.104],[1.81,.074,.080,-.100]]);
+const HN=2.2;
+function headFn(y,th){
+  const [a,zf,zb]=HEAD(y), zc=(zf+zb)/2, b=(zf-zb)/2;
+  const f=Math.max(.04,Math.sqrt(clamp((y-1.572)/0.012,0,1))*(y>1.735?Math.sqrt(Math.max(0,1-((y-1.735)/.075)**2)):1));
+  return V3(a*f*se(Math.sin(th),HN), y, zc+b*f*se(Math.cos(th),HN));
+}
+const headCenter=(y)=>{ const [,zf,zb]=HEAD(y); return V3(0,y,(zf+zb)/2); };
+/* ---- neck ---- */
+function neckFn(y,th){ return V3(.054*Math.sin(th), y, -.008+.051*Math.cos(th)); }
+/* ---- limbs along a curve ---- */
+function limb(points,keys,ref,capA=true,capB=true){
+  const curve=new THREE.CatmullRomCurve3(points.map(p=>V3(...p)),false,'centripetal'), R=prof(keys);
+  const fn=(t,v)=>{
+    t=clamp(t,0,1);
+    const Cc=curve.getPointAt(t), T=curve.getTangentAt(t);
+    const F=ref.clone().sub(T.clone().multiplyScalar(T.dot(ref))).normalize();
+    const Sx=new THREE.Vector3().crossVectors(F,T).normalize();
+    const [rx,rz]=R(t);
+    const ec=Math.max(.04,(capA?Math.sqrt(clamp(t/.05,0,1)):1)*(capB?Math.sqrt(clamp((1-t)/.05,0,1)):1));
+    return Cc.add(Sx.multiplyScalar(Math.sin(v)*rx*ec)).add(F.multiplyScalar(Math.cos(v)*rz*ec));
+  };
+  fn.center=(t)=>curve.getPointAt(clamp(t,0,1));
+  return fn;
+}
+
+function mat(id){
+  if(!regionMat[id]) regionMat[id]=new THREE.MeshStandardMaterial({color:FEATURES.has(id)?FEAT:SKIN,roughness:.72,metalness:0,emissive:0x000000,side:THREE.DoubleSide});
+  return regionMat[id];
+}
+function addMesh(parent,id,geo){
+  const m=new THREE.Mesh(geo,mat(id)); m.userData.region=id; parent.add(m); pickables.push(m); return m;
+}
+
+function buildBody(B){
+  const PI=Math.PI, up=V3(0,1,0), fwd=V3(0,0,1);
+  const tc=(y)=>V3(0,y,0);
+  // torso zones (one continuous surface)
+  const zone=(id,y0,y1,a,l)=>addMesh(B,id,surf(torsoFn,tc,y0,y1,a,a+l,Math.max(6,Math.round((y1-y0)*160)),Math.round(l/PI*40)));
+  zone('pelvis',.77,.93,0,2*PI);
+  zone('lowerAbd',.93,1.08,-PI/2,PI); zone('lowerBackL',.93,1.08,PI/2,PI/2); zone('lowerBackR',.93,1.08,PI,PI/2);
+  zone('upperAbd',1.08,1.235,-PI/2,PI); zone('midBack',1.08,1.235,PI/2,PI);
+  zone('chestL',1.235,1.55,0,PI/2); zone('chestR',1.235,1.55,-PI/2,PI/2); zone('upperBack',1.235,1.55,PI/2,PI);
+
+  // zone outlines on the torso
+  const lm=new THREE.LineBasicMaterial({color:0x0B3D91,transparent:true,opacity:.28});
+  const lineOn=(pts)=>B.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lm));
+  const push=(y,th)=>{ const p=torsoFn(y,th); const o=V3(p.x,0,p.z).normalize().multiplyScalar(.0015); return p.add(o); };
+  [.93,1.08,1.235].forEach(y=>lineOn(Array.from({length:121},(_,i)=>push(y,i/120*2*PI))));
+  const vline=(th,y0,y1)=>lineOn(Array.from({length:40},(_,i)=>push(y0+(y1-y0)*i/39,th)));
+  vline(PI/2,.93,1.46); vline(-PI/2,.93,1.46); vline(0,1.235,1.47); vline(PI,.93,1.08);
+
+  // neck + head
+  addMesh(B,'neck',surf(neckFn,(y)=>V3(0,y,-.008),1.50,1.66,0,2*PI,10,40));
+  addMesh(B,'head',surf(headFn,(y)=>headCenter(y),1.572,1.81,0,2*PI,56,64));
+
+  // face features placed on the head surface
+  const onHead=(y,th)=>{ const e=1e-4, P=headFn(y,th);
+    const N=new THREE.Vector3().crossVectors(headFn(y,th+e).sub(headFn(y,th-e)),headFn(y+e,th).sub(headFn(y-e,th)));
+    if(N.dot(P.clone().sub(headCenter(y)))<0) N.negate(); return {P,N:N.normalize()}; };
+  const thX=(y,x)=>{ const [a]=HEAD(y); return Math.asin(Math.sign(x)*Math.pow(Math.abs(x)/a,HN/2)); };
+  const feature=(id,y,th,sc,out,geo)=>{
+    const {P,N}=onHead(y,th); const m=addMesh(B,id,geo||new THREE.SphereGeometry(1,28,18));
+    m.position.copy(P.add(N.clone().multiplyScalar(out)));
+    m.quaternion.setFromRotationMatrix(new THREE.Matrix4().lookAt(N,V3(0,0,0),up));
+    m.scale.set(...sc); return m; };
+  feature('eyeL',1.700,thX(1.70,.031),[.0165,.0085,.006],.0005);
+  feature('eyeR',1.700,thX(1.70,-.031),[.0165,.0085,.006],.0005);
+  feature('earL',1.690,PI/2+.14,[.018,.029,.008],.004);
+  feature('earR',1.690,-PI/2-.14,[.018,.029,.008],.004);
+  feature('mouth',1.628,0,[.022,.0075,.006],.001);
+  feature('head',1.668,0,[.007,.018,.011],.004);          // nose (part of head)
+
+  // arms (A-pose) incl. hand + thumb
+  [['armL',1],['armR',-1]].forEach(([id,s])=>{
+    const sh=[s*.15,1.47,-.005], sh2=[s*.215,1.425,-.005], el=[s*.32,1.14,.0], wr=[s*.43,.895,.02];
+    const arm=limb([sh,sh2,el,wr],[[0,.052,.058],[.07,.063,.063],[.18,.054,.056],[.32,.045,.047],[.47,.037,.040],[.55,.040,.042],[.65,.041,.040],[.85,.031,.028],[1,.026,.022]],fwd);
+    addMesh(B,id,surf(arm,arm.center,0,1,0,2*PI,64,32));
+    const d=V3(wr[0]-el[0],wr[1]-el[1],wr[2]-el[2]).normalize(), W=V3(...wr);
+    const pt=k=>W.clone().add(d.clone().multiplyScalar(k)).toArray();
+    const hand=limb([pt(-.01),pt(.09),pt(.175)],[[0,.020,.030],[.25,.020,.042],[.6,.017,.040],[.85,.013,.031],[1,.008,.02]],fwd);
+    addMesh(B,id,surf(hand,hand.center,0,1,0,2*PI,24,24));
+    const tdir=d.clone().add(V3(0,0,.9)).normalize();
+    const thumb=addMesh(B,id,new THREE.CapsuleGeometry(.0105,.035,6,12));
+    thumb.position.copy(W.clone().add(d.clone().multiplyScalar(.045)).add(V3(0,0,.028)).add(tdir.clone().multiplyScalar(.02)));
+    thumb.quaternion.setFromUnitVectors(up,tdir);
+  });
+
+  // legs + feet
+  [['legL',1],['legR',-1]].forEach(([id,s])=>{
+    const leg=limb([[s*.088,.90,0],[s*.10,.68,.01],[s*.108,.47,.012],[s*.112,.27,-.005],[s*.115,.075,-.015]],
+      [[0,.096,.102],[.12,.090,.094],[.3,.074,.076],[.47,.052,.054],[.53,.050,.055],[.62,.054,.062],[.72,.050,.056],[.85,.036,.040],[1,.030,.032]],fwd);
+    addMesh(B,id,surf(leg,leg.center,0,1,0,2*PI,72,32));
+    const foot=limb([[s*.116,.045,-.055],[s*.12,.035,.03],[s*.125,.026,.15]],[[0,.032,.035],[.15,.038,.040],[.5,.042,.030],[.8,.045,.020],[1,.035,.012]],up);
+    addMesh(B,id,surf(foot,foot.center,0,1,0,2*PI,28,24));
+  });
+}
+
+function init3D(){
+  const canvas=$('#gl');
+  if(!window.THREE){
+    canvas.remove();
+    $('#vp').insertAdjacentHTML('beforeend','<div class="fallback">'+Object.keys(REGIONS).map(id=>`<button class="opt" data-action="rm" data-v="${id}"><b>${REGIONS[id].label}</b></button>`).join('')+'</div>');
+    return;
+  }
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(27,1,.05,50);
+
+  scene.add(new THREE.HemisphereLight(0xffffff,0x7d8899,.6));
+  const key=new THREE.DirectionalLight(0xffffff,.7); key.position.set(2.5,3.5,4); scene.add(key);
+  const fill=new THREE.DirectionalLight(0xe6efff,.25); fill.position.set(-3,1,2); scene.add(fill);
+  const rim=new THREE.DirectionalLight(0x9cc8ff,.4); rim.position.set(0,2.5,-4); scene.add(rim);
+
+  const ringM=new THREE.MeshBasicMaterial({color:0x0B3D91,transparent:true,opacity:.3,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.44,.447,96),ringM); ring.rotation.x=-Math.PI/2; scene.add(ring);
+  const ring2=new THREE.Mesh(new THREE.RingGeometry(.58,.583,96),ringM.clone()); ring2.material.opacity=.12; ring2.rotation.x=-Math.PI/2; scene.add(ring2);
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(.44,64),new THREE.MeshBasicMaterial({color:0x0B3D91,transparent:true,opacity:.05})); disc.rotation.x=-Math.PI/2; scene.add(disc);
+
+  pivot=new THREE.Group(); pivot.position.y=.9; scene.add(pivot);
+  const body=new THREE.Group(); body.position.y=-.9; pivot.add(body);
+  buildBody(body);
+
+  bindPointer(canvas);
+  new ResizeObserver(resize3D).observe($('#vp'));
+  resize3D(); loop();
+}
+
+function paint3D(){
+  if(!renderer) return;
+  for(const id in regionMat){
+    const m=regionMat[id], sel=S.regions.includes(id), hov=hovered===id;
+    const bl=S.flow==='bleeding'; m.color.setHex(sel?(bl?0xE23A1E:SEL):hov?HOV:(FEATURES.has(id)?FEAT:SKIN));
+    m.emissive.setHex(sel?(bl?0x5a1206:0x0b2f70):0x000000);
+  }
+}
+let baseDist=4.4;
+function resize3D(){
+  if(!renderer) return;
+  const r=$('#vp').getBoundingClientRect(); if(!r.width) return;
+  renderer.setSize(r.width,r.height,false); camera.aspect=r.width/r.height;
+  baseDist = camera.aspect<.75 ? 4.4*.75/camera.aspect : 4.4;
+  setZoom(zoomMode,true);
+  camera.updateProjectionMatrix();
+}
+function setView(v){
+  const base=v==='back'?Math.PI:0, k=Math.round((tgtY-base)/(2*Math.PI));
+  tgtY=base+k*2*Math.PI; tgtX=0;
+}
+function setZoom(v,keep){
+  zoomMode=v;
+  if(v==='head'){ tgtLook=1.69; tgtDist=1.0; } else { tgtLook=.9; tgtDist=baseDist; }
+  $$('#zoom button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+}
+function loop(){
+  rotY+=(tgtY-rotY)*.12; rotX+=(tgtX-rotX)*.12; look+=(tgtLook-look)*.12; dist+=(tgtDist-dist)*.12;
+  pivot.rotation.y=rotY; pivot.rotation.x=rotX;
+  camera.position.set(0,look+.02*dist,dist); camera.lookAt(0,look,0);
+  const front=Math.cos(rotY)>=0;
+  $('#facing').textContent='VIEW · '+(front?'FRONT':'BACK');
+  $$('#view button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='front')===front));
+  renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+}
+function pick(e){
+  const r=e.target.getBoundingClientRect();
+  const v=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  const rc=new THREE.Raycaster(); rc.setFromCamera(v,camera);
+  const hit=rc.intersectObjects(pickables,false)[0];
+  return hit?hit.object.userData.region:null;
+}
+function bindPointer(c){
+  let down=null, moved=0;
+  const hov=$('#hover');
+  const label=id=>REGIONS[id].label+(S.regions.includes(id)?'  ✓':'');
+  c.addEventListener('pointerdown',e=>{ down={x:e.clientX,y:e.clientY}; moved=0; c.setPointerCapture(e.pointerId); });
+  c.addEventListener('pointermove',e=>{
+    if(down){
+      const dx=e.clientX-down.x, dy=e.clientY-down.y; moved+=Math.abs(dx)+Math.abs(dy);
+      if(moved>4){ c.classList.add('drag'); tgtY+=dx*.012; tgtX=clamp(tgtX+dy*.006,-.35,.35); hov.style.opacity=0; }
+      down={x:e.clientX,y:e.clientY}; return;
+    }
+    if(e.pointerType!=='mouse') return;
+    const id=pick(e);
+    if(id!==hovered){ hovered=id; paint3D(); }
+    const vr=$('#vp').getBoundingClientRect();
+    hov.style.opacity=id?1:0;
+    if(id){ hov.textContent=label(id); hov.style.left=(e.clientX-vr.left+14)+'px'; hov.style.top=(e.clientY-vr.top+14)+'px'; }
+  });
+  c.addEventListener('pointerup',e=>{
+    c.classList.remove('drag');
+    if(down && moved<=4){ const id=pick(e); if(id){ toggleRegion(id); hov.textContent=label(id); } }
+    down=null;
+  });
+  c.addEventListener('pointerleave',()=>{ if(!down){ hovered=null; paint3D(); hov.style.opacity=0; } });
+  c.addEventListener('wheel',e=>{ e.preventDefault(); setZoom(e.deltaY<0?'head':'body'); },{passive:false});
+}
+
+init3D(); renderStepper(); updateFooter();
+
+</script>
+</body>
+</html>
