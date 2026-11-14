@@ -1,0 +1,10 @@
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import DashboardApp from '../Astronaut Health Dashboard/Astronaut Health Dashboard/src/app/(frontend)/DashboardApp'
+import '../Astronaut Health Dashboard/Astronaut Health Dashboard/src/app/(frontend)/styles.css'
+
+createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <DashboardApp emergencySnapshots={[]} />
+  </React.StrictMode>,
+)
