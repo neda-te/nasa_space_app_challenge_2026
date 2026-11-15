@@ -4,6 +4,7 @@ import DashboardApp from '../Astronaut Health Dashboard/Astronaut Health Dashboa
 import '../Astronaut Health Dashboard/Astronaut Health Dashboard/src/app/(frontend)/styles.css'
 import '../shared/dashboard.css'
 import '../shared/features.css'
+import '../shared/telemetry.css'
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

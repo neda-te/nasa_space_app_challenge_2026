@@ -79,9 +79,11 @@ html:has(.emergency-app) { height: auto; overflow: auto; background: var(--heal-
 .emergency-app .btn.ghost { color: var(--heal-primary); border-color: var(--heal-line); }
 .emergency-app button:focus-visible { outline: 2px solid var(--heal-primary); outline-offset: 3px; }
 .emergency-app #guide { position: fixed; padding: 16px; overflow-y: auto; }
-.emergency-app .gbox { width: min(1120px,100%); height: min(760px,calc(100dvh - 32px)); max-height: calc(100dvh - 32px); overflow: hidden; }
-.emergency-app .gtext { overflow: hidden; }
-.emergency-app .gimg { min-height: 0; }
+.emergency-app .gbox { width: min(1120px,100%); height: min(760px,calc(100dvh - 32px)); max-height: calc(100dvh - 32px); overflow: hidden; grid-template-columns: minmax(0,1fr) minmax(0,1.3fr); }
+.emergency-app .gtext { overflow: hidden; min-width: 0; }
+.emergency-app .gimg { min-height: 0; min-width: 0; }
+.emergency-app .gcap { min-width: 0; }
+.emergency-app .gcap b { white-space: normal; overflow-wrap: anywhere; }
 .emergency-app .gdescription { display: none; }
 .emergency-app .gtext h3 { font-size: 20px; }
 .emergency-app #toast { position: fixed; bottom: 24px; font-size: var(--heal-body); }

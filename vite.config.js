@@ -71,6 +71,7 @@ export default defineConfig({
         await cp(path.join(root, 'index.html'), path.join(emergency, 'index.html'))
         await cp(path.join(root, 'img'), path.join(emergency, 'img'), { recursive: true })
         await cp(path.join(root, 'dist/dashboard.html'), path.join(root, 'dist/index.html'))
+        await cp(path.join(root, 'data'), path.join(root, 'dist/data'), { recursive: true })
         await cp(path.join(root, 'shared'), path.join(root, 'dist/shared'), { recursive: true })
         await mkdir(path.join(root, 'dist/vendor'), { recursive: true })
         await cp(path.join(root, 'node_modules/three/build/three.min.js'), path.join(root, 'dist/vendor/three.min.js'))

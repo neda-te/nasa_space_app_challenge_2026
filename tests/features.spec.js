@@ -49,7 +49,7 @@ test('alerts, complete tooltips, mission text, and sample CO₂ chart work with 
   }
   await navigate(page, 'Trends & Analysis')
   await expect(page.getByRole('heading', { name: 'CO₂ trend', exact: true })).toBeVisible()
-  await expect(page.locator('.co2-chart-card')).toContainText('NO CO₂ HISTORY CONNECTED')
+  await expect(page.locator('.co2-chart-card')).toContainText('LONG-TERM HISTORY')
   await page.locator('.co2-point').last().focus()
   await expect(page.locator('.co2-readout')).toContainText('2.1 mmHg')
   await page.locator('.page-title .range-tabs').getByRole('button', { name: '30 Days', exact: true }).click()
@@ -57,7 +57,7 @@ test('alerts, complete tooltips, mission text, and sample CO₂ chart work with 
   await page.locator('.page-title .range-tabs').getByRole('button', { name: '24 Hours', exact: true }).click()
   await expect(page.locator('.co2-chart svg')).toContainText('Time (UTC)')
   await page.getByText('View sample values', { exact: true }).click()
-  await expect(page.locator('.sample-values tbody tr')).toHaveCount(13)
+  await expect(page.locator('.co2-chart-card .sample-values tbody tr')).toHaveCount(13)
   await noOverflow(page)
   await page.locator('.co2-chart-card').scrollIntoViewIfNeeded()
   await page.screenshot({ path: info.outputPath('co2-and-tooltips.png') })

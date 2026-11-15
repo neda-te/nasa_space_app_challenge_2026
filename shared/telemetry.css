@@ -1,0 +1,33 @@
+.demo-controls,.live-telemetry { background: var(--heal-panel); color: var(--heal-text); border: 1px solid var(--heal-line); border-radius: 16px; padding: 18px; margin-bottom: 20px; }
+.demo-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.demo-controls strong { display: block; font: 700 13px var(--heal-heading); color: var(--heal-primary); }
+.demo-controls span { font-size: 14px; }
+.demo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.demo-actions button,.live-metric-select select { color: var(--heal-primary); background: var(--heal-panel); border: 1px solid var(--heal-line); padding: 10px 14px; border-radius: 8px; font: 600 14px var(--heal-font); cursor: pointer; min-height: 44px; }
+.demo-actions button:disabled { opacity: .6; cursor: wait; }
+.demo-actions button:focus-visible,.live-metric-select select:focus-visible { outline: 2px solid var(--heal-primary); outline-offset: 2px; }
+.demo-scenario { padding: 12px; border-radius: 8px; background: var(--heal-panel-soft); font-size: 15px; }
+.demo-scenario small { display: block; margin-top: 4px; color: var(--heal-muted); }
+.demo-scenario.demo-warning { border-inline-start: 4px solid var(--heal-critical); color: var(--heal-critical-text); }
+.live-telemetry h3 { margin: 0 0 8px; font-family: var(--heal-heading); }
+.live-readings { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 16px 0; }
+.live-readings > div { padding: 12px; background: var(--heal-panel-soft); border: 1px solid var(--heal-line); border-radius: 10px; }
+.live-readings span,.live-readings small { display: block; font-size: 14px; color: var(--heal-muted); }
+.live-readings strong { display: block; font: 600 28px var(--heal-technical); overflow-wrap: anywhere; }
+.live-metric-select { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 15px; }
+.live-metric-select select { max-width: 100%; }
+.live-chart { overflow-x: auto; margin-top: 14px; }
+.live-chart svg { width: 100%; min-width: 240px; display: block; }
+.live-chart line { stroke: var(--heal-line); }
+.live-chart text { fill: var(--heal-muted); font: 13px var(--heal-technical); }
+.live-chart polyline { fill: none; stroke: var(--heal-primary); stroke-width: 2.5; }
+.live-chart circle { fill: var(--heal-primary); }
+.live-telemetry details { margin-top: 12px; font-size: 14px; }
+.live-telemetry summary { cursor: pointer; }
+.emergency-app .demo-controls { margin: 10px 0; padding: 10px 14px; }
+.emergency-app .demo-controls span { color: var(--heal-text); }
+.body-model-only .demo-controls { display: none; }
+@media(max-width:600px) { .live-readings { grid-template-columns: repeat(2,minmax(0,1fr)); } .live-readings strong { font-size: 23px; } .demo-controls,.live-telemetry { padding: 14px; } }
+
+.emergency-app .demo-header-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.emergency-app .demo-header-actions button { font-size: 12px; padding: 6px 8px; min-height: 32px; }

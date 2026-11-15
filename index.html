@@ -225,7 +225,7 @@ h1 .info{width:1.5rem;height:1.5rem;font-size:.8rem}
 .gframe{position:relative;flex:1;min-height:0;background:#fff;border:1px solid var(--line);border-radius:.8rem;overflow:hidden}
 .gframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:.6rem;animation:gin .25s ease-out}
 @keyframes gin{from{opacity:0;transform:translateX(.8rem)}to{opacity:1;transform:none}}
-.gframe .ph{position:absolute;inset:.8rem;border:2px dashed var(--line2);border-radius:.6rem;display:grid;place-items:center;text-align:center;color:var(--mut2);font-family:var(--mono);font-size:.66rem;line-height:1.7}
+.gframe .ph{position:absolute;inset:.8rem;border:2px dashed var(--line2);border-radius:.6rem;display:grid;place-items:center;text-align:center;color:var(--mut2);font-family:var(--mono);font-size:.85rem;line-height:1.7}
 .gframe .ph svg{width:2.4rem;height:2.4rem;stroke:var(--line2);fill:none;stroke-width:1.4;display:block;margin:0 auto .5rem}
 .gnav{display:flex;align-items:center;gap:.8rem}
 .garr{width:2.6rem;height:2.6rem;flex:none;border-radius:50%;background:var(--b);color:#fff;font-size:1.5rem;line-height:1;display:grid;place-items:center;transition:.15s}
@@ -266,6 +266,8 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
 <link rel="stylesheet" href="../shared/emergency.css">
 <link rel="stylesheet" href="../shared/features.css">
 <script src="../shared/preferences.js"></script>
+<link rel="stylesheet" href="../shared/telemetry.css">
+<script src="../shared/telemetry.js"></script>
 </head>
 <body class="emergency-app">
 <div id="app">
@@ -275,10 +277,11 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
     </div>
     <div class="stepper" id="stepper"></div>
     <div class="hdr-r">
-      <div class="crew"><b>Bob · CM-2</b><span id="met">MET 143d 06:12:40</span><span id="profileSummary"></span></div>
+      <div class="crew"><b>Bob · CM-2</b><span id="met">MET 143d 06:12:40</span><span id="profileSummary"></span><span id="demoTime">Loading simulated feed…</span></div>
       <div class="alarmbox">
         <div class="alarm">EMERGENCY <span id="elapsed">00:00</span></div>
         <div class="live" id="deliveryStatus">PROTOTYPE · NO DATA SENT</div>
+        <div class="demo-actions demo-header-actions"><button id="demoPause" type="button">Pause demo</button><button id="demoRestart" type="button">Restart demo</button></div>
       </div>
     </div>
   </header>
@@ -311,11 +314,11 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
           <div><b>Other</b><small>Digestive issues, dizziness, fatigue …</small></div></button>
       </div>
       <div class="vitals">
-        <div>Heart rate <span class="info" data-tip="heart-rate">i</span><b class="warn">112 bpm</b></div>
-        <div>SpO₂ <span class="info" data-tip="oxygen-saturation">i</span><b>97 %</b></div>
-        <div>Blood pressure <span class="info" data-tip="blood-pressure">i</span><b>138/88</b></div>
-        <div>Skin temp. <span class="info" data-tip="skin-temperature">i</span><b>36.9 °C</b></div>
-        <div class="src">Simulated · wrist device</div>
+        <div>Heart rate <span class="info" data-tip="heart-rate">i</span><b id="demoHeart">— bpm</b></div>
+        <div>SpO₂ <span class="info" data-tip="oxygen-saturation">i</span><b id="demoOxygen">— %</b></div>
+        <div>Blood pressure <span class="info" data-tip="blood-pressure">i</span><b id="demoPressure">— mmHg</b></div>
+        <div>Skin temp. <span class="info" data-tip="skin-temperature">i</span><b id="demoTemperature">— °C</b></div>
+        <div>Cabin CO₂<b id="demoCO2">— mmHg</b></div><div class="src">Simulated live data · shared five-minute feed</div>
       </div>
     </section>
 
@@ -608,12 +611,12 @@ const P = {
   pain:{n:'Pain score',c:'assess',d:'0–10, track the trend',need:'—',s:['Ask: “0 is no pain, 10 the worst imaginable. Where are you now?”','Note where it is, where it spreads, and what makes it better or worse.','Repeat every 15–30 minutes and after each medication.'],note:['Reading','A rising score despite medication is a warning sign.']},
   air:{n:'Cabin air check',c:'assess',d:'CO₂, oxygen, pressure, smoke, chemicals',need:'Module readouts, portable gas analyser',s:['Read CO₂, oxygen and pressure for this module.','Smell, smoke or alarm: use the portable analyser.','Ask the others: same symptoms? Then the air is the likely cause.','Move the patient to a module with good air; increase ventilation.'],note:[UG,'Warm air does not rise. CO₂ can collect in a pocket wherever air is not moving, for example around a sleeping person.']},
 
-  ecg:{n:'ECG (12-lead)',c:'test',d:'Heart rhythm and signs of a heart attack',need:'ECG device, 10 electrodes, razor',s:['Restrain the patient; ask them to relax and stay still.','Dry / shave the skin. Place 4 limb and 6 chest electrodes as shown on the device.','Record 10 seconds without moving or speaking.','Send to the flight surgeon; repeat if symptoms change.'],note:['Reading','The device’s automatic reading is only a hint — the flight surgeon interprets.']},
+  ecg:{n:'ECG (12-lead)',c:'test',d:'Heart rhythm and signs of a heart attack',need:'ECG device, 10 electrodes, razor',s:[{"t": "Prepare the patient", "d": "Restrain the patient; ask them to relax and stay still.", "img": "img/ecg/ChatGPT Go╠êrseli 15 Kas 2026 14_13_07-1.png"}, {"t": "Place electrodes", "d": "Dry / shave the skin. Place 4 limb and 6 chest electrodes as shown on the device.", "img": "img/ecg/ChatGPT Go╠êrseli 15 Kas 2026 14_13_08-2.png"}, {"t": "Record ECG", "d": "Record 10 seconds without moving or speaking.", "img": "img/ecg/ChatGPT Go╠êrseli 15 Kas 2026 14_13_13-3.png"}, {"t": "Send for review", "d": "Send to the flight surgeon; repeat if symptoms change.", "img": "img/ecg/ChatGPT Go╠êrseli 15 Kas 2026 14_13_14-4.png"}],note:['Reading','The device’s automatic reading is only a hint — the flight surgeon interprets.']},
   sound:{n:'Listen to the chest',c:'test',d:'Stethoscope: both lungs, heart',need:'Stethoscope (electronic if available)',s:['Find the quietest spot — fans are loud.','Compare left and right at 4 points on the front and 4 on the back.','Note: no sound on one side, whistling, crackling.'],note:['Reading','One side silent plus sharp pain or breathlessness → possible collapsed lung.']},
   us:{n:'Ultrasound',c:'test',d:'Guided live by an expert on the ground',need:'Ultrasound device, gel, wipes, video link',s:[
-    {t:'Apply gel',d:'Restrain the patient and yourself. Switch on and choose the preset the ground names. Put a generous line of gel on the probe and on the skin over the area.',img:'img/us/01.jpg'},
-    {t:'Scan',d:'Open the video link — the expert tells you where to place the probe and how to tilt it. Hold each view still for 5 seconds and save the clip. No link: use the on-screen reference images.',img:'img/us/02.jpg'},
-    {t:'Clean up',d:'Wipe the gel off the skin and the probe. Disinfect the probe, bag the used wipes, stow the device.',img:'img/us/03.jpg'}],
+    {t:'Apply gel',d:'Restrain the patient and yourself. Switch on and choose the preset the ground names. Put a generous line of gel on the probe and on the skin over the area.'},
+    {t:'Scan',d:'Open the video link — the expert tells you where to place the probe and how to tilt it. Hold each view still for 5 seconds and save the clip. No link: use the on-screen reference images.'},
+    {t:'Clean up',d:'Wipe the gel off the skin and the probe. Disinfect the probe, bag the used wipes, stow the device.'}],
     note:['Looks for','Urine backing up in the kidney · bladder volume · free fluid in the belly · collapsed lung · heart pumping · clots in veins · eye injury.']},
   blood:{n:'Blood draw & analysis',c:'test',d:'Venous sample from the inside of the elbow',need:'Tourniquet, alcohol swab, needle + holder, vacuum tubes, gauze, plaster, sharps container, labels, sample bag',s:[
     {t:'Examine the arm',d:'Pick the arm without injury or IV line. Look at the inside of the elbow for a straight vein. Ask about problems with earlier blood draws.',img:'img/blood/01.jpg'},
@@ -636,7 +639,7 @@ const P = {
     {t:'Check the site',d:'Bleeding stopped and no swelling → plaster on. Large bruise, numbness or tingling in the hand → report.',img:'img/blood/17.jpg'}],
     note:['Microgravity','Strap the arm and anchor yourself. Every loose item — caps, swabs, tubes — needs Velcro or a bag. Blood does not drip: drops float, catch them with gauze.']},
   urine:{n:'Urine test strip',c:'test',d:'Blood, infection signs, hydration',need:'Collection device, test strips',s:['Collect a sample with the collection device.','Wet the strip completely, then wait the time printed on the pack.','Compare the colour fields with the chart.'],note:['Reading','Blood → stone or injury · leukocytes / nitrite → infection · very concentrated → dehydration.']},
-  eye:{n:'Eye exam',c:'test',d:'Vision, pupil, foreign body',need:'Light, reading card, wet swab, eye shield',s:['Compare both eyes: redness, pupil shape, visible particle.','Test vision separately for each eye with the reading card.','Pull the lower lid down and look for a particle; turn the upper lid if you have learned how.','Cut or puncture suspected: do not press, do not rinse — cover with a rigid shield.']},
+  eye:{n:'Eye exam',c:'test',d:'Vision, pupil, foreign body',need:'Light, reading card, wet swab, eye shield',s:[{"t": "Compare both eyes", "d": "Compare both eyes: redness, pupil shape, visible particle.", "img": "img/eye exam/01_compare_eyes.png"}, {"t": "Test vision", "d": "Test vision separately for each eye with the reading card.", "img": "img/eye exam/02_vision_reading_card.png"}, {"t": "Check the eyelid", "d": "Pull the lower lid down and look for a particle; turn the upper lid if you have learned how.", "img": "img/eye exam/03_lower_eyelid_check.png"}, {"t": "Protect the eye", "d": "Cut or puncture suspected: do not press, do not rinse — cover with a rigid shield.", "img": "img/eye exam/04_rigid_eye_shield.png"}]},
   ent:{n:'Ear, mouth & throat exam',c:'test',d:'Otoscope and light',need:'Otoscope, tongue depressor, light',s:['Ear: pull the ear gently up and back; look at the canal and eardrum.','Mouth: teeth, gums, tongue, inside of the cheeks.','Throat: red, swollen, coating?','Note blood, fluid or pus and from where.']},
 
   press:{n:'Direct pressure',c:'treat',d:'First action for every external bleed',need:'Gloves, gauze, pressure bandage, eye protection',s:['Gloves on. Press gauze firmly straight onto the bleeding point.','Hold for 10 minutes without lifting. Anchor yourself so you can keep pushing.','Soaked through: do not remove. Add gauze on top and press harder.','Bleeding controlled: wrap a firm pressure bandage; check warmth and feeling beyond it.'],note:[UG,'Blood does not drip. It clings to the wound as a growing dome and breaks off as floating drops. Cover with towels and protect your eyes.']},
@@ -1152,18 +1155,32 @@ function vitHtml(v){
   const box=(k,l,val,u)=>`<div class="v ${cls(k,v[k])}"><span>${l}</span><b>${val}<u>${u}</u></b></div>`;
   return `<div class="lv">DEMO<br>VITALS</div>`+box('hr','Heart rate',v.hr>0?v.hr:'—','bpm')+box('spo2','SpO₂',v.spo2,'%')+box('sys','Blood pressure',v.sys>0?v.sys+'/'+v.dia:'—','')+box('rr','Breathing',v.rr,'/min')+box('temp','Temp.',v.temp.toFixed(1),'°C');
 }
-function startVitals(base){
-  stopVitals();
-  const j=(x,d)=>x>0?x+Math.round((Math.random()*2-1)*d):x;
-  const tick=()=>{ $('#vit').innerHTML=vitHtml({hr:j(base.hr,2),spo2:Math.min(100,j(base.spo2,1)),sys:j(base.sys,2),dia:base.dia,rr:j(base.rr,1),temp:base.temp}); };
-  tick(); vitTimer=setInterval(tick,1600);
+function startVitals(){ renderSharedTelemetry(window.HEALiumTelemetry.snapshot()); }
+function stopVitals(){ /* The shared clock continues while navigating. */ }
+let lastDemoSample=null;
+function renderSharedTelemetry(feed){
+  const time=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
+  $('#demoTime').textContent=feed.error ? 'Simulated feed unavailable' : feed.loading ? 'Loading simulated feed…' : 'SIMULATED · '+(feed.complete?'Complete':feed.playing?'Playing':'Paused')+' · '+time(feed.seconds)+' / 5:00';
+  $('#demoPause').textContent=feed.error?'Retry demo data':feed.complete?'Replay demo':feed.playing?'Pause demo':'Resume demo';
+  $('#demoPause').disabled=feed.loading;
+  const sample=feed.sample;
+  if(!sample){ $('#vit').textContent=feed.error||'Loading simulated live vitals…'; return; }
+  $('#demoHeart').textContent=sample.heartRate+' bpm';
+  $('#demoOxygen').textContent=sample.spo2+' %';
+  $('#demoPressure').textContent=sample.systolic+'/'+sample.diastolic+' mmHg';
+  $('#demoTemperature').textContent=sample.temperature.toFixed(1)+' °C';
+  $('#demoCO2').textContent=sample.co2.toFixed(2)+' mmHg';
+  $('#demoHeart').classList.toggle('warn',sample.stage==='alert');
+  if(lastDemoSample!==sample || !$('#vit .v')){
+    $('#vit').innerHTML=vitHtml({hr:sample.heartRate,spo2:sample.spo2,sys:sample.systolic,dia:sample.diastolic,rr:sample.respiratoryRate,temp:sample.temperature});
+    lastDemoSample=sample;
+  }
 }
-function stopVitals(){ if(vitTimer){ clearInterval(vitTimer); vitTimer=null; } }
 
 /* guide modal: step list + image, arrow keys */
 let G=null, guideReturnFocus=null;
 const stp = x => typeof x==='string' ? {d:x} : x;
-const PH = '<div class="ph"><div><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4 4 3 3-2 4 3"/></svg>ILLUSTRATION<br>FOLLOWS</div></div>';
+const PH = '<div class="ph"><div><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4 4 3 3-2 4 3"/></svg>TEXT-ONLY STEP<br>Follow the written instructions</div></div>';
 function openGuide(id,i){
   const p=P[id], why = i!=null && A && A.rec[i] && A.rec[i][1], steps=p.s.map(stp);
   guideReturnFocus=document.activeElement;
@@ -1175,6 +1192,7 @@ function openGuide(id,i){
       ${why?`<div class="why"><b>In this case:</b> ${why}</div>`:''}
       <div class="gneed"><b>You need:</b> ${p.need}</div>
       <ol class="gsteps" id="gsteps">${steps.map((s,k)=>`<li data-action="gstep" data-v="${k}"><span class="gn">${k+1}</span><div>${s.t?`<b>${s.t}</b>`:''}<span>${s.d}</span></div></li>`).join('')}</ol>
+      ${['ecg','eye'].includes(id)?'<p class="hint">Prototype illustrations. Use device instructions and flight-surgeon guidance for the procedure; illustrations are not placement diagrams or live transmission status.</p>':''}
       ${p.note?`<div class="note"><b>${p.note[0]}</b>${p.note[1]}</div>`:''}
     </div>
     <div class="gimg">
@@ -1193,7 +1211,7 @@ function setGStep(k,instant){
   const s=G.steps[k];
   $$('#gsteps li').forEach((li,j)=>{ li.classList.toggle('on',j===k); li.classList.toggle('past',j<k); });
   $$('#gbar i').forEach((b,j)=>b.classList.toggle('on',j<=k));
-  $('#gframe').innerHTML = s.img ? `<img src="${s.img}" alt="${s.t||'Step '+(k+1)}" onerror="this.parentNode.innerHTML=PH">` : PH;
+  $('#gframe').innerHTML = s.img ? `<img src="${s.img}" alt="${s.t||'Step '+(k+1)}" onerror="this.parentNode.innerHTML=PH.replace('TEXT-ONLY STEP','IMAGE UNAVAILABLE')">` : PH;
   $('#gdescription').textContent = s.d;
   $('#gcap').innerHTML = `<span>STEP ${k+1} / ${n}</span><b>${s.t||G.steps[k].d.split(/[.:—]/)[0]}</b>`;
   $('#gprev').disabled = k===0; $('#gnext').disabled = k===n-1;
@@ -1656,6 +1674,11 @@ function bindPointer(c){
 }
 
 init3D(); renderStepper(); updateFooter();syncProfile();
+renderSharedTelemetry(window.HEALiumTelemetry.snapshot());
+const unsubscribeTelemetry=window.HEALiumTelemetry.subscribe(renderSharedTelemetry);
+addEventListener('pagehide',unsubscribeTelemetry,{once:true});
+$('#demoPause').addEventListener('click',()=>{const feed=window.HEALiumTelemetry.snapshot();if(feed.error)window.HEALiumTelemetry.retry();else if(feed.playing)window.HEALiumTelemetry.pause();else window.HEALiumTelemetry.play();});
+$('#demoRestart').addEventListener('click',()=>window.HEALiumTelemetry.restart());
 if(modelOnly){
   S.type='pain';startRoute();go(1);
   const query=new URLSearchParams(location.search), region=query.get('region');

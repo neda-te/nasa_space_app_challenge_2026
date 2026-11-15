@@ -84,3 +84,35 @@ must be installed). Tests cover desktop, tablet, mobile, narrow mobile, and
 landscape sizes, including navigation, text overflow, actual WebGL body alignment
 and resizing, and simulated submission success/failure. Screenshots and failure
 traces are written to `.cache/browser-tests/`.
+
+## Five-minute live demo
+
+The app replays 60 fictional telemetry samples from `data/demo-telemetry.json`,
+one every five seconds. No database server, sensor connection, or API key is needed.
+Use **Pause demo**, **Resume demo**, **Restart demo**, or **Replay demo** above the
+page content. Emergency mode has the same controls. Playback stops at 5:00;
+it does not silently loop. Restart demo begins a fresh run.
+
+Timeline: 0:00–1:00 stable, 1:00–2:00 rising, 2:00–3:00 scripted alert,
+3:00–4:00 recovery, 4:00–5:00 stable again. The alert is a scripted presentation
+event, not a clinical threshold or diagnosis. The notification bell and live
+telemetry panel show the scenario stage.
+
+Dashboard and emergency mode share the same readings and clock. Playback also
+continues across navigation and reloads; controls synchronize across tabs using
+browser storage. If storage is blocked, the current page and its emergency frame
+still share an in-memory clock. If the JSON cannot load, the app shows a retry
+control rather than fabricating readings.
+
+Heart rate, SpO₂, blood pressure, skin temperature, respiratory rate, and cabin
+CO₂ update from the feed. Live charts reveal only captured samples and provide
+a readable values table. Lab results, sleep records, readiness context, and
+long-term charts remain labeled sample history, separate from live playback.
+`shared/telemetry.js` owns playback; `shared/live-telemetry.tsx` renders the dashboard
+controls, readings, alert, and charts. The build includes the JSON in `dist/data`.
+
+## Refactor integration and guide assets
+
+The current local HEALium dashboard remains the application entry point: no sign-in, working notifications, session-only check-ins/reminders, shared settings, and synchronized five-minute playback. The coworker’s ingestion module is retained under `src/ingestion`, independently of the older refactored UI. Its simulated adapter uses the same JSON fixture; it does not replace the browser playback clock. CSV imports use `csv-parse`; reading identity includes location and sensor ID. Run `npm test` for regression coverage. See `src/ingestion/README.md` for the integration boundary.
+
+Blood draw uses all 18 supplied photos; ECG and eye exam each use their four supplied illustrations in step order. The supplied ECG/eye images are labeled prototype illustrations rather than placement diagrams or live transmission status. Guides without supplied images (including ultrasound) clearly show text-only steps. Missing-image failures preserve written instructions and step navigation. `tests/guides.spec.js` opens every procedure and verifies every step, image decoding, navigation, and fallback states.

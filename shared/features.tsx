@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import './preferences.js'
+import { DemoAlert, useTelemetry } from './live-telemetry'
 
 export type Preferences = { darkMode: boolean; height: number; weight: number; gender: 'female' | 'male' }
 declare global {
@@ -83,6 +84,7 @@ export function InfoTip({ label, text, children }: { label: string; text?: strin
 }
 
 export function Alerts({ children }: { children: ReactNode }) {
+  const feed = useTelemetry()
   const [open, setOpen] = useState(false)
   const anchor = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
@@ -97,10 +99,10 @@ export function Alerts({ children }: { children: ReactNode }) {
     return () => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', escape) }
   }, [open])
   return <>
-    <button ref={anchor} className="notification-button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded={open} aria-controls="mission-alerts" onClick={() => setOpen(!open)}>{children}<span>2</span></button>
+    <button ref={anchor} className="notification-button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded={open} aria-controls="mission-alerts" onClick={() => setOpen(!open)}>{children}<span>{feed.sample?.stage === 'alert' ? 3 : 2}</span></button>
     {open && createPortal(<div ref={panel} id="mission-alerts" role="dialog" aria-label="Alerts" className="alerts-panel">
       <div className="feature-heading"><h2>Alerts</h2><button ref={closeButton} className="secondary-button" onClick={close} aria-label="Close alerts">Close</button></div>
-      <p className="sample-note">Sample mission alerts · prototype</p>
+      <DemoAlert /><p className="sample-note">Sample mission alerts · prototype</p>
       <ul><li className="radiation-alert">Solar storm soon: high radiation alert.</li><li>Next blood tests on Wednesday.</li></ul>
     </div>, document.body)}
   </>
@@ -172,7 +174,7 @@ export function CO2Trend({ range }: { range: '24 Hours' | '7 Days' | '30 Days' }
   const y = (value: number) => 188 - (value - 1.4) / 1.2 * 150
   const index = Math.min(selected ?? count - 1, count - 1)
   return <section className="co2-chart-card" aria-labelledby="co2-title">
-    <div className="feature-heading"><div><span className="eyebrow">SAMPLE DATA · NO CO₂ HISTORY CONNECTED</span><h3 id="co2-title">CO₂ trend</h3></div><InfoTip label="CO₂ trend" text="Cabin carbon dioxide partial pressure, shown in mmHg. This chart uses clearly labeled sample history because no sensor history service is connected. It is not an exposure assessment or a medical threshold." /></div>
+    <div className="feature-heading"><div><span className="eyebrow">SAMPLE DATA · LONG-TERM HISTORY · SEPARATE FROM LIVE DEMO</span><h3 id="co2-title">CO₂ trend</h3></div><InfoTip label="CO₂ trend" text="Cabin carbon dioxide partial pressure, shown in mmHg. This chart uses clearly labeled sample history because no sensor history service is connected. It is not an exposure assessment or a medical threshold." /></div>
     <p>Cabin carbon dioxide partial pressure · {range.toLowerCase()} · mmHg</p>
     <div ref={ref} className="co2-chart"><svg viewBox={`0 0 ${width} 250`} role="img" aria-label="Sample carbon dioxide trend, mmHg, with UTC time axis">
       {[1.4,1.8,2.2,2.6].map((value) => <g key={value}><line x1="52" x2={width-22} y1={y(value)} y2={y(value)} className="co2-grid" /><text x="44" y={y(value)+4} textAnchor="end">{value.toFixed(1)}</text></g>)}

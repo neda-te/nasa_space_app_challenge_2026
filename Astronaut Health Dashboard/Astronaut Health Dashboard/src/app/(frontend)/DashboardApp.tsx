@@ -1,6 +1,7 @@
 'use client'
 
 import healiumLogo from '../../../../../img/logo.jpeg'
+import { DemoControls, LiveTelemetry, useTelemetry } from '../../../../../shared/live-telemetry'
 import { Alerts, InfoTip, PreferencesPanel, BodyModel, BreathingFullscreen, CO2Trend, usePreferences } from '../../../../../shared/features'
 import { useEffect, useRef, useState, useTransition, type DragEvent, type ReactNode } from 'react'
 import { submitDailyCheckIn, type CheckInSubmission } from './checkin-actions'
@@ -657,11 +658,17 @@ function Sparkline({
   values,
   tone = 'teal',
   mode = 'Line',
+  scaleToFit = false,
 }: {
   values: number[]
   tone?: 'teal' | 'orange' | 'blue'
   mode?: ChartStyle
+  scaleToFit?: boolean
 }) {
+  if (scaleToFit) {
+    const min = Math.min(...values), max = Math.max(...values)
+    values = values.map(value => max === min ? 15 : 4 + (value - min) / (max - min) * 22)
+  }
   const points = values
     .map((value, index) => `${index * (94 / Math.max(values.length - 1, 1)) + 3},${30 - value}`)
     .join(' ')
@@ -723,6 +730,7 @@ function HomeWidget({
   fatigueScore: number | null
   openPhysical: (category: string) => void
 }) {
+  const feed = useTelemetry()
   if (id === 'heart')
     return (
       <article
@@ -740,17 +748,17 @@ function HomeWidget({
         </div>
         <p>HEART RATE <InfoTip label="Heart Rate" text="Simulated wearable heart rate in beats per minute. Compare with your personal baseline and measurement context; a single reading is not a diagnosis." /></p>
         <div className="big-metric">
-          62 <small>bpm</small>
+          {feed.sample?.heartRate ?? '—'} <small>bpm</small>
         </div>
         <div className="compare-row">
           <span>
-            Yesterday <b>60 bpm</b>
+            Demo baseline <b>62 bpm</b>
           </span>
           <span>
-            Baseline <b>+2 bpm</b>
+            Change <b>{feed.sample ? `${feed.sample.heartRate - 62 >= 0 ? '+' : ''}${feed.sample.heartRate - 62} bpm` : '—'}</b>
           </span>
         </div>
-        <Sparkline values={[14, 16, 13, 18, 11, 16, 14, 17, 13, 15]} mode={chart} />
+        <Sparkline scaleToFit values={feed.history.length > 1 ? feed.history.map(sample => sample.heartRate) : [62, 62]} mode={chart} />
         <button className="card-link" onClick={() => openPhysical('Cardiovascular Health')}>
           View cardiovascular details <Icon name="arrow" size={14} />
         </button>
@@ -965,7 +973,7 @@ function HomeWidget({
       <div>
         <span className="eyebrow">OPTIONAL WIDGET</span>
         <h3>Cabin environment</h3>
-        <p>22.4°C · 42% RH · CO₂ 2.1 mmHg</p>
+        <p>22.4°C · 42% RH · CO₂ {feed.sample?.co2.toFixed(2) ?? '—'} mmHg · simulated</p>
       </div>
       <button onClick={() => go('Environment')}>
         Open environment <Icon name="arrow" size={14} />
@@ -1245,7 +1253,9 @@ function HealthSummary({
 }) {
   const fatigue = dailyScore ?? 5.8
   const highFatigue = fatigue >= 7
-  const status = highFatigue ? 'Attention needed' : 'Monitor today'
+  const feed = useTelemetry()
+  const demoAlert = feed.sample?.stage === 'alert'
+  const status = demoAlert ? 'Demo telemetry alert' : highFatigue ? 'Attention needed' : 'Monitor today'
 
   return (
     <section className="health-summary" aria-labelledby="health-summary-title">
@@ -1257,7 +1267,7 @@ function HealthSummary({
           <span className="eyebrow">TODAY&apos;S HEALTH SUMMARY</span>
           <h3 id="health-summary-title">{status}</h3>
           <p>
-            {highFatigue
+            {demoAlert ? 'The simulated heart rate and cabin CO₂ have risen. See live telemetry below or open Emergency.' : highFatigue
               ? 'Fatigue is high, with sleep and reaction time outside your personal range.'
               : 'Most indicators are stable. Sleep and reaction time need added attention.'}
           </p>
@@ -1439,12 +1449,10 @@ function DashboardPage({
       />
       <div className="simulated-banner">
         <span>SIMULATED CREW DATA</span>
-        <p>
-          Prototype measurements are clearly separated by source type and are not intended for
-          diagnosis.
-        </p>
+        <p>Live demo readings update every five seconds. Laboratory, sleep, and long-term history remain sample records. No real sensor is connected.</p>
         <button onClick={() => go('Sources')}>View data transparency</button>
       </div>
+      <LiveTelemetry />
       <div className={`home-grid widget-size-${size.toLowerCase()}`}>
         {widgets.map((id) => (
           <HomeWidget
@@ -1655,6 +1663,7 @@ function PhysicalTabs({ active, go }: { active: Page; go: (page: Page) => void }
 
 function PhysicalPage({ go, initialOpen }: { go: (page: Page) => void; initialOpen: string }) {
   const [open, setOpen] = useState(initialOpen)
+  const feed = useTelemetry()
   return (
     <>
       <PageTitle
@@ -1679,7 +1688,8 @@ function PhysicalPage({ go, initialOpen }: { go: (page: Page) => void; initialOp
         </p>
       </div>
       <div className="category-grid">
-        {healthCategories.map((item) => {
+        {healthCategories.map((original) => {
+          const item = original.title === 'Cardiovascular Health' && feed.sample ? { ...original, status: (feed.sample.stage === 'alert' ? 'Monitor' : 'Normal') as Status, value: `${feed.sample.heartRate} bpm`, detail: 'Simulated live heart rate · demo baseline 62 bpm', type: 'Simulated live feed', time: `${feed.sample.elapsedSeconds}s into demo`, fields: original.fields.map(([label, value]) => [label, label === 'Blood pressure' ? `${feed.sample!.systolic} / ${feed.sample!.diastolic} mmHg` : label === 'Personal baseline' ? `${feed.sample!.heartRate - 62} bpm versus demo start` : value]) } : original
           const expanded = open === item.title
           return (
             <article className={`category-card ${expanded ? 'expanded' : ''}`} key={item.title}>
@@ -1819,6 +1829,7 @@ function LabPage({ type, go }: { type: 'Blood' | 'Urine'; go: (page: Page) => vo
 }
 
 function EnvironmentPage() {
+  const feed = useTelemetry()
   const [open, setOpen] = useState('Radiation')
   return (
     <>
@@ -1828,7 +1839,7 @@ function EnvironmentPage() {
         description="Cabin conditions, exposure context, periodic samples, and research measurements."
         action={
           <div className="live-chip">
-            <i />8 systems nominal
+            <i />Simulated cabin feed
           </div>
         }
       />
@@ -1839,8 +1850,11 @@ function EnvironmentPage() {
           automatically assigned as a specific crew member's personal exposure.
         </p>
       </div>
+      <LiveTelemetry co2Only />
       <div className="environment-grid">
-        {environmental.map((item, index) => {
+        {environmental.map((original, index) => {
+          const isCO2 = /CO₂|carbon dioxide/i.test(original.name)
+          const item = isCO2 ? { ...original, status: (feed.sample?.stage === 'alert' ? 'Monitor' : 'Normal') as Status, type: 'Simulated live feed', details: [['Demo sample time', `${feed.sample?.elapsedSeconds ?? 0}s`], ['Location', 'Habitat module'], ['Source', 'Shared five-minute demo · no sensor connected']] } : original
           const expanded = open === item.name
           return (
             <article className={`environment-card ${expanded ? 'expanded' : ''}`} key={item.name}>
@@ -1851,7 +1865,7 @@ function EnvironmentPage() {
                   <StatusBadge status={item.status} />
                 </div>
                 <h3>{item.name}</h3>
-                <strong>{item.value}</strong>
+                <strong>{isCO2 ? `${feed.sample?.co2.toFixed(2) ?? '—'} mmHg` : item.value}</strong>
                 <div className="env-type">
                   <SourceTag
                     kind={
@@ -1869,8 +1883,8 @@ function EnvironmentPage() {
               </button>
               {expanded && (
                 <div className="environment-detail">
-                  <Sparkline
-                    values={[16, 14, 15, 13, 17, 16, 14, 15]}
+                  <Sparkline scaleToFit={isCO2}
+                    values={isCO2 ? (feed.history.length > 1 ? feed.history.map(sample => sample.co2) : [2.1, 2.1]) : [16, 14, 15, 13, 17, 16, 14, 15]}
                     tone={item.status === 'Monitor' ? 'orange' : 'blue'}
                   />
                   {item.details.map(([label, value]) => (
@@ -2157,6 +2171,7 @@ function TrendsPage() {
           )}
         </div>
       </section>
+      <LiveTelemetry co2Only />
       <CO2Trend range={range} />
       <div className="analysis-grid">
         <article className="chart-panel large">
@@ -4126,8 +4141,8 @@ export default function App({
           <div className="connection">
             <span />
             <div>
-              <strong>All systems connected</strong>
-              <small>Synced 38 sec ago</small>
+              <strong>Simulated telemetry</strong>
+              <small>Five-minute demo feed</small>
             </div>
           </div>
           <p className="current-mission" aria-label="Current mission">Asteria VII</p>
@@ -4164,6 +4179,7 @@ export default function App({
           </div>
         </header>
         <div className="dashboard-content">
+          <DemoControls />
           {page === 'Dashboard' && (
             <DashboardPage
               go={go}
@@ -4215,7 +4231,7 @@ export default function App({
         <footer className="app-footer">
           <span>NASA Space Apps Challenge · Research interface v3.0</span>
           <span>
-            Personal baseline: 14-day rolling model <i /> Telemetry nominal
+            Personal baseline: 14-day rolling model <i /> Simulated telemetry
           </span>
         </footer>
       </main>

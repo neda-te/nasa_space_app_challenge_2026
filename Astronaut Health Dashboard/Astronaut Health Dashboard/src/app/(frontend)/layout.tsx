@@ -6,6 +6,7 @@ import { makeSiteSettings, sanitizeHtmlAttribute } from '@/lib/make-site-setting
 import './styles.css'
 import '../../../../../shared/dashboard.css'
 import '../../../../../shared/features.css'
+import '../../../../../shared/telemetry.css'
 
 const defaultTitle = 'HEALium'
 const title = defaultTitle
