@@ -311,10 +311,10 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
           <div><b>Other</b><small>Digestive issues, dizziness, fatigue …</small></div></button>
       </div>
       <div class="vitals">
-        <div>Heart rate<b class="warn">112 bpm</b></div>
-        <div>SpO₂<b>97 %</b></div>
-        <div>Blood pressure<b>138/88</b></div>
-        <div>Skin temp.<b>36.9 °C</b></div>
+        <div>Heart rate <span class="info" data-tip="heart-rate">i</span><b class="warn">112 bpm</b></div>
+        <div>SpO₂ <span class="info" data-tip="oxygen-saturation">i</span><b>97 %</b></div>
+        <div>Blood pressure <span class="info" data-tip="blood-pressure">i</span><b>138/88</b></div>
+        <div>Skin temp. <span class="info" data-tip="skin-temperature">i</span><b>36.9 °C</b></div>
         <div class="src">Simulated · wrist device</div>
       </div>
     </section>
@@ -332,7 +332,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
               <div class="seg" id="zoom"><button class="on" data-action="zoom" data-v="body">BODY</button><button data-action="zoom" data-v="head">HEAD</button></div>
             </div>
           </div>
-          <div class="vp-bot"><span id="facing">VIEW · FRONT</span><span>Multiple areas allowed</span><span id="modelProfile"></span></div>
+          <div class="vp-bot"><span id="facing">VIEW · FRONT</span><span>Multiple areas allowed <span class="info" data-tip="body-controls">i</span></span><span id="modelProfile"></span></div>
           <div id="hover"></div>
         </div>
         <div class="side">
@@ -358,7 +358,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
     <!-- SCREEN 3 -->
     <section class="screen" id="s3">
       <div class="summary">
-        <h1>Priors &amp; suggestions</h1>
+        <h1>Priors &amp; suggestions <span class="info" data-tip="prior-results">i</span></h1>
         <div class="tags" id="tags"></div>
         <div class="vit" id="vit"></div>
       </div>
@@ -392,7 +392,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
     <div class="fl"><span class="disc">PROTOTYPE · not a medical device · demo data</span><button class="link hide" id="restart" data-action="restart">↺ Restart demo</button></div>
     <div class="btns">
       <div class="need hide" id="need"></div>
-      <button class="btn pri hide" id="sendReport" data-action="send">Simulate sending data</button>
+      <button class="btn pri hide" id="sendReport" data-action="send">Simulate sending data</button> <span class="info" data-tip="submission">i</span>
       <button class="btn ghost hide" id="back" data-action="back">← Back</button>
       <button class="btn pri" id="next" data-action="next" disabled>Continue →</button>
     </div>
@@ -837,6 +837,14 @@ const U = {
    TOOLTIPS
    ========================================================= */
 const TIPS = {
+  "heart-rate":"<h4>Heart rate</h4>Beats per minute (bpm). This wrist-device value is simulated in the prototype.",
+  "oxygen-saturation":"<h4>Oxygen saturation</h4>SpO\u2082 is displayed as a percentage. This wrist-device value is simulated in the prototype.",
+  "blood-pressure":"<h4>Blood pressure</h4>The first value is systolic pressure and the second is diastolic pressure, in mmHg. These are simulated values.",
+  "skin-temperature":"<h4>Skin temperature</h4>A simulated skin-surface reading in degrees Celsius. It is not a core body temperature measurement.",
+  "body-controls":"<h4>Body controls</h4>Drag to rotate the model. Front and Back change the view; Body and Head change the framing. Tap a region to select it; multiple regions can be selected. The model follows the gender saved in Settings.",
+  "guide-navigation":"<h4>Instruction manual</h4>Use Previous step and Next step, the numbered list, or the left and right arrow keys to move through the guide. The image and caption follow the selected step. Close returns to your assessment.",
+  "submission":"<h4>Sending data</h4>This prototype simulates submission. The completion message appears only after the simulation succeeds; no information is delivered to a flight surgeon.",
+  "prior-results":"<h4>Assessment results</h4>This prototype organizes your selections into a rule-based summary using demo records. The ranked items are possible causes, not a confirmed diagnosis.",
   s1:`<h4>How it works</h4>Choose the category that fits best. One tap — no typing needed.<br><span class="m">If the person does not react, tick the red box first.</span>`,
   pos:`<h4>Position</h4><b>Inside</b> = deep pain you can't press on directly (organs).<br><b>Outside</b> = skin, muscle or bone — usually worse when you press or move.`,
   kind:`<h4>Kind of pain</h4><ul><li><b>Sharp</b> – stabbing; stones, injuries, foreign bodies</li><li><b>Dull</b> – aching, pressure; inflammation, muscles, heart</li><li><b>Pulsating</b> – in waves (colic) or throbbing (tooth, ear)</li><li><b>Other</b> – burning, cramping</li></ul>`,
@@ -1158,7 +1166,7 @@ function openGuide(id,i){
   steps.forEach(s=>{ if(s.img){ const im=new Image(); im.src=s.img; } });
   $('#gbox').innerHTML = `<div class="gtext">
       <div class="kicker">${CATS.find(c=>c[0]===p.c)[1]} · step-by-step guide</div>
-      <h2 id="guideTitle">${p.n}</h2><div class="hint">${p.d}</div>
+      <h2 id="guideTitle">${p.n} <span class="info" data-tip="guide-navigation">i</span></h2><div class="hint">${p.d}</div>
       ${why?`<div class="why"><b>In this case:</b> ${why}</div>`:''}
       <div class="gneed"><b>You need:</b> ${p.need}</div>
       <ol class="gsteps" id="gsteps">${steps.map((s,k)=>`<li data-action="gstep" data-v="${k}"><span class="gn">${k+1}</span><div>${s.t?`<b>${s.t}</b>`:''}<span>${s.d}</span></div></li>`).join('')}</ol>
@@ -1215,10 +1223,10 @@ document.addEventListener('focusin',e=>{ const el=e.target.closest('.info'); if(
 document.addEventListener('focusout',e=>{ const el=e.target.closest('.info'); if(el&&!pinned&&!tip.contains(e.relatedTarget)) hideTip(); });
 addEventListener('resize',()=>{if(pinned)showTip(pinned);});
 function enhanceInfo(){
-  document.querySelectorAll('.info:not([tabindex])').forEach(el=>{el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label','About '+(el.dataset.tip||'this item'));el.setAttribute('aria-describedby','tip');});
+  document.querySelectorAll('.info:not([tabindex])').forEach(el=>{el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label','About '+(TIPS[el.dataset.tip]?.match(/<h4>(.*?)<\/h4>/)?.[1]||el.dataset.tip||'this item'));el.setAttribute('aria-describedby','tip');});
 }
 tip.setAttribute('role','tooltip');tip.tabIndex=0;
-new MutationObserver(enhanceInfo).observe(app,{childList:true,subtree:true});
+new MutationObserver(enhanceInfo).observe(document.body,{childList:true,subtree:true});
 enhanceInfo();
 
 let submissionVersion=0;

@@ -1,0 +1,45 @@
+import { test, expect } from '@playwright/test'
+
+test('contextual information works across pages and emergency manual', async ({ page }) => {
+  const errors = []; page.on('pageerror', e => errors.push(e.message))
+  await page.goto('/')
+  const summary = await page.locator('.health-summary').boundingBox()
+  const reminders = await page.locator('.dashboard-reminders').boundingBox()
+  expect(summary.y + summary.height).toBeLessThanOrEqual(reminders.y + 1)
+  const check = async (scope, trigger) => {
+    await trigger.scrollIntoViewIfNeeded(); await trigger.focus()
+    const tip = scope.getByRole('tooltip'); await expect(tip).toBeVisible()
+    expect((await tip.innerText()).length).toBeGreaterThan(40)
+    const bounds = await tip.boundingBox(), viewport = page.viewportSize()
+    expect(bounds.x).toBeGreaterThanOrEqual(0); expect(bounds.y).toBeGreaterThanOrEqual(0)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width + 1)
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height + 1)
+    await page.keyboard.press('Escape'); await expect(tip).not.toBeVisible()
+    await trigger.click(); await expect(tip).toBeVisible()
+    await page.keyboard.press('Escape')
+  }
+  // Exercise every regular navigation destination using its actual rendered button.
+  const nav = page.getByRole('navigation')
+  const names = await nav.getByRole('button').allTextContents()
+  for (const name of names.filter(n => !/breathing/i.test(n))) {
+    await nav.getByRole('button', { name: name.trim(), exact: true }).click()
+    const tips = page.locator('.dashboard-content .info-trigger')
+    if (await tips.count()) await check(page, tips.first())
+    await expect(page.locator('button button')).toHaveCount(0)
+  }
+  await page.getByRole('button', { name: /Breathing exercise/i }).filter({ visible: true }).first().click()
+  await check(page, page.getByRole('button', { name: 'About Breathing mode', exact: true }))
+  await page.getByRole('button', { name: 'Go back', exact: true }).click()
+  await page.getByRole('button', { name: 'Help — open emergency mode' }).click()
+  const frame = page.frameLocator('.emergency-frame')
+  await check(frame, frame.getByRole('button', { name: 'About Oxygen saturation', exact: true }))
+  await frame.locator('[data-action="type"][data-v="other"]').click()
+  await frame.locator('[data-action="item"][data-v="fatigue"]').click()
+  await frame.locator('[data-action="grp"][data-g="dur"][data-v="today"]').click()
+  await frame.locator('[data-action="grp"][data-g="sev"][data-v="mild"]').click()
+  await frame.locator('#next').click()
+  await check(frame, frame.getByRole('button', { name: 'About Assessment results', exact: true }))
+  await frame.locator('[data-action="guide"][data-v="blood"]').first().click()
+  await check(frame, frame.getByRole('button', { name: 'About Instruction manual', exact: true }))
+  expect(errors).toEqual([])
+})

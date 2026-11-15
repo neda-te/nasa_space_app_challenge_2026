@@ -193,3 +193,9 @@
   .breathing-fullscreen .mood-check { border-left: 0; padding-left: 0; flex-direction: column; align-items: start; }
   .breathing-fullscreen .mood-check > div { display: flex; flex-wrap: wrap; gap: 6px; }
 }
+
+/* Keep accordion help separate from the expanding button. */
+.card-information { display: block; padding: 8px 12px 0; text-align: right; }
+
+/* Dismissed emergency tips must leave keyboard and accessibility navigation. */
+.emergency-app #tip:not(.on) { visibility: hidden; pointer-events: none; }

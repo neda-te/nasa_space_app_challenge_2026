@@ -179,7 +179,6 @@ const navItems: { label: string; icon: string; page: Page }[] = [
   { label: 'Tests & Lab Data', icon: 'lab', page: 'Blood' },
   { label: 'Trends & Analysis', icon: 'trend', page: 'Trends' },
   { label: 'My Journal', icon: 'journal', page: 'Journal' },
-  { label: 'Data Sources', icon: 'data', page: 'Sources' },
   { label: 'Emergency Data', icon: 'heart', page: 'EmergencyData' },
   { label: 'Dashboard Settings', icon: 'settings', page: 'Customize' },
 ]
@@ -703,7 +702,7 @@ function PageTitle({
     <div className="page-title">
       <div>
         <span className="eyebrow">{kicker}</span>
-        <h2>{title}</h2>
+        <h2>{title} <InfoTip label={title} text={description} /></h2>
         <p>{description}</p>
       </div>
       {action}
@@ -1429,6 +1428,7 @@ function DashboardPage({
           </div>
         }
       />
+      <HealthSummary dailyScore={dailyScore} go={go} />
       <DashboardReminders
         completions={reminderCompletions}
         signedIn={signedIn}
@@ -1437,7 +1437,6 @@ function DashboardPage({
         go={go}
         openPhysical={openPhysical}
       />
-      <HealthSummary dailyScore={dailyScore} go={go} />
       <div className="simulated-banner">
         <span>SIMULATED CREW DATA</span>
         <p>
@@ -1684,6 +1683,7 @@ function PhysicalPage({ go, initialOpen }: { go: (page: Page) => void; initialOp
           const expanded = open === item.title
           return (
             <article className={`category-card ${expanded ? 'expanded' : ''}`} key={item.title}>
+              <span className="card-information"><InfoTip label={item.title} text={`${item.detail} Acquisition: ${item.type}. Collection time: ${item.time}. Expand this card to view its component measurements.`} /></span>
               <button
                 className="category-summary"
                 onClick={() => setOpen(expanded ? '' : item.title)}
@@ -1794,7 +1794,7 @@ function LabPage({ type, go }: { type: 'Blood' | 'Urine'; go: (page: Page) => vo
           <div className={`result-row ${row.missing ? 'missing' : ''}`} key={row.name}>
             <div>
               <small>{row.category}</small>
-              <b>{row.name}</b>
+              <b>{row.name} <InfoTip label={row.name} text={`${row.category}. Result collected ${row.date}; source: ${row.source}. Reference information: ${row.reference}. Previous values and the sparkline provide historical context. Missing data means no result is available, not a zero reading.`} /></b>
               <span>{row.date}</span>
             </div>
             <strong>
@@ -1844,6 +1844,7 @@ function EnvironmentPage() {
           const expanded = open === item.name
           return (
             <article className={`environment-card ${expanded ? 'expanded' : ''}`} key={item.name}>
+              <span className="card-information"><InfoTip label={item.name} text={`${item.type}. ${item.details.map(([label, value]) => `${label}: ${value}`).join('; ')}. Cabin measurements describe the monitoring location and are not automatically a personal exposure reading.`} /></span>
               <button onClick={() => setOpen(expanded ? '' : item.name)}>
                 <div className="environment-card-top">
                   <span className="env-number">0{index + 1}</span>
@@ -2136,7 +2137,7 @@ function TrendsPage() {
         <div className="trend-section-heading">
           <div>
             <span className="eyebrow">SIMULATED HISTORICAL DATA</span>
-            <h3>Health & performance trends</h3>
+            <h3>Health & performance trends <InfoTip label="Health & performance trends" text="Compare the selected time period across the displayed sample measurements. Different measures use different units; use their labels when comparing values." /></h3>
           </div>
           <p>
             Select a metric to expand its detailed chart. Hover chart points for measured values.
@@ -2162,7 +2163,7 @@ function TrendsPage() {
           <div className="chart-title">
             <div>
               <span className="eyebrow">HEALTH TREND</span>
-              <h3>Sleep duration & reaction time</h3>
+              <h3>Sleep duration & reaction time <InfoTip label="Sleep duration & reaction time" text="Shows sample sleep and reaction-time histories together. Changes occurring together do not establish that one caused the other." /></h3>
             </div>
             <div className="chart-legend">
               <span>
@@ -2213,7 +2214,7 @@ function TrendsPage() {
           <div className="chart-title">
             <div>
               <span className="eyebrow">ENVIRONMENTAL CONTEXT</span>
-              <h3>CO₂ & sleep quality</h3>
+              <h3>CO₂ & sleep quality <InfoTip label="CO₂ & sleep quality" text="Compares sample cabin CO₂ and sleep quality. This comparison does not establish a cause or represent a personal exposure assessment." /></h3>
             </div>
             <SourceTag kind="research">Correlation view</SourceTag>
           </div>
@@ -2308,7 +2309,7 @@ function SourcesPage() {
           <article className={activeSource === name ? 'expanded' : ''} key={name}>
             <div className="nasa-mark">NASA</div>
             <div>
-              <h3>{name}</h3>
+              <h3>{name} <InfoTip label={name} text={note} /></h3>
               <p>{use}</p>
             </div>
             <span>{type}</span>
@@ -2328,7 +2329,7 @@ function SourcesPage() {
         ))}
       </div>
       <div className="transparency-note">
-        <h3>Prototype data policy</h3>
+        <h3>Prototype data policy <InfoTip label="Prototype data policy" text="Displayed crew measurements are simulated. Research sources inform the interface structure rather than providing live astronaut records." /></h3>
         <p>
           Actual astronaut measurements are not displayed. All crew values in this hackathon
           prototype are simulated and clearly labeled. Research-derived categories inform interface
@@ -2370,7 +2371,7 @@ function EmergencyDataPage({ snapshots }: { snapshots: EmergencySnapshotView[] }
             <div className="viewer-heading">
               <div>
                 <span className="eyebrow">ANATOMICAL EVENT MAP</span>
-                <h3>Astronaut body representation</h3>
+                <h3>Astronaut body representation <InfoTip label="Astronaut body representation" text="The highlighted regions come from the selected emergency snapshot. The schematic model uses the gender saved in Settings." /></h3>
               </div>
               <div className="view-toggle">
                 <button className={!side ? 'active' : ''} onClick={() => setSide(false)}>
@@ -2584,7 +2585,7 @@ function CustomizePage({
         <aside className="custom-controls">
           <section>
             <span className="eyebrow">ADD WIDGETS</span>
-            <h3>Widget library</h3>
+            <h3>Widget library <InfoTip label="Widget library" text="Add optional modules to your dashboard preview, then save your layout to apply the changes." /></h3>
             {optional.map((id) => {
               const added = draft.includes(id)
               return (
@@ -2600,7 +2601,7 @@ function CustomizePage({
           </section>
           <section>
             <span className="eyebrow">CHART STYLE</span>
-            <h3>Default visualization</h3>
+            <h3>Default visualization <InfoTip label="Default visualization" text="Chooses the chart style for compatible dashboard widgets after you save the layout." /></h3>
             <div className="chart-options">
               {(['Line', 'Bars', 'Area'] as ChartStyle[]).map((item) => (
                 <button
@@ -2616,7 +2617,7 @@ function CustomizePage({
           </section>
           <section>
             <span className="eyebrow">WIDGET SIZE</span>
-            <h3>Compatible health modules</h3>
+            <h3>Compatible health modules <InfoTip label="Compatible health modules" text="Controls how much space compatible dashboard widgets use. Smaller screens may stack widgets to keep them readable." /></h3>
             <div className="size-options">
               {(['Compact', 'Medium', 'Wide'] as WidgetSize[]).map((item) => (
                 <button
@@ -2916,7 +2917,7 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
             <div className="control-title">
               <div>
                 <span className="eyebrow">ENVIRONMENT</span>
-                <h3>Choose your space</h3>
+                <h3>Choose your space <InfoTip label="Choose your space" text="Changes the visual scene and its matching ambient sound. Your breathing timing is controlled separately by Breathing mode." /></h3>
               </div>
             </div>
             <div className="breathing-theme-grid">
@@ -2941,7 +2942,7 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
             <div className="control-title">
               <div>
                 <span className="eyebrow">SESSION</span>
-                <h3>Breathing mode</h3>
+                <h3>Breathing mode <InfoTip label="Breathing mode" text="Selects the timing of the breathing animation. Pause the session before changing its pattern or length. Opening emergency mode pauses the exercise." /></h3>
               </div>
             </div>
             <div className="breathing-mode-grid">
@@ -2980,7 +2981,7 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
             <div className="control-title">
               <div>
                 <span className="eyebrow">SOUND</span>
-                <h3>Ambient support</h3>
+                <h3>Ambient support <InfoTip label="Ambient support" text="Ambient sound and spoken guidance can be controlled separately. Audio availability depends on your browser and device volume." /></h3>
               </div>
               <button
                 className={`sound-master ${soundOn ? 'active' : ''}`}
@@ -3201,7 +3202,7 @@ function DailyCheckInFlow({
         <div className="modal-body checkin-choice-body">
           <div className="checkin-intro">
             <span className="research-label">SESSION-ONLY PROTOTYPE · NO DATA TRANSMITTED</span>
-            <h3>Choose your check-in</h3>
+            <h3>Choose your check-in <InfoTip label="Choose your check-in" text="Morning and evening check-ins collect different self-reported observations. Completing a prototype check-in does not contact a flight surgeon." /></h3>
             <p>
               Short self-reports informed by Spaceflight Standard Measures and Behavioral Core
               Measures research. This does not reproduce an official NASA questionnaire.
@@ -3294,7 +3295,7 @@ function DailyCheckInFlow({
           <div className="checkin-trend-card">
             <div>
               <span className="eyebrow">SUBJECTIVE TREND · 7 DAYS</span>
-              <h3>Alertness, fatigue & stress</h3>
+              <h3>Alertness, fatigue & stress <InfoTip label="Alertness, fatigue & stress" text="These are your own ratings at the time of the check-in. Use the scale labels and answer based on how you currently feel." /></h3>
             </div>
             <div className="checkin-trend-lines">
               <svg viewBox="0 0 420 90" preserveAspectRatio="none">
@@ -3436,7 +3437,7 @@ function DailyCheckInFlow({
         ) : (
           <>
             <div className="evening-intro">
-              <h3>How was your day?</h3>
+              <h3>How was your day? <InfoTip label="How was your day?" text="Records your own reflection on the day. Review your selections before submitting the check-in." /></h3>
               <p>Use the compact 1–5 scales. You can skip any item.</p>
             </div>
             <div className="evening-slider-list">
@@ -4114,17 +4115,6 @@ export default function App({
                 09:42:18 <small>UTC</small>
               </strong>
             </div>
-            <label className="crew-selector">
-              <span className="crew-avatar">MC</span>
-              <span className="crew-copy">
-                <small>ACTIVE CREW MEMBER</small>
-                <select value={crew} onChange={(e) => setCrew(e.target.value)}>
-                  <option>Cmdr. Maya Chen</option>
-                  <option>Dr. Elias Romero</option>
-                  <option>Lt. Anika Patel</option>
-                </select>
-              </span>
-            </label>
             <Alerts key={page}><Icon name="bell" size={20} /></Alerts>
             <button
               className="help-button"
@@ -4132,7 +4122,7 @@ export default function App({
               aria-haspopup="dialog"
               onClick={() => setEmergencyOpen(true)}
             >
-              Help
+              Emergency
             </button>
           </div>
         </header>
@@ -4156,7 +4146,6 @@ export default function App({
           {page === 'Urine' && <LabPage type="Urine" go={go} />}
           {page === 'Environment' && <EnvironmentPage />}
           {page === 'Trends' && <TrendsPage />}
-          {page === 'Sources' && <SourcesPage />}
           {page === 'EmergencyData' && <EmergencyDataPage snapshots={emergencySnapshots} />}
           {page === 'Breathing' && <BreathingFullscreen onBack={() => go(previousPage.current)} onEmergency={() => setEmergencyOpen(true)}><BreathingExercisePage emergencyActive={emergencyOpen} /></BreathingFullscreen>}
           {page === 'Journal' && (
