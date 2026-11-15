@@ -5,6 +5,7 @@ import { BodyCustomCode, renderHeadCustomCode } from '@/lib/make-custom-code'
 import { makeSiteSettings, sanitizeHtmlAttribute } from '@/lib/make-site-settings'
 import './styles.css'
 import '../../../../../shared/dashboard.css'
+import '../../../../../shared/features.css'
 
 const defaultTitle = 'HEALium'
 const title = defaultTitle

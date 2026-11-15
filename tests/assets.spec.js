@@ -1,5 +1,28 @@
 import { test, expect } from '@playwright/test'
 
+test('emergency navigation and manual controls remain readable in dark mode', async ({ page }, info) => {
+  await page.addInitScript(() => localStorage.setItem('healium.preferences.v1', JSON.stringify({ darkMode: true, height: 172, weight: 68, gender: 'female' })))
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Help — open emergency mode' }).click()
+  const frame = page.frameLocator('.emergency-frame')
+  await frame.locator('[data-action="type"][data-v="other"]').click()
+  await frame.locator('[data-action="item"][data-v="fatigue"]').click()
+  await frame.locator('[data-action="grp"][data-g="dur"][data-v="today"]').click()
+  await frame.locator('[data-action="grp"][data-g="sev"][data-v="mild"]').click()
+  await frame.locator('#next').click()
+  const contrast = async (locator) => locator.evaluate(element => {
+    const luminance = color => color.match(/[\d.]+/g).slice(0,3).map(Number).map(value => { const c=value/255; return c<=.04045 ? c/12.92 : ((c+.055)/1.055)**2.4 }).reduce((sum,value,i)=>sum+value*[.2126,.7152,.0722][i],0)
+    const style=getComputedStyle(element), fg=luminance(style.color), bg=luminance(style.backgroundColor)
+    return (Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)
+  })
+  expect(await contrast(frame.locator('#back'))).toBeGreaterThanOrEqual(4.5)
+  await frame.locator('[data-action="guide"][data-v="blood"]').first().click()
+  expect(await contrast(frame.getByRole('button', { name: 'Next step', exact: true }))).toBeGreaterThanOrEqual(4.5)
+  expect(await contrast(frame.getByRole('button', { name: 'Close', exact: true }))).toBeGreaterThanOrEqual(4.5)
+  await expect.poll(() => frame.locator('#gframe img').evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  await page.screenshot({ path: info.outputPath('manual-dark.png') })
+})
+
 test('supplied logo and all 18 blood-draw step photos display correctly', async ({ page }, info) => {
   test.setTimeout(120000)
   const errors = []

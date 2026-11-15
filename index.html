@@ -264,6 +264,8 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
 </style>
 <link rel="stylesheet" href="../shared/tokens.css">
 <link rel="stylesheet" href="../shared/emergency.css">
+<link rel="stylesheet" href="../shared/features.css">
+<script src="../shared/preferences.js"></script>
 </head>
 <body class="emergency-app">
 <div id="app">
@@ -273,7 +275,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
     </div>
     <div class="stepper" id="stepper"></div>
     <div class="hdr-r">
-      <div class="crew"><b>Bob · CM-2</b><span id="met">MET 143d 06:12:40</span></div>
+      <div class="crew"><b>Bob · CM-2</b><span id="met">MET 143d 06:12:40</span><span id="profileSummary"></span></div>
       <div class="alarmbox">
         <div class="alarm">EMERGENCY <span id="elapsed">00:00</span></div>
         <div class="live" id="deliveryStatus">PROTOTYPE · NO DATA SENT</div>
@@ -330,7 +332,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
               <div class="seg" id="zoom"><button class="on" data-action="zoom" data-v="body">BODY</button><button data-action="zoom" data-v="head">HEAD</button></div>
             </div>
           </div>
-          <div class="vp-bot"><span id="facing">VIEW · FRONT</span><span>Multiple areas allowed</span></div>
+          <div class="vp-bot"><span id="facing">VIEW · FRONT</span><span>Multiple areas allowed</span><span id="modelProfile"></span></div>
           <div id="hover"></div>
         </div>
         <div class="side">
@@ -403,6 +405,10 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
 
 <script src="../vendor/three.min.js"></script>
 <script>
+let appPreferences=window.HEALiumPreferences.read();
+let modelGender=appPreferences.gender;
+const modelOnly=new URLSearchParams(location.search).get('view')==='body';
+if(modelOnly) document.body.classList.add('body-model-only');
 /* =========================================================
    BODY REGIONS + PAIN CAUSES (unchanged)
    ========================================================= */
@@ -1181,6 +1187,8 @@ function setGStep(k,instant){
 }
 function closeGuide(){ $('#guide').classList.remove('on'); G=null; }
 document.addEventListener('keydown',e=>{
+  const info=e.target.closest?.('.info');
+  if(info && (e.key==='Enter' || e.key===' ')){e.preventDefault();info.click();return;}
   if(e.key==='Escape'){ closeGuide(); hideTip(); return; }
   if(!G) return;
   if(e.key==='ArrowRight'||e.key==='ArrowDown'){ e.preventDefault(); setGStep(G.k+1); }
@@ -1194,15 +1202,24 @@ const tip=$('#tip'); let pinned=null;
 function tipHtml(el){ if(el.dataset.tipHtml) return decodeURIComponent(el.dataset.tipHtml); return el.dataset.tip==='anat' ? anatTip() : TIPS[el.dataset.tip]; }
 function showTip(el){
   tip.innerHTML=tipHtml(el); tip.classList.add('on');
-  const a=app.getBoundingClientRect(), r=el.getBoundingClientRect(), t=tip.getBoundingClientRect();
-  let x=r.left-a.left+r.width/2-t.width/2, y=r.bottom-a.top+8;
-  x=Math.max(8,Math.min(x,a.width-t.width-8));
-  if(y+t.height>a.height-8) y=r.top-a.top-t.height-8;
-  tip.style.left=x+'px'; tip.style.top=Math.max(8,y)+'px';
+  const r=el.getBoundingClientRect(), t=tip.getBoundingClientRect();
+  const x=Math.max(12,Math.min(r.left+r.width/2-t.width/2,innerWidth-t.width-12));
+  let y=r.bottom+8;
+  if(y+t.height>innerHeight-12) y=r.top-t.height-8;
+  tip.style.left=x+'px'; tip.style.top=Math.max(12,y)+'px';
 }
 function hideTip(){ tip.classList.remove('on'); if(pinned) pinned.classList.remove('pin'); pinned=null; }
 document.addEventListener('mouseover',e=>{ const el=e.target.closest('.info'); if(el&&!pinned) showTip(el); });
-document.addEventListener('mouseout',e=>{ const el=e.target.closest('.info'); if(el&&!pinned&&!el.contains(e.relatedTarget)) tip.classList.remove('on'); });
+document.addEventListener('mouseout',e=>{ const el=e.target.closest('.info'); if(el&&!pinned&&!el.contains(e.relatedTarget)&&!tip.contains(e.relatedTarget)&&document.activeElement!==el) tip.classList.remove('on'); });
+document.addEventListener('focusin',e=>{ const el=e.target.closest('.info'); if(el&&!pinned) showTip(el); });
+document.addEventListener('focusout',e=>{ const el=e.target.closest('.info'); if(el&&!pinned&&!tip.contains(e.relatedTarget)) hideTip(); });
+addEventListener('resize',()=>{if(pinned)showTip(pinned);});
+function enhanceInfo(){
+  document.querySelectorAll('.info:not([tabindex])').forEach(el=>{el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label','About '+(el.dataset.tip||'this item'));el.setAttribute('aria-describedby','tip');});
+}
+tip.setAttribute('role','tooltip');tip.tabIndex=0;
+new MutationObserver(enhanceInfo).observe(app,{childList:true,subtree:true});
+enhanceInfo();
 
 let submissionVersion=0;
 function resetSubmission(){
@@ -1289,7 +1306,7 @@ document.addEventListener('click',e=>{
 /* =========================================================
    3D BODY  — procedural, continuous surface split into zones
    ========================================================= */
-let renderer, scene, camera, pivot, pickables=[], regionMat={}, hovered=null;
+let renderer, scene, camera, pivot, bodyGroup, pickables=[], regionMat={}, hovered=null, dirty3D=true;
 let rotY=0, rotX=0, tgtY=0, tgtX=0, look=.9, tgtLook=.9, dist=4.4, tgtDist=4.4, zoomMode='body';
 const SKIN=0xd9dfe7, FEAT=0xb4bfcd, HOV=0xb5cbef, SEL=0x0032A0;
 const FEATURES=new Set(['eyeL','eyeR','earL','earR','mouth']);
@@ -1349,7 +1366,11 @@ const TORSO=prof([ //  y     half-width  front-depth  back-depth
 function torsoFn(y,th){
   const [a,bf,bb]=TORSO(y), f=y<0.81?Math.max(.03,Math.sqrt(clamp((y-0.77)/0.04,0,1))):1;
   const s=Math.sin(th), c=Math.cos(th);
-  return V3(a*f*se(s,2.0), y, (c>=0?bf:bb)*f*se(c,2.0));
+  const female=modelGender==='female';
+  const hip=Math.exp(-(((y-.87)/.12)**2)), waist=Math.exp(-(((y-1.07)/.12)**2)), shoulder=Math.exp(-(((y-1.40)/.12)**2));
+  const width=female ? 1+.15*hip-.12*waist-.10*shoulder : 1;
+  const depth=female&&c>=0 ? 1+.12*Math.exp(-(((y-1.32)/.10)**2)) : 1;
+  return V3(a*width*f*se(s,2.0), y, (c>=0?bf:bb)*depth*f*se(c,2.0));
 }
 /* ---- head ---- */
 const HEAD=prof([ // y  half-width  z-front  z-back
@@ -1399,7 +1420,7 @@ function buildBody(B){
   zone('chestL',1.235,1.55,0,PI/2); zone('chestR',1.235,1.55,-PI/2,PI/2); zone('upperBack',1.235,1.55,PI/2,PI);
 
   // zone outlines on the torso
-  const lm=new THREE.LineBasicMaterial({color:0x0032A0,transparent:true,opacity:.28});
+  const lm=new THREE.LineBasicMaterial({color:appPreferences.darkMode?0x9BBDFF:0x0032A0,transparent:true,opacity:.4});
   const lineOn=(pts)=>B.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lm));
   const push=(y,th)=>{ const p=torsoFn(y,th); const o=V3(p.x,0,p.z).normalize().multiplyScalar(.0015); return p.add(o); };
   [.93,1.08,1.235].forEach(y=>lineOn(Array.from({length:121},(_,i)=>push(y,i/120*2*PI))));
@@ -1429,7 +1450,8 @@ function buildBody(B){
 
   // arms (A-pose) incl. hand + thumb
   [['armL',1],['armR',-1]].forEach(([id,s])=>{
-    const sh=[s*.15,1.47,-.005], sh2=[s*.215,1.425,-.005], el=[s*.32,1.14,.0], wr=[s*.43,.895,.02];
+    const armWidth=modelGender==='female'?.94:1;
+    const sh=[s*.15*armWidth,1.47,-.005], sh2=[s*.215*armWidth,1.425,-.005], el=[s*.32*armWidth,1.14,.0], wr=[s*.43*armWidth,.895,.02];
     const arm=limb([sh,sh2,el,wr],[[0,.052,.058],[.07,.063,.063],[.18,.054,.056],[.32,.045,.047],[.47,.037,.040],[.55,.040,.042],[.65,.041,.040],[.85,.031,.028],[1,.026,.022]],fwd);
     addMesh(B,id,surf(arm,arm.center,0,1,0,2*PI,64,32));
     const d=V3(wr[0]-el[0],wr[1]-el[1],wr[2]-el[2]).normalize(), W=V3(...wr);
@@ -1475,22 +1497,44 @@ function init3D(){
   const disc=new THREE.Mesh(new THREE.CircleGeometry(.44,64),new THREE.MeshBasicMaterial({color:0x0032A0,transparent:true,opacity:.05})); disc.rotation.x=-Math.PI/2; scene.add(disc);
 
   pivot=new THREE.Group(); scene.add(pivot);
-  const body=new THREE.Group(); pivot.add(body);
-  buildBody(body);
-  const bounds=new THREE.Box3().setFromObject(body);
-  bodySize=bounds.getSize(new THREE.Vector3());
-  const center=bounds.getCenter(new THREE.Vector3());
-  body.position.sub(center);
-  pivot.position.y=center.y;
-  bodyLook=center.y;
-  look=tgtLook=bodyLook;
+  rebuildBody();
 
   bindPointer(canvas);
   new ResizeObserver(resize3D).observe($('.model-stage'));
   resize3D(); loop();
 }
+function rebuildBody(){
+  if(!pivot) return;
+  if(bodyGroup){pivot.remove(bodyGroup);bodyGroup.traverse(object=>{if(object.geometry)object.geometry.dispose();});}
+  pickables=[];hovered=null;
+  pivot.position.set(0,0,0);pivot.rotation.set(0,0,0);
+  pivot.updateMatrixWorld(true);
+  bodyGroup=new THREE.Group();pivot.add(bodyGroup);buildBody(bodyGroup);
+  const bounds=new THREE.Box3().setFromObject(bodyGroup);
+  bodySize=bounds.getSize(new THREE.Vector3());
+  const center=bounds.getCenter(new THREE.Vector3());
+  bodyGroup.position.sub(center);pivot.position.y=center.y;bodyLook=center.y;
+  look=tgtLook=bodyLook;
+  $('#gl')?.setAttribute('aria-label',(modelGender==='female'?'Female':'Male')+' 3D body model');
+  document.body.dataset.modelGender=modelGender;
+  resize3D();paint3D();
+}
+function syncProfile(){
+  const text=(modelGender==='female'?'Female':'Male')+' model · '+appPreferences.height+' cm · '+appPreferences.weight+' kg';
+  $('#profileSummary').textContent=text;
+  $('#modelProfile').textContent=text;
+  document.body.dataset.modelGender=modelGender;
+}
+window.HEALiumPreferences.subscribe(next=>{
+  const changed=next.gender!==modelGender;
+  appPreferences=next;modelGender=next.gender;syncProfile();
+  dirty3D=true;
+  if(changed)rebuildBody();
+  if(bodyGroup)bodyGroup.traverse(object=>{if(object.isLine)object.material.color.setHex(next.darkMode?0x9BBDFF:0x0032A0);});
+});
 
 function paint3D(){
+  dirty3D=true;
   if(!renderer) return;
   for(const id in regionMat){
     const m=regionMat[id], sel=S.regions.includes(id), hov=hovered===id;
@@ -1515,6 +1559,7 @@ function setView(v){
   tgtY=base+k*2*Math.PI; tgtX=0;
 }
 function setZoom(v,keep){
+  dirty3D=true;
   zoomMode=v;
   if(v==='head'){ tgtLook=1.69; tgtDist=1.0; } else { tgtLook=bodyLook; tgtDist=baseDist; }
   if(keep){ look=tgtLook; dist=tgtDist; }
@@ -1527,6 +1572,8 @@ function loop(){
   if(!$('#s2').classList.contains('on') || $('#s2body').classList.contains('hide')){
     requestAnimationFrame(loop); return;
   }
+  const moving=Math.abs(tgtY-rotY)+Math.abs(tgtX-rotX)+Math.abs(tgtLook-look)+Math.abs(tgtDist-dist)>.0001;
+  if(!dirty3D&&!moving){requestAnimationFrame(loop);return;}
   rotY+=(tgtY-rotY)*easing; rotX+=(tgtX-rotX)*easing; look+=(tgtLook-look)*easing; dist+=(tgtDist-dist)*easing;
   pivot.rotation.y=rotY; pivot.rotation.x=rotX;
   camera.position.set(0,look,dist); camera.lookAt(0,look,0);
@@ -1534,6 +1581,7 @@ function loop(){
   $('#facing').textContent='VIEW · '+(front?'FRONT':'BACK');
   $$('#view button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='front')===front));
   renderer.render(scene,camera);
+  dirty3D=false;
   requestAnimationFrame(loop);
 }
 function pick(e){
@@ -1570,7 +1618,16 @@ function bindPointer(c){
   c.addEventListener('wheel',e=>{ e.preventDefault(); setZoom(e.deltaY<0?'head':'body'); },{passive:false});
 }
 
-init3D(); renderStepper(); updateFooter();
+init3D(); renderStepper(); updateFooter();syncProfile();
+if(modelOnly){
+  S.type='pain';startRoute();go(1);
+  const query=new URLSearchParams(location.search), region=query.get('region');
+  const groups={chest:['chestL','chestR'],abdomen:['upperAbd','lowerAbd'],'left-arm':['armL'],'right-arm':['armR'],'left-leg':['legL'],'right-leg':['legR'],'whole-body':Object.keys(REGIONS)};
+  const mapped=Object.hasOwn(groups,region)?groups[region]:Object.hasOwn(REGIONS,region)?[region]:[];
+  mapped.forEach(toggleRegion);
+  if(query.get('side')==='side')tgtY=Math.PI/2;
+  resize3D();
+}
 
 </script>
 </body>

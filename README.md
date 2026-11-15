@@ -55,6 +55,19 @@ for primary text. Headings use Inter, body text uses Public Sans, and technical
 readings and timestamps use DM Mono. Warning and success states keep distinct
 semantic colors.
 
+Dashboard Settings also saves dark mode, height (cm), weight (kg), and the
+female/male schematic body model selection in this browser's local storage.
+These preferences restore after reload and synchronize across same-origin tabs
+and the emergency iframe. They are separate from session-only journals and
+check-ins; they are not sent to a backend. If browser storage is unavailable,
+the settings form reports a save error.
+
+The dashboard's body preview and emergency mode share the same interactive 3D
+renderer. Breathing opens a full-screen view with a reserved safety toolbar for
+Emergency and Go back; opening emergency mode pauses the exercise. The alerts
+panel and CO₂ history show explicitly labeled sample data. Circled information
+icons support hover, keyboard focus, and tap, with viewport-bounded tooltips.
+
 The emergency assessment has a **Simulate sending data** button. The requested
 confirmation appears only after the simulated response succeeds, alongside an
 explicit **Simulation only · no data transmitted** status. No report reaches a

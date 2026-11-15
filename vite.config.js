@@ -55,7 +55,8 @@ export default defineConfig({
         })
         // Serve the isolated emergency document, including its relative images.
         server.middlewares.use('/emergency', async (req, res, next) => {
-          if (req.url !== '/' && req.url !== '/index.html') return next()
+          const pathname = req.url?.split('?')[0]
+          if (pathname !== '/' && pathname !== '/index.html') return next()
           res.setHeader('Content-Type', 'text/html; charset=utf-8')
           res.end(await readFile(path.join(root, 'index.html')))
         })

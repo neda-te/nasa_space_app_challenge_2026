@@ -11,7 +11,9 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:4173',
     channel: 'chrome',
     launchOptions: { args: ['--enable-webgl', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
-    trace: 'retain-on-failure',
+    // Canvas DOM snapshots can stall software WebGL on Windows. Tests save
+    // explicit screenshots; retain lightweight call/source traces on failure.
+    trace: { mode: 'retain-on-failure', screenshots: false, snapshots: false, sources: true },
   },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 1000 } } },
