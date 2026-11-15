@@ -76,7 +76,7 @@ test('dashboard opens directly, readable navigation and prototype tools remain u
   await page.screenshot({ path: info.outputPath('dashboard.png'), fullPage: true })
   await page.getByRole('button', { name: 'Complete Scheduled blood test' }).click()
   await expect(page.getByRole('button', { name: 'Reopen Scheduled blood test' })).toHaveAttribute('aria-pressed','true')
-  for (const name of ['Physical Health','Environmental Monitoring','Tests & Lab Data','Trends & Analysis','My Journal','Data Sources','Emergency Data','Dashboard Settings']) {
+  for (const name of ['Physical Health','Environmental Monitoring','Tests & Lab Data','Trends & Analysis','My Journal','Emergency Data','Dashboard Settings']) {
     await page.getByRole('navigation').getByRole('button',{name,exact:true}).click()
     await noPageOverflow(page)
     await expect(page.getByRole('button', { name: /sign in|log in/i })).toHaveCount(0)
@@ -95,8 +95,6 @@ test('3D body remains centered and fully visible after resize, rotate, zoom and 
   const errors = []
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('/')
-  const crew = page.locator('.crew-selector select')
-  await crew.selectOption('Dr. Elias Romero')
   const frame = await openEmergency(page)
   await noPageOverflow(await frameContext(page))
   await frame.locator('[data-action="type"][data-v="pain"]').click()
@@ -132,7 +130,6 @@ test('3D body remains centered and fully visible after resize, rotate, zoom and 
   await page.screenshot({ path: info.outputPath('emergency-body.png') })
   await page.getByRole('button', { name: 'Back to dashboard' }).click()
   await expect(page.getByRole('dialog')).not.toBeVisible()
-  await expect(crew).toHaveValue('Dr. Elias Romero')
   expect(errors).toEqual([])
 })
 

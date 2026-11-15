@@ -702,7 +702,7 @@ function PageTitle({
     <div className="page-title">
       <div>
         <span className="eyebrow">{kicker}</span>
-        <h2>{title} <InfoTip label={title} text={description} /></h2>
+        <h2 aria-label={title}>{title} <InfoTip label={title} text={description} /></h2>
         <p>{description}</p>
       </div>
       {action}
@@ -2738,7 +2738,9 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
   const startAmbient = () => {
     if (!soundOn || audioRef.current) return
     const AudioContextClass = window.AudioContext
-    const context = new AudioContextClass()
+    if (!AudioContextClass) return
+    let context: AudioContext
+    try { context = new AudioContextClass() } catch { return }
     const oscillator = context.createOscillator()
     const gain = context.createGain()
     const frequencies: Record<BreathingScene, number> = {
@@ -2792,32 +2794,33 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
     setStarted(true)
     setRunning(true)
     startAmbient()
-    speak('Inhale')
+    speak(!started || sessionRemaining <= 0 ? 'Inhale' : phaseNames[phase])
   }
 
   useEffect(() => {
     if (!running) return
-    const interval = window.setInterval(() => {
-      setSessionRemaining((current) => {
-        if (current <= 1) {
-          window.setTimeout(finishSession, 0)
-          return 0
-        }
-        return current - 1
-      })
-      setPhaseSeconds((current) => {
-        if (current > 1) return current - 1
+    const timer = window.setTimeout(() => {
+      if (sessionRemaining <= 1) {
+        setSessionRemaining(0)
+        if (phase === 2 && phaseSeconds <= 1) setBreaths(count => count + 1)
+        finishSession()
+        return
+      }
+      setSessionRemaining(sessionRemaining - 1)
+      if (phaseSeconds > 1) setPhaseSeconds(phaseSeconds - 1)
+      else {
         const nextPhase = (phase + 1) % 3
-        if (phase === 2) setBreaths((count) => count + 1)
+        if (phase === 2) setBreaths(count => count + 1)
         setPhase(nextPhase)
-        window.setTimeout(() => speak(phaseNames[nextPhase]), 0)
-        return pattern[nextPhase]
-      })
+        setPhaseSeconds(pattern[nextPhase])
+        speak(phaseNames[nextPhase])
+      }
     }, 1000)
-    return () => window.clearInterval(interval)
-  }, [running, phase, pattern, voiceOn, volume])
+    return () => window.clearTimeout(timer)
+  }, [running, sessionRemaining, phaseSeconds, phase, pattern, voiceOn, volume])
 
   useEffect(() => {
+    if (running && soundOn && !audioRef.current) startAmbient()
     if (audioRef.current) {
       audioRef.current.gain.gain.setTargetAtTime(
         soundOn ? (volume / 100) * 0.045 : 0,
@@ -2825,7 +2828,7 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
         0.08,
       )
     }
-  }, [volume, soundOn])
+  }, [volume, soundOn, running])
 
   useEffect(() => {
     if (!running) return
@@ -2833,7 +2836,12 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
     startAmbient()
   }, [theme])
 
-  useEffect(() => () => stopAmbient(), [])
+  useEffect(() => { if (!voiceOn && 'speechSynthesis' in window) window.speechSynthesis.cancel() }, [voiceOn])
+
+  useEffect(() => () => {
+    stopAmbient()
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+  }, [])
 
   const selectDuration = (minutes: number) => {
     if (running) return
@@ -2952,6 +2960,10 @@ function BreathingExercisePage({ emergencyActive = false }: { emergencyActive?: 
                   disabled={running}
                   onClick={() => {
                     setMode(item)
+                    setPhase(0)
+                    setStarted(false)
+                    setCompleted(false)
+                    setSessionRemaining(totalSeconds)
                     setPhaseSeconds(breathingPatterns[item][0])
                   }}
                   key={item}
@@ -3529,6 +3541,31 @@ function WellnessModal({
   const [breathing, setBreathing] = useState(false)
   const [duration, setDuration] = useState(2)
   const [scene, setScene] = useState<BreathingScene>('ball')
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null
+    const modal = document.querySelector<HTMLElement>('.wellness-modal')
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    modal?.querySelector<HTMLButtonElement>('.modal-close')?.focus()
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !document.querySelector('.info-popup')) {
+        event.preventDefault(); closeRef.current(); return
+      }
+      if (event.key !== 'Tab' || document.activeElement?.closest('.info-popup')) return
+      const controls = [...(modal?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select,textarea,[tabindex="0"]') ?? [])].filter(node => node.getClientRects().length)
+      const first = controls[0], last = controls[controls.length - 1]
+      if (event.shiftKey && (document.activeElement === first || !modal?.contains(document.activeElement))) { event.preventDefault(); last?.focus() }
+      else if (!event.shiftKey && (document.activeElement === last || !modal?.contains(document.activeElement))) { event.preventDefault(); first?.focus() }
+    }
+    document.addEventListener('keydown', keyboard)
+    return () => {
+      document.removeEventListener('keydown', keyboard)
+      document.body.style.overflow = overflow
+      if (previous?.isConnected) previous.focus()
+    }
+  }, [])
   return (
     <div
       className="modal-backdrop"

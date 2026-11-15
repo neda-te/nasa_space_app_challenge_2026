@@ -15,6 +15,7 @@ test('emergency navigation and manual controls remain readable in dark mode', as
     const style=getComputedStyle(element), fg=luminance(style.color), bg=luminance(style.backgroundColor)
     return (Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)
   })
+  expect(await contrast(page.locator('.emergency-dialog-bar'))).toBeGreaterThanOrEqual(4.5)
   expect(await contrast(frame.locator('#back'))).toBeGreaterThanOrEqual(4.5)
   await frame.locator('[data-action="guide"][data-v="blood"]').first().click()
   expect(await contrast(frame.getByRole('button', { name: 'Next step', exact: true }))).toBeGreaterThanOrEqual(4.5)

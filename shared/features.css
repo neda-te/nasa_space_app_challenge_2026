@@ -199,3 +199,10 @@
 
 /* Dismissed emergency tips must leave keyboard and accessibility navigation. */
 .emergency-app #tip:not(.on) { visibility: hidden; pointer-events: none; }
+
+.emergency-app .fallback { overflow-y: auto; align-content: flex-start; padding: 8px; }
+.emergency-app .fallback-notice { position: absolute; top: 0; margin: 8px 16px; color: var(--heal-text); }
+/* Visibility changes immediately so focus can enter the opening manual. */
+.emergency-app #guide { transition: opacity .2s; }
+.emergency-dialog-bar { background: var(--heal-panel); color: var(--heal-text); }
+[data-theme="dark"] .emergency-app :is(.vit,.kbd kbd) { background: var(--heal-panel); color: var(--heal-text); border-color: var(--heal-line); }

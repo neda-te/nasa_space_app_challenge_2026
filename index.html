@@ -911,7 +911,9 @@ function startRoute(){
   }
 }
 const curKey = () => S.route[S.idx]||'emergency';
+let routeTimer;
 function go(n){
+  clearTimeout(routeTimer);
   resetSubmission();
   S.idx=n; const key=curKey(), scr = key==='emergency'?1:key==='assess'?3:2;
   $$('.screen').forEach((s,i)=>s.classList.toggle('on', i+1===scr));
@@ -949,7 +951,8 @@ function groupsHtml(F){
 }
 function renderS2(flow){
   S.flow=flow; const F=FLOWS[flow];
-  $('#ustrip').classList.toggle('hide', !(S.uncon && flow!=='unconscious')), body=F.mode==='body';
+  $('#ustrip').classList.toggle('hide', !(S.uncon && flow!=='unconscious'));
+  const body=F.mode==='body';
   $('#s2body').classList.toggle('hide',!body); $('#s2list').classList.toggle('hide',body);
   if(body){
     $('#vpTitle').textContent=F.vp; $('#bodyGroups').innerHTML=groupsHtml(F); $('#listGroups').innerHTML='';
@@ -970,6 +973,7 @@ function renderChips(){
     ? S.regions.map(id=>`<span class="chip">${REGIONS[id].label}<button data-action="rm" data-v="${id}" aria-label="remove">×</button></span>`).join('')
     : '<div class="empty">Nothing selected yet — tap the body.</div>';
   $('#anatInfo').classList.toggle('hide', !S.regions.length);
+  $$('.fallback [data-action=rm]').forEach(button=>{const selected=S.regions.includes(button.dataset.v);button.classList.toggle('sel',selected);button.setAttribute('aria-pressed',selected);});
   if(typeof paint3D==='function') paint3D();
   updateFooter();
 }
@@ -1157,16 +1161,17 @@ function startVitals(base){
 function stopVitals(){ if(vitTimer){ clearInterval(vitTimer); vitTimer=null; } }
 
 /* guide modal: step list + image, arrow keys */
-let G=null;
+let G=null, guideReturnFocus=null;
 const stp = x => typeof x==='string' ? {d:x} : x;
 const PH = '<div class="ph"><div><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4 4 3 3-2 4 3"/></svg>ILLUSTRATION<br>FOLLOWS</div></div>';
 function openGuide(id,i){
   const p=P[id], why = i!=null && A && A.rec[i] && A.rec[i][1], steps=p.s.map(stp);
+  guideReturnFocus=document.activeElement;
   G={steps,k:-1};
   steps.forEach(s=>{ if(s.img){ const im=new Image(); im.src=s.img; } });
   $('#gbox').innerHTML = `<div class="gtext">
       <div class="kicker">${CATS.find(c=>c[0]===p.c)[1]} · step-by-step guide</div>
-      <h2 id="guideTitle">${p.n} <span class="info" data-tip="guide-navigation">i</span></h2><div class="hint">${p.d}</div>
+      <h2 id="guideTitle" aria-label="${p.n}">${p.n} <span class="info" data-tip="guide-navigation">i</span></h2><div class="hint">${p.d}</div>
       ${why?`<div class="why"><b>In this case:</b> ${why}</div>`:''}
       <div class="gneed"><b>You need:</b> ${p.need}</div>
       <ol class="gsteps" id="gsteps">${steps.map((s,k)=>`<li data-action="gstep" data-v="${k}"><span class="gn">${k+1}</span><div>${s.t?`<b>${s.t}</b>`:''}<span>${s.d}</span></div></li>`).join('')}</ol>
@@ -1180,6 +1185,8 @@ function openGuide(id,i){
       <div class="gfoot"><span class="kbd"><kbd>←</kbd> <kbd>→</kbd> switch steps</span><button class="btn ghost" data-action="closeguide">Close</button></div>
     </div>`;
   $('#guide').classList.add('on'); setGStep(0,true);
+  enhanceInfo();
+  $('#gbox [data-action=closeguide]').focus();
 }
 function setGStep(k,instant){
   if(!G) return; const n=G.steps.length; k=Math.max(0,Math.min(n-1,k)); if(k===G.k) return; G.k=k;
@@ -1193,12 +1200,29 @@ function setGStep(k,instant){
   const ol=$('#gsteps'), li=ol.children[k];
   ol.scrollTo({top: li.offsetTop - ol.clientHeight/2 + li.offsetHeight/2, behavior: instant?'auto':'smooth'});
 }
-function closeGuide(){ $('#guide').classList.remove('on'); G=null; }
+function closeGuide(){
+  if(!G) return;
+  $('#guide').classList.remove('on'); G=null; hideTip();
+  if(guideReturnFocus?.isConnected) guideReturnFocus.focus();
+  guideReturnFocus=null;
+}
 document.addEventListener('keydown',e=>{
   const info=e.target.closest?.('.info');
   if(info && (e.key==='Enter' || e.key===' ')){e.preventDefault();info.click();return;}
-  if(e.key==='Escape'){ closeGuide(); hideTip(); return; }
+  if(e.key==='Escape'){
+    e.preventDefault();
+    if(tip.classList.contains('on')) hideTip(); else closeGuide();
+    return;
+  }
   if(!G) return;
+  if(e.key==='Tab'){
+    const controls=Array.from($('#gbox').querySelectorAll('button:not(:disabled),[tabindex="0"]')).filter(el=>el.getClientRects().length);
+    const first=controls[0],last=controls[controls.length-1];
+    if(e.shiftKey && (document.activeElement===first || !$('#gbox').contains(document.activeElement))){e.preventDefault();last?.focus();}
+    else if(!e.shiftKey && (document.activeElement===last || !$('#gbox').contains(document.activeElement))){e.preventDefault();first?.focus();}
+    return;
+  }
+  if(e.target===tip) return;
   if(e.key==='ArrowRight'||e.key==='ArrowDown'){ e.preventDefault(); setGStep(G.k+1); }
   if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); setGStep(G.k-1); }
 });
@@ -1293,7 +1317,7 @@ document.addEventListener('click',e=>{
   const v=el.dataset.v;
   switch(el.dataset.action){
     case 'uncon': setUncon(!S.uncon); break;
-    case 'type': S.type=v; $$('.tile').forEach(t=>t.classList.toggle('sel',t===el)); updateFooter(); setTimeout(()=>{ startRoute(); go(1); },220); break;
+    case 'type': S.type=v; $$('.tile').forEach(t=>t.classList.toggle('sel',t===el)); updateFooter(); clearTimeout(routeTimer); routeTimer=setTimeout(()=>{ startRoute(); go(1); },220); break;
     case 'grp': S.sel[el.dataset.g]=v; $$(`[data-action=grp][data-g=${el.dataset.g}]`).forEach(b=>b.classList.toggle('sel',b===el)); updateFooter(); break;
     case 'item': S.items[S.flow]=v; $$('[data-action=item]').forEach(b=>b.classList.toggle('sel',b===el)); updateFooter(); break;
     case 'rm': toggleRegion(v); break;
@@ -1484,12 +1508,14 @@ function buildBody(B){
 
 function init3D(){
   const canvas=$('#gl');
-  if(!window.THREE){
+  const fallback=()=>{
+    renderer=null;
     canvas.remove();
     $('#vp').insertAdjacentHTML('beforeend','<div class="fallback">'+Object.keys(REGIONS).map(id=>`<button class="opt" data-action="rm" data-v="${id}"><b>${REGIONS[id].label}</b></button>`).join('')+'</div>');
-    return;
-  }
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+    $('#vp').insertAdjacentHTML('afterbegin','<p class="fallback-notice">3D view unavailable. Select body areas using the buttons below.</p>');
+  };
+  if(!window.THREE){fallback();return;}
+  try { renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true}); } catch { fallback();return; }
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   scene=new THREE.Scene();
   camera=new THREE.PerspectiveCamera(27,1,.05,50);
@@ -1622,6 +1648,9 @@ function bindPointer(c){
     if(down && moved<=4){ const id=pick(e); if(id){ toggleRegion(id); hov.textContent=label(id); } }
     down=null;
   });
+  const cancelDrag=()=>{down=null;moved=0;c.classList.remove('drag');};
+  c.addEventListener('pointercancel',cancelDrag);
+  c.addEventListener('lostpointercapture',cancelDrag);
   c.addEventListener('pointerleave',()=>{ if(!down){ hovered=null; paint3D(); hov.style.opacity=0; } });
   c.addEventListener('wheel',e=>{ e.preventDefault(); setZoom(e.deltaY<0?'head':'body'); },{passive:false});
 }

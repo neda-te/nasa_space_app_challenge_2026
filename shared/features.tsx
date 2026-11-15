@@ -22,6 +22,9 @@ export function usePreferences() {
   return settings
 }
 
+// Closing a popup can expose another icon under a stationary pointer.
+let tooltipHoverSuppressed = false
+
 export function InfoTip({ label, text, children }: { label: string; text?: string; children?: ReactNode }) {
   const id = useId()
   const button = useRef<HTMLButtonElement>(null)
@@ -31,6 +34,17 @@ export function InfoTip({ label, text, children }: { label: string; text?: strin
   const [open, setOpen] = useState(false)
   const [pinned, setPinned] = useState(false)
   const [position, setPosition] = useState({ top: 12, left: 12 })
+  const reveal = () => {
+    window.dispatchEvent(new CustomEvent('healium:tooltip-open', { detail: id }))
+    setOpen(true)
+  }
+  useEffect(() => {
+    const closeOther = (event: Event) => {
+      if ((event as CustomEvent).detail !== id) { setOpen(false); setPinned(false) }
+    }
+    window.addEventListener('healium:tooltip-open', closeOther)
+    return () => window.removeEventListener('healium:tooltip-open', closeOther)
+  }, [id])
   useLayoutEffect(() => {
     if (!open) return
     const place = () => {
@@ -51,17 +65,17 @@ export function InfoTip({ label, text, children }: { label: string; text?: strin
     const close = (event: Event) => {
       if (!button.current?.contains(event.target as Node) && !popup.current?.contains(event.target as Node)) { setOpen(false); setPinned(false) }
     }
-    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') { dismissed.current = true; setOpen(false); setPinned(false); if (document.activeElement !== button.current) { suppressFocus.current = true; button.current?.focus() } } }
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') { tooltipHoverSuppressed = true; dismissed.current = true; setOpen(false); setPinned(false); if (popup.current?.contains(document.activeElement)) { suppressFocus.current = true; button.current?.focus() } } }
     document.addEventListener('pointerdown', close)
     document.addEventListener('keydown', escape)
     return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', escape) }
   }, [open])
   return <>
     <button ref={button} type="button" className="info-trigger" aria-label={`About ${label}`} aria-expanded={open} aria-describedby={open ? id : undefined}
-      onMouseEnter={() => { if (!dismissed.current) setOpen(true) }} onMouseLeave={() => { if (document.activeElement !== button.current && !popup.current?.contains(document.activeElement)) { dismissed.current = false; if (!pinned) setOpen(false) } }}
-      onFocus={() => { if (suppressFocus.current) suppressFocus.current = false; else if (!dismissed.current) setOpen(true) }} onBlur={(event) => { if (!popup.current?.contains(event.relatedTarget)) { dismissed.current = false; if (!pinned) setOpen(false) } }}
-      onKeyDown={(event) => { event.stopPropagation(); if (event.key === 'Escape') { dismissed.current = true; setOpen(false); setPinned(false) } else if (event.key === 'ArrowDown' && open) { event.preventDefault(); popup.current?.focus() } }}
-      onClick={(event) => { event.stopPropagation(); dismissed.current = pinned; setPinned(!pinned); setOpen(!pinned) }}>i</button>
+      onMouseEnter={() => { if (!tooltipHoverSuppressed && !dismissed.current) reveal() }} onMouseMove={(event) => { if (event.movementX || event.movementY) { tooltipHoverSuppressed = false; if (!open && !dismissed.current) reveal() } }} onMouseLeave={() => { if (document.activeElement !== button.current && !popup.current?.contains(document.activeElement)) { dismissed.current = false; if (!pinned) setOpen(false) } }}
+      onFocus={() => { if (suppressFocus.current) suppressFocus.current = false; else if (!dismissed.current) reveal() }} onBlur={(event) => { if (!popup.current?.contains(event.relatedTarget)) { dismissed.current = false; if (!pinned) setOpen(false) } }}
+      onKeyDown={(event) => { if (open) event.stopPropagation(); if (event.key === 'Escape') { tooltipHoverSuppressed = true; dismissed.current = true; setOpen(false); setPinned(false) } else if (event.key === 'ArrowDown' && open) { event.preventDefault(); popup.current?.focus() } }}
+      onClick={(event) => { event.stopPropagation(); dismissed.current = pinned; setPinned(!pinned); if (pinned) setOpen(false); else reveal() }}>i</button>
     {open && createPortal(<div ref={popup} id={id} role="tooltip" tabIndex={0} className="info-popup" style={position} onMouseLeave={() => { if (!pinned && document.activeElement !== button.current && !popup.current?.contains(document.activeElement)) setOpen(false) }} onBlur={(event) => { if (!pinned && !button.current?.contains(event.relatedTarget) && !popup.current?.contains(event.relatedTarget)) setOpen(false) }}>
       <strong>{label}</strong>{text && <p>{text}</p>}{children}
     </div>, document.body)}
