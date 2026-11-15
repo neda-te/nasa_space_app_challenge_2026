@@ -1,0 +1,133 @@
+/* Same type roles, buttons, and palette as the dashboard; no viewport scaling. */
+.emergency-app {
+  --bg: var(--heal-bg); --panel: var(--heal-panel); --panel2: var(--heal-panel-soft);
+  --line: var(--heal-line); --line2: #c7d4e3; --txt: var(--heal-text); --mut: var(--heal-muted); --mut2: var(--heal-muted);
+  --b: var(--heal-primary); --b2: var(--heal-accent); --red: var(--heal-critical); --amber: var(--heal-warning);
+  --head: var(--heal-heading); --mono: var(--heal-technical);
+  display: block; height: auto; min-height: 100dvh; overflow: auto;
+  background: var(--heal-bg); font: var(--heal-body)/1.5 var(--heal-font);
+}
+html:has(.emergency-app) { height: auto; overflow: auto; background: var(--heal-bg); font-size: 16px; }
+.emergency-app #app { width: 100%; min-height: 100dvh; overflow: visible; grid-template-rows: auto 1fr auto; }
+.emergency-app #app { background: var(--heal-bg); }
+.emergency-app #app::before { display: none; }
+.emergency-app :is(header,footer,.panel,.viewport,.tile,.gbox) { background: var(--heal-panel); }
+.emergency-app :is(.stepper,.hdr-r,.vitals,.rec,.tag,.seg button,.lbl,.kicker,.vp-bot,.disc,.gcap span,.gcap b,.gtext,.gsteps,.gsteps li b) { font-family: var(--heal-font); }
+.emergency-app :is(#met,#elapsed,.v b,.v b u,.vitals b,.rec b,.gcap span,.vp-bot,.vitals .src) { font-family: var(--heal-technical); font-variant-numeric: tabular-nums; }
+.emergency-app header { min-height: 80px; padding: 14px 24px; }
+.emergency-app .logo { font-size: 22px; letter-spacing: 0; }
+.emergency-app .logo div { white-space: nowrap; }
+.emergency-app .app-logo { display: block; width: 72px; height: 61px; object-fit: contain; border-radius: 6px; }
+.emergency-app .stepper { font-size: var(--heal-caption); flex-wrap: wrap; white-space: normal; justify-content: center; }
+.emergency-app .step { gap: 6px; }
+.emergency-app .step i { width: 24px; height: 24px; font-size: var(--heal-caption); }
+.emergency-app .hdr-r { font-size: var(--heal-caption); }
+.emergency-app .crew b { font-size: var(--heal-body); }
+.emergency-app .live { font-size: var(--heal-caption); white-space: normal; text-align: right; }
+.emergency-app .screen { display: none; position: relative; inset: auto; padding: 24px; opacity: 1; visibility: visible; transform: none; transition: none; }
+.emergency-app .screen.on { display: block; }
+.emergency-app #s1 { display: none; padding: 32px clamp(20px,4vw,64px); }
+.emergency-app #s1.on { display: flex; min-height: 540px; }
+.emergency-app #s3 { display: none; }
+.emergency-app #s3.on { display: grid; grid-template-rows: auto auto auto; }
+.emergency-app :is(h1,.summary h1) { font: 600 var(--heal-title)/1.3 var(--heal-heading); white-space: normal; }
+.emergency-app h2 { font: 600 20px/1.3 var(--heal-heading); }
+.emergency-app :is(.lbl,.kicker,.tag,.disc,.link,.need,.vitals,.vitals .src,.vp-bot,.v span,.vit .lv,.rec,.rec b,.cause small,.cat small,.chip,.opt small,.opt.soon i,.tile small,.tile .k,.uncon small,.uncon .st,.hint,.seg button,.gtext,.gtext .note,.kbd,.gcap span,.gtext .note b,.gnav,.live,.cbanner,.tx,.src) { font-size: var(--heal-caption); }
+.emergency-app :is(.tile b,.opt b,.cause b,.cat b,.v b,.btn,.link,.gtext h3) { font-family: var(--heal-font); }
+.emergency-app :is(.tile b,.opt b,.cause b,.cat b) { font-size: var(--heal-body); line-height: 1.4; }
+.emergency-app .v b { font: 500 var(--heal-reading)/1.2 var(--heal-technical); }
+.emergency-app .v b u { font-size: var(--heal-caption); }
+.emergency-app .vitals b { font: 500 var(--heal-reading)/1.2 var(--heal-technical); }
+.emergency-app :is(.lbl,.kicker) { font-family: var(--heal-font); font-weight: 600; letter-spacing: .06em; }
+.emergency-app .vitals { flex-wrap: wrap; gap: 24px; }
+.emergency-app .vitals .src { margin-left: 0; }
+.emergency-app .uncon b { font-size: 18px; }
+.emergency-app .uncon { min-height: 88px; }
+.emergency-app .uncon > span:nth-child(2) { flex: 1; min-width: 0; }
+.emergency-app .tiles { grid-template-columns: repeat(5,minmax(0,1fr)); }
+.emergency-app .tile { min-height: 190px; height: auto; gap: 20px; padding: 18px; }
+.emergency-app .s2grid { position: relative; inset: auto; grid-template-columns: minmax(0,1.45fr) minmax(280px,1fr); align-items: stretch; min-height: 560px; }
+.emergency-app .side { min-width: 0; }
+.emergency-app .side .panel:last-child { flex: initial; }
+.emergency-app .viewport { display: flex; flex-direction: column; min-width: 0; }
+.emergency-app .vp-top { position: static; padding: 18px; display: flex; flex-wrap: wrap; gap: 14px; }
+.emergency-app .vp-top { order: 0; }
+.emergency-app .model-stage { order: 1; }
+.emergency-app .vp-bot { order: 2; }
+.emergency-app .vp-ctrl { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+.emergency-app .seg button { min-height: 36px; padding: 6px 12px; }
+.emergency-app .model-stage { position: relative; flex: 1; height: 440px; min-height: 360px; }
+.emergency-app #gl { width: 100%; height: 100%; }
+.emergency-app .vp-bot { position: static; padding: 14px 18px; gap: 12px; }
+.emergency-app .ustrip { position: static; transform: none; width: fit-content; margin: 0 auto 16px; white-space: normal; font-size: var(--heal-caption); }
+.emergency-app :is(.opts,.opts.three) { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.emergency-app .opt { min-width: 0; padding: 12px; }
+.emergency-app .listpanel .opts.one .opt { padding: 16px; }
+.emergency-app .summary { flex-wrap: wrap; align-items: start; }
+.emergency-app .summary .tags { flex-basis: 100%; }
+.emergency-app .vit { flex-wrap: wrap; }
+.emergency-app .grid3 { grid-template-rows: auto auto; grid-template-columns: minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr); }
+.emergency-app .grid3 > .panel, .emergency-app .a-side .panel { overflow: visible; }
+.emergency-app :is(.cause,.rec,.catgrid > *) { min-width: 0; }
+.emergency-app .cause { grid-template-columns: minmax(0,1fr) auto auto; padding-block: 12px; }
+.emergency-app .catgrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.emergency-app footer { padding: 16px 24px; gap: 16px; flex-wrap: wrap; }
+.emergency-app .fl, .emergency-app .btns { flex-wrap: wrap; gap: 12px; }
+.emergency-app .need { flex-wrap: wrap; gap: 8px; margin: 0; }
+.emergency-app .btn { min-height: 42px; padding: 9px 16px; border-radius: 8px; font: 600 var(--heal-body)/1.4 var(--heal-font); }
+.emergency-app .btn.pri { box-shadow: none; margin: 0; }
+.emergency-app .btn.ghost { color: var(--heal-primary); border-color: var(--heal-line); }
+.emergency-app button:focus-visible { outline: 2px solid var(--heal-primary); outline-offset: 3px; }
+.emergency-app #guide { position: fixed; padding: 16px; overflow-y: auto; }
+.emergency-app .gbox { width: min(1120px,100%); height: min(760px,calc(100dvh - 32px)); max-height: calc(100dvh - 32px); overflow: hidden; }
+.emergency-app .gtext { overflow: hidden; }
+.emergency-app .gimg { min-height: 0; }
+.emergency-app .gdescription { display: none; }
+.emergency-app .gtext h3 { font-size: 20px; }
+.emergency-app #toast { position: fixed; bottom: 24px; font-size: var(--heal-body); }
+.emergency-app #tip { font-size: var(--heal-body); max-width: min(340px,calc(100vw - 32px)); }
+.emergency-app #tip h4 { font-size: var(--heal-caption); }
+.emergency-app .submission-status { padding: 16px; color: var(--heal-success); border: 1px solid #add2c1; border-radius: 8px; background: #eff9f3; font: var(--heal-body)/1.5 var(--heal-font); }
+.emergency-app .submission-status strong { display: block; font-size: var(--heal-label); }
+.emergency-app .submission-status small { display: block; margin-top: 6px; color: var(--heal-muted); font-size: var(--heal-caption); }
+.emergency-app .submission-status[data-state="error"] { color: var(--heal-critical); background: #fff3f0; border-color: #efb2a8; }
+.emergency-app .fallback { position: static; padding: 16px; }
+@media (max-width: 1100px) {
+  .emergency-app header { grid-template-columns: auto 1fr; }
+  .emergency-app .stepper { grid-column: 1 / -1; grid-row: 2; }
+  .emergency-app .tiles { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .emergency-app .grid3 { grid-template-columns: minmax(0,1fr) minmax(0,1fr); grid-template-areas: 'causes do' 'side side' 'records cat'; }
+  .emergency-app .a-side { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 720px) {
+  .emergency-app header { padding: 12px; gap: 12px; }
+  .emergency-app .hdr-r { gap: 8px; white-space: normal; }
+  .emergency-app .crew { display: none; }
+  .emergency-app .screen, .emergency-app #s1 { padding: 18px 14px; }
+  .emergency-app #s1.on { min-height: 0; }
+  .emergency-app .tiles { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .emergency-app .tile { min-height: 170px; padding: 16px; }
+  .emergency-app .uncon { align-items: start; flex-wrap: wrap; padding: 16px; gap: 12px; }
+  .emergency-app .uncon .st { width: 100%; text-align: left; }
+  .emergency-app .vitals { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+  .emergency-app .s2grid { grid-template-columns: 1fr; min-height: 0; }
+  .emergency-app .model-stage { flex: none; height: clamp(220px,calc(100dvh - 350px),440px); min-height: 0; }
+  .emergency-app .vp-top { gap: 12px; padding: 16px; }
+  .emergency-app .vp-ctrl { width: 100%; justify-content: space-between; }
+  .emergency-app .seg button { padding: 6px 10px; }
+  .emergency-app .grid3 { grid-template-columns: minmax(0,1fr); grid-template-areas: 'causes' 'do' 'side' 'records' 'cat'; }
+  .emergency-app .a-side { display: flex; }
+  .emergency-app .grid3 > .panel { padding: 16px; }
+  .emergency-app .vit { width: 100%; }
+  .emergency-app .vit > .v { flex: 1 1 42%; }
+  .emergency-app footer { padding: 16px 14px; }
+  .emergency-app .btns { width: 100%; justify-content: flex-end; }
+  .emergency-app .need { width: 100%; }
+  .emergency-app .gbox { display: flex; flex-direction: column; height: auto; overflow-y: auto; }
+  .emergency-app .gimg { order: 0; flex: none; min-height: 0; padding: 16px; }
+  .emergency-app .gframe { flex: none; height: clamp(160px,30dvh,260px); }
+  .emergency-app .gdescription { display: block; margin: 0; color: var(--heal-text); font-size: var(--heal-body); line-height: 1.5; }
+  .emergency-app .gcap b { white-space: normal; font-size: var(--heal-body); }
+  .emergency-app .gtext { order: 1; flex: none; height: 480px; padding: 16px; }
+  .emergency-app .ghead { flex-wrap: wrap; }
+}

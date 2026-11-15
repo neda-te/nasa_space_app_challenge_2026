@@ -1,0 +1,22 @@
+/* Shared by the dashboard and the isolated emergency document. */
+:root {
+  --heal-font: 'Public Sans', system-ui, sans-serif;
+  --heal-heading: 'Inter', system-ui, sans-serif;
+  --heal-technical: 'DM Mono', ui-monospace, monospace;
+  --heal-caption: 0.75rem;
+  --heal-label: 0.8125rem;
+  --heal-body: 0.875rem;
+  --heal-reading: 1.875rem;
+  --heal-title: 1.5rem;
+  --heal-bg: #F4F6FB;
+  --heal-panel: #ffffff;
+  --heal-panel-soft: #F4F6FB;
+  --heal-line: #d9e2ed;
+  --heal-text: #14234A;
+  --heal-muted: #55657e;
+  --heal-primary: #0032A0;
+  --heal-accent: #0032A0;
+  --heal-warning: #9a6200;
+  --heal-critical: #D83933;
+  --heal-success: #236b53;
+}

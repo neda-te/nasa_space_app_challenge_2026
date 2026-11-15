@@ -30,19 +30,44 @@ original emergency prototype is available at `/emergency/index.html`.
 
 - The dashboard components and styles remain in
   `Astronaut Health Dashboard/Astronaut Health Dashboard/src/app/(frontend)`.
-- `index.html` and `img/` remain the original emergency prototype sources.
+- `index.html` and `img/` contain the emergency prototype sources.
   The launcher serves them in an iframe to isolate their CSS, scripts, canvas,
   and keyboard controls. The build copies them into `dist/emergency/`.
 - `local/main.tsx` mounts the existing dashboard without the Figma server runtime.
-- `local/local-actions.ts` provides explicit availability errors for features
-  that require Figma Make: sign-in, private journal, reminders, and saved health
-  check-ins. It does not simulate authentication or store private health data.
+- Sign-in has been removed from the app. Legacy `/login`, `/signin`, `/sign-in`,
+  `/register`, and `/signup` URLs redirect to the dashboard in the local servers.
+- `local/local-actions.ts` supports reminders and journal entries in memory for
+  the current session. Reloading clears these records. Check-ins and sharing
+  are explicitly simulated; no authentication or delivery service is implied.
   Emergency Data starts empty locally; connecting or importing records is a
   separate backend integration.
 - The original Next.js/Payload configuration and backend files are retained.
   This local launcher does not need their platform-owned credentials.
 
-Fonts and the emergency prototype's Three.js library load from their existing
-external providers, so internet access is needed for the original fonts and 3D
-body display. The prototype includes a region-button fallback when Three.js is
-unavailable. This remains a simulated research prototype.
+`shared/tokens.css` defines both modes' typography and palette. Responsive layout
+styles live in `shared/dashboard.css` and `shared/emergency.css`. Three.js is
+bundled locally; fonts still load from Google Fonts. The prototype includes a
+region-button fallback when Three.js is unavailable.
+
+The shared theme uses `#F4F6FB` for the background, `#FFFFFF` for cards,
+`#D83933` for emergency states, `#0032A0` for primary controls, and `#14234A`
+for primary text. Headings use Inter, body text uses Public Sans, and technical
+readings and timestamps use DM Mono. Warning and success states keep distinct
+semantic colors.
+
+The emergency assessment has a **Simulate sending data** button. The requested
+confirmation appears only after the simulated response succeeds, alongside an
+explicit **Simulation only · no data transmitted** status. No report reaches a
+flight surgeon. Failed submissions show an error and allow a retry.
+
+## Browser verification
+
+```powershell
+npm run test:e2e
+```
+
+This builds the production app and tests it in headless Google Chrome (Chrome
+must be installed). Tests cover desktop, tablet, mobile, narrow mobile, and
+landscape sizes, including navigation, text overflow, actual WebGL body alignment
+and resizing, and simulated submission success/failure. Screenshots and failure
+traces are written to `.cache/browser-tests/`.

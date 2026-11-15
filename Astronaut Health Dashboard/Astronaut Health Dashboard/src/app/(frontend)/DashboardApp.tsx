@@ -1,13 +1,11 @@
 'use client'
 
+import healiumLogo from '../../../../../img/logo.jpeg'
 import { useEffect, useRef, useState, useTransition, type DragEvent, type ReactNode } from 'react'
 import { submitDailyCheckIn, type CheckInSubmission } from './checkin-actions'
 import {
   deleteJournalEntry,
   getPrivateDashboardData,
-  loginAstronaut,
-  logoutAstronaut,
-  registerAstronaut,
   saveJournalEntry,
   setReminderCompleted,
   type JournalEntryView,
@@ -1203,7 +1201,7 @@ function DashboardReminders({
           <span className="eyebrow">SCHEDULE & FOLLOW-UP</span>
           <h3 id="dashboard-reminders-title">Health reminders</h3>
         </div>
-        <span>{signedIn ? 'Completion sync active' : 'Sign in to sync completion'}</span>
+        <span>Session-only prototype</span>
       </div>
       <div className="reminder-grid">
         {dashboardReminders.map((reminder) => {
@@ -3297,6 +3295,11 @@ function DailyCheckInFlow({
   const [hasPhysicalDiscomfort, setHasPhysicalDiscomfort] = useState<boolean | null>(null)
   const [discomfortDescription, setDiscomfortDescription] = useState('')
   const [privacyLevel, setPrivacyLevel] = useState<'private' | 'crew-medical'>('private')
+  const [simulatedSubmission, setSimulatedSubmission] = useState(false)
+
+  useEffect(() => {
+    if (flow === 'summary') document.querySelector('.wellness-modal')?.scrollTo({ top: 0 })
+  }, [flow])
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const currentMorning = morningQuestions[step]
@@ -3329,6 +3332,7 @@ function DailyCheckInFlow({
         setError(result.message)
         return
       }
+      setSimulatedSubmission('simulated' in result && result.simulated === true)
       setCompletedType(sessionType)
       const fatigue =
         sessionType === 'evening'
@@ -3344,7 +3348,7 @@ function DailyCheckInFlow({
       <>
         <div className="modal-body checkin-choice-body">
           <div className="checkin-intro">
-            <span className="research-label">RESEARCH-INSPIRED PROTOTYPE</span>
+            <span className="research-label">SESSION-ONLY PROTOTYPE · NO DATA TRANSMITTED</span>
             <h3>Choose your check-in</h3>
             <p>
               Short self-reports informed by Spaceflight Standard Measures and Behavioral Core
@@ -3403,8 +3407,14 @@ function DailyCheckInFlow({
               <Icon name="check" size={19} />
             </span>
             <div>
-              <h3>{completedType === 'morning' ? 'Morning' : 'Evening'} check-in saved</h3>
-              <p>Your private record has been added to today’s health timeline.</p>
+              <h3>{completedType === 'morning' ? 'Morning' : 'Evening'} check-in {simulatedSubmission ? 'simulated' : 'saved'}</h3>
+              {simulatedSubmission ? (
+                <div className="submission-status" role="status">
+                  <strong>Simulation only · no data transmitted</strong>
+                  <p>The data has been sent to the flight surgeon.</p>
+                  <small>This confirmation previews a successful submission. No flight surgeon received data.</small>
+                </div>
+              ) : <p>Your private record has been added to today’s health timeline.</p>}
             </div>
           </div>
           <div className="checkin-summary-grid">
@@ -3791,124 +3801,15 @@ function WellnessModal({
   )
 }
 
-function AuthModal({
-  onClose,
-  onAuthenticated,
-}: {
-  onClose: () => void
-  onAuthenticated: (data: PrivateDashboardData) => void
-}) {
-  const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [isPending, startTransition] = useTransition()
-
-  const submit = () => {
-    setError('')
-    startTransition(async () => {
-      const result =
-        mode === 'register'
-          ? await registerAstronaut({ name, email, password })
-          : await loginAstronaut({ email, password })
-      if (!result.success) {
-        setError(result.message)
-        return
-      }
-      onAuthenticated(result.data)
-      onClose()
-    })
-  }
-
-  return (
-    <div
-      className="modal-backdrop"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
-    >
-      <section
-        className="wellness-modal auth-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="auth-title"
-      >
-        <div className="modal-header">
-          <div className="modal-symbol">
-            <Icon name="lock" size={19} />
-          </div>
-          <div>
-            <span className="eyebrow">PRIVATE ASTRONAUT ACCOUNT</span>
-            <h2 id="auth-title">
-              {mode === 'login' ? 'Sign in to HEALium' : 'Create astronaut account'}
-            </h2>
-          </div>
-          <button className="modal-close" onClick={onClose} aria-label="Close sign-in">
-            <Icon name="plus" size={18} />
-          </button>
-        </div>
-        <div className="modal-body auth-body">
-          <p>
-            Your journal, questionnaire responses, and reminder completion records are stored
-            privately under this account.
-          </p>
-          {mode === 'register' && (
-            <label>
-              <span>Name</span>
-              <input
-                value={name}
-                maxLength={100}
-                onChange={(event) => setName(event.target.value)}
-                autoComplete="name"
-              />
-            </label>
-          )}
-          <label>
-            <span>Email</span>
-            <input
-              value={email}
-              type="email"
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
-            />
-          </label>
-          <label>
-            <span>Password</span>
-            <input
-              value={password}
-              type="password"
-              minLength={8}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-            />
-          </label>
-          {error && <p className="checkin-error">{error}</p>}
-        </div>
-        <div className="modal-footer auth-footer">
-          <button
-            className="checkin-skip"
-            onClick={() => {
-              setMode(mode === 'login' ? 'register' : 'login')
-              setError('')
-            }}
-          >
-            {mode === 'login' ? 'Create an account' : 'I already have an account'}
-          </button>
-          <button className="primary-button" disabled={isPending} onClick={submit}>
-            {isPending ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
-          </button>
-        </div>
-      </section>
-    </div>
-  )
-}
-
 function JournalPage({
+  prototypeMode = false,
   entries,
   signedIn,
   onAuthRequired,
   onEntrySaved,
   onEntryDeleted,
 }: {
+  prototypeMode?: boolean
   entries: JournalEntryView[]
   signedIn: boolean
   onAuthRequired: () => void
@@ -3995,10 +3896,10 @@ function JournalPage({
       <PageTitle
         kicker="PRIVATE CREW RECORD · MC-01"
         title="My Journal"
-        description="Personal reflections remain private unless you explicitly share an entry with crew medical."
+        description={prototypeMode ? 'Session-only prototype. Entries disappear on reload; sharing is simulated.' : 'Personal reflections remain private unless you explicitly share an entry with crew medical.'}
         action={
           <span className="journal-privacy-badge">
-            <Icon name="lock" size={13} /> Owner-only access
+            <Icon name="lock" size={13} /> {prototypeMode ? 'Session only · prototype' : 'Owner-only access'}
           </span>
         }
       />
@@ -4007,14 +3908,10 @@ function JournalPage({
           <span>
             <Icon name="lock" size={24} />
           </span>
-          <h3>Sign in to open your private journal</h3>
+          <h3>Private journal is unavailable</h3>
           <p>
-            Entries are stored in owner-scoped Payload records and are not visible to other
-            astronauts.
+            Private records require a connected record service.
           </p>
-          <button className="primary-button" onClick={onAuthRequired}>
-            Sign in
-          </button>
         </section>
       ) : (
         <div className="journal-layout">
@@ -4152,8 +4049,10 @@ function JournalPage({
 
 export default function App({
   emergencySnapshots,
+  prototypeMode = false,
 }: {
   emergencySnapshots: EmergencySnapshotView[]
+  prototypeMode?: boolean
 }) {
   const [page, setPage] = useState<Page>('Dashboard')
   const [crew, setCrew] = useState('Cmdr. Maya Chen')
@@ -4162,7 +4061,6 @@ export default function App({
   const [size, setSize] = useState<WidgetSize>('Medium')
   const [dailyScore, setDailyScore] = useState<number | null>(null)
   const [wellnessModal, setWellnessModal] = useState<'checkin' | 'breathing' | null>(null)
-  const [authModalOpen, setAuthModalOpen] = useState(false)
   const emergencyDialog = useRef<HTMLDialogElement>(null)
   const [emergencyOpen, setEmergencyOpen] = useState(false)
   const [privateData, setPrivateData] = useState<PrivateDashboardData>({
@@ -4209,17 +4107,9 @@ export default function App({
     go('Physical')
   }
   const openCheckIn = () => {
-    if (!privateData.user) {
-      setAuthModalOpen(true)
-      return
-    }
     setWellnessModal('checkin')
   }
   const toggleReminder = (key: string, completed: boolean) => {
-    if (!privateData.user) {
-      setAuthModalOpen(true)
-      return
-    }
     setPrivateError('')
     startPrivateTransition(async () => {
       const result = await setReminderCompleted(key, completed)
@@ -4234,15 +4124,6 @@ export default function App({
           result.data,
         ],
       }))
-    })
-  }
-  const signOut = () => {
-    startPrivateTransition(async () => {
-      const result = await logoutAstronaut()
-      if (result.success) {
-        setPrivateData({ user: null, reminders: [], journals: [] })
-        setDailyScore(null)
-      }
     })
   }
   const upsertJournal = (entry: JournalEntryView) => {
@@ -4276,10 +4157,13 @@ export default function App({
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">
-            <span className="orbit" />
-            <span className="planet" />
-          </div>
+          <img
+            className="app-logo"
+            src={typeof healiumLogo === 'string' ? healiumLogo : healiumLogo.src}
+            alt="HEALium logo"
+            width={72}
+            height={61}
+          />
           <div>
             <strong>HEALium</strong>
             <small>CREW HEALTH SYSTEM</small>
@@ -4360,25 +4244,15 @@ export default function App({
             </div>
             <Icon name="chevron" size={15} />
           </div>
-          <button
-            className={`account-button ${privateData.user ? 'signed-in' : ''}`}
-            onClick={() => (privateData.user ? signOut() : setAuthModalOpen(true))}
-            disabled={privatePending}
-          >
-            <Icon name="lock" size={14} />
-            <span>
-              <strong>{privateData.user ? privateData.user.name : 'Private data sign-in'}</strong>
-              <small>{privateData.user ? 'Sign out' : 'Sync journal & reminders'}</small>
-            </span>
-          </button>
+
         </div>
       </aside>
       <main className="main-content">
         <header className="topbar">
           <div>
             <div className="title-line">
-              <h1>Astronaut Health Monitoring</h1>
-              <span className="demo-note">SIMULATED DEMO DATA</span>
+              <h1>HEALium</h1>
+              <span className="demo-note">{prototypeMode ? 'PROTOTYPE · SESSION ONLY' : 'SIMULATED DEMO DATA'}</span>
             </div>
             <p>
               {pageNames[page]} <span>•</span> Personal-baseline monitoring
@@ -4407,7 +4281,7 @@ export default function App({
               <span>2</span>
             </button>
             <button
-              className="rounded-lg border border-[#FC3D21] bg-[#FC3D21] px-4 py-2 text-xs font-semibold text-white hover:bg-[#dd321a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
+              className="help-button"
               aria-label="Help — open emergency mode"
               aria-haspopup="dialog"
               onClick={() => setEmergencyOpen(true)}
@@ -4426,7 +4300,7 @@ export default function App({
               dailyScore={dailyScore}
               openPhysical={openPhysical}
               reminderCompletions={privateData.reminders}
-              signedIn={Boolean(privateData.user)}
+              signedIn={prototypeMode || Boolean(privateData.user)}
               onToggleReminder={toggleReminder}
               onStartCheckIn={openCheckIn}
             />
@@ -4442,8 +4316,9 @@ export default function App({
           {page === 'Journal' && (
             <JournalPage
               entries={privateData.journals}
-              signedIn={Boolean(privateData.user)}
-              onAuthRequired={() => setAuthModalOpen(true)}
+              signedIn={prototypeMode || Boolean(privateData.user)}
+              onAuthRequired={() => setPrivateError('Private records are unavailable in this environment.')}
+              prototypeMode={prototypeMode}
               onEntrySaved={upsertJournal}
               onEntryDeleted={removeJournal}
             />
@@ -4482,29 +4357,20 @@ export default function App({
           }}
         />
       )}
-      {authModalOpen && (
-        <AuthModal
-          onClose={() => setAuthModalOpen(false)}
-          onAuthenticated={(data) => {
-            setPrivateData(data)
-            setPrivateError('')
-          }}
-        />
-      )}
       <dialog
         ref={emergencyDialog}
         aria-label="Emergency mode"
-        className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-[#d9e0ea] p-0 text-[#07173F] backdrop:bg-[#d9e0ea]"
+        className="emergency-dialog"
         onCancel={() => setEmergencyOpen(false)}
         onClose={() => setEmergencyOpen(false)}
       >
         {emergencyOpen && (
-          <div className="flex h-full flex-col">
-            <div className="flex shrink-0 items-center justify-between border-b border-[#cbd5e3] bg-white px-5 py-2 text-xs">
+          <div className="emergency-dialog-layout">
+            <div className="emergency-dialog-bar">
               <strong>HEALium · Emergency mode</strong>
               <button
                 autoFocus
-                className="rounded-lg border border-[#cbd5e3] bg-white px-4 py-2 font-semibold hover:bg-[#eef2f7] focus-visible:outline-2 focus-visible:outline-[#0B3D91]"
+                className="secondary-button"
                 onClick={() => setEmergencyOpen(false)}
               >
                 ← Back to dashboard
@@ -4513,7 +4379,7 @@ export default function App({
             <iframe
               title="HEALium emergency flow"
               src="/emergency/index.html"
-              className="min-h-0 w-full flex-1 border-0"
+              className="emergency-frame"
             />
           </div>
         )}

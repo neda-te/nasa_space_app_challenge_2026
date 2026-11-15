@@ -4,24 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HEALium – Emergency Flow Prototype</title>
+<link rel="icon" type="image/jpeg" href="img/logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{
   --bg:#eef2f7; --panel:#ffffff; --panel2:#f6f8fb; --line:#e1e7ef; --line2:#cbd5e3;
-  --b:#0B3D91; --b2:#2E96F5; --bdim:rgba(11,61,145,.06); --bglow:rgba(11,61,145,.25);
-  --txt:#07173F; --mut:#55657e; --mut2:#8b98ac; --red:#FC3D21; --amber:#b86a00;
-  --mono:'JetBrains Mono',ui-monospace,monospace; --head:'Space Grotesk',Inter,sans-serif;
+  --b:#0032A0; --b2:#0032A0; --bdim:rgba(0,50,160,.06); --bglow:rgba(0,50,160,.25);
+  --txt:#14234A; --mut:#55657e; --mut2:#8b98ac; --red:#D83933; --amber:#b86a00;
+  --mono:var(--heal-technical); --head:var(--heal-heading);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#d9e0ea;color:var(--txt);font-family:Inter,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+html,body{height:100%;background:#d9e0ea;color:var(--txt);font-family:var(--heal-font);overflow:hidden;-webkit-font-smoothing:antialiased}
 body{display:flex;align-items:center;justify-content:center}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
 #app{position:relative;overflow:hidden;display:grid;grid-template-rows:3.6rem 1fr 4.2rem;
   background:radial-gradient(120% 90% at 15% 0%,#ffffff 0%,var(--bg) 60%,#e6ebf3 100%)}
 #app::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.6;
-  background-image:linear-gradient(rgba(11,61,145,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(11,61,145,.045) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(0,50,160,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(0,50,160,.045) 1px,transparent 1px);
   background-size:2.5rem 2.5rem;mask-image:radial-gradient(80% 70% at 50% 40%,#000 0%,transparent 90%)}
 
 /* ---------- header ---------- */
@@ -62,12 +63,12 @@ h2{font-family:var(--head);font-weight:600;font-size:.95rem}
 
 /* screen 1 */
 #s1{display:flex;flex-direction:column;justify-content:center;padding:0 4rem}
-.uncon{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:.9rem 1.2rem;border-radius:1rem;border:2px solid rgba(252,61,33,.55);background:#fff;text-align:left;transition:.18s;width:100%;box-shadow:0 .4rem 1.4rem -1rem rgba(252,61,33,.5)}
+.uncon{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:.9rem 1.2rem;border-radius:1rem;border:2px solid rgba(216,57,51,.55);background:#fff;text-align:left;transition:.18s;width:100%;box-shadow:0 .4rem 1.4rem -1rem rgba(216,57,51,.5)}
 .uncon .cb{width:2rem;height:2rem;flex:none;border-radius:.5rem;border:2px solid var(--red);display:grid;place-items:center;color:transparent;font-size:1.3rem;font-weight:700;background:#fff;transition:.15s}
 .uncon b{font-family:var(--head);font-size:1.15rem;font-weight:600;display:block;color:var(--red)}
 .uncon small{color:var(--mut);font-size:.74rem}
 .uncon .st{margin-left:auto;font-family:var(--mono);font-size:.64rem;color:var(--mut2);letter-spacing:.08em;text-align:right}
-.uncon:hover{background:rgba(252,61,33,.04)}
+.uncon:hover{background:rgba(216,57,51,.04)}
 .uncon.on{background:var(--red);border-color:var(--red)}
 .uncon.on .cb{color:var(--red);border-color:#fff}
 .uncon.on b,.uncon.on small,.uncon.on .st{color:#fff}
@@ -104,9 +105,9 @@ h2{font-family:var(--head);font-weight:600;font-size:.95rem}
 .side .panel{padding:1.05rem 1.25rem}
 .side .panel:last-child{flex:1}
 .chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem;min-height:2rem}
-.chip{display:inline-flex;align-items:center;gap:.45rem;padding:.38rem .45rem .38rem .75rem;border-radius:2rem;background:var(--bdim);border:1px solid rgba(11,61,145,.3);color:var(--b);font-size:.78rem;font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:.45rem;padding:.38rem .45rem .38rem .75rem;border-radius:2rem;background:var(--bdim);border:1px solid rgba(0,50,160,.3);color:var(--b);font-size:.78rem;font-weight:500}
 .chip button{width:1.15rem;height:1.15rem;border-radius:50%;display:grid;place-items:center;color:var(--mut);font-size:.8rem;line-height:1}
-.chip button:hover{background:rgba(11,61,145,.12);color:var(--b)}
+.chip button:hover{background:rgba(0,50,160,.12);color:var(--b)}
 .empty{color:var(--mut2);font-size:.78rem;padding:.4rem 0}
 .opts{display:grid;gap:.6rem;margin-top:.7rem;grid-template-columns:1fr 1fr}
 .opts.three{grid-template-columns:1fr 1fr 1fr}
@@ -197,7 +198,7 @@ h1 .info{width:1.5rem;height:1.5rem;font-size:.8rem}
 .tx{display:flex;flex-direction:column;gap:.28rem;margin-top:.45rem;font-size:.71rem}
 .tx div{display:flex;gap:.5rem;align-items:flex-start;line-height:1.38}
 .tx div::before{content:"→";color:var(--b);font-family:var(--mono)}
-.flags{border-color:rgba(252,61,33,.35)!important;background:linear-gradient(180deg,rgba(252,61,33,.07),#fff)!important}
+.flags{border-color:rgba(216,57,51,.35)!important;background:linear-gradient(180deg,rgba(216,57,51,.07),#fff)!important}
 .flags h2{color:var(--red);font-size:.82rem}
 .flags .tx div::before{content:"!";color:var(--red);font-weight:700}
 
@@ -261,20 +262,21 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
 #toast.on{opacity:1;transform:translate(-50%,0)}
 .fallback{position:absolute;inset:4rem 1.2rem 3rem;display:flex;flex-wrap:wrap;gap:.5rem;align-content:center;justify-content:center}
 </style>
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/emergency.css">
 </head>
-<body>
+<body class="emergency-app">
 <div id="app">
   <header>
     <div class="logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#0B3D91" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M3 12h4l2-4 3 8 2-5 1.5 1H21" stroke="#2E96F5"/></svg>
-      <div>HEAL<span>ium</span></div>
+      <img class="app-logo" src="img/logo.jpeg" alt="HEALium logo" width="72" height="61">
     </div>
     <div class="stepper" id="stepper"></div>
     <div class="hdr-r">
       <div class="crew"><b>Bob · CM-2</b><span id="met">MET 143d 06:12:40</span></div>
       <div class="alarmbox">
         <div class="alarm">EMERGENCY <span id="elapsed">00:00</span></div>
-        <div class="live">LIVE · BEING SENT TO FLIGHT SURGEON</div>
+        <div class="live" id="deliveryStatus">PROTOTYPE · NO DATA SENT</div>
       </div>
     </div>
   </header>
@@ -311,7 +313,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
         <div>SpO₂<b>97 %</b></div>
         <div>Blood pressure<b>138/88</b></div>
         <div>Skin temp.<b>36.9 °C</b></div>
-        <div class="src">Live · wrist device</div>
+        <div class="src">Simulated · wrist device</div>
       </div>
     </section>
 
@@ -320,7 +322,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
       <div class="ustrip hide" id="ustrip">UNCONSCIOUS · keep the airway open · re-check breathing every minute</div>
       <div class="s2grid" id="s2body">
         <div class="panel viewport" id="vp">
-          <canvas id="gl"></canvas>
+          <div class="model-stage"><canvas id="gl" aria-label="Interactive 3D body model"></canvas></div>
           <div class="vp-top">
             <div><div class="kicker" id="vpTitle">Location</div><div class="hint">Drag to rotate · tap a body part to select</div></div>
             <div class="vp-ctrl">
@@ -380,6 +382,7 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
           <div id="catalog"></div>
         </div>
       </div>
+      <div class="submission-status hide" id="submissionStatus" role="status" aria-live="polite"></div>
     </section>
   </main>
 
@@ -387,17 +390,18 @@ footer{position:relative;z-index:2;display:flex;align-items:center;justify-conte
     <div class="fl"><span class="disc">PROTOTYPE · not a medical device · demo data</span><button class="link hide" id="restart" data-action="restart">↺ Restart demo</button></div>
     <div class="btns">
       <div class="need hide" id="need"></div>
+      <button class="btn pri hide" id="sendReport" data-action="send">Simulate sending data</button>
       <button class="btn ghost hide" id="back" data-action="back">← Back</button>
       <button class="btn pri" id="next" data-action="next" disabled>Continue →</button>
     </div>
   </footer>
 
-  <div id="guide"><div class="gbox" id="gbox"></div></div>
+  <div id="guide"><div class="gbox" id="gbox" role="dialog" aria-modal="true" aria-labelledby="guideTitle"></div></div>
   <div id="tip"></div>
   <div id="toast"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="../vendor/three.min.js"></script>
 <script>
 /* =========================================================
    BODY REGIONS + PAIN CAUSES (unchanged)
@@ -582,7 +586,7 @@ const FLOWS = {
    ========================================================= */
 const UG='Microgravity', G1='With gravity (Moon / Mars base)';
 const P = {
-  help:{n:'Alert crew & flight surgeon',c:'life',d:'Second rescuer, medical kit, voice loop',need:'Crew call, voice loop to ground',s:['Call out loudly for the nearest crew member.','This report is already streaming to the flight surgeon — open the voice loop.','One person stays with the patient, one fetches the medical kit and the defibrillator.','No ground contact (comm gap / signal delay): follow the steps shown here.']},
+  help:{n:'Alert crew & flight surgeon',c:'life',d:'Second rescuer, medical kit, voice loop',need:'Crew call, voice loop to ground',s:['Call out loudly for the nearest crew member.','Open the voice loop to contact the flight surgeon. This prototype does not transmit reports.','One person stays with the patient, one fetches the medical kit and the defibrillator.','No ground contact (comm gap / signal delay): follow the steps shown here.']},
   restrain:{n:'Restrain the patient',c:'life',d:'Fix patient and yourself before treating',need:'Crew medical restraint (rigid board fixed to the structure), straps',s:['Move the patient to the medical restraint.','Fasten the straps across chest, hips and legs; pad the head.','Anchor yourself too (foot loops, strap). Otherwise every push moves you, not the patient.','Keep airway, chest and arms accessible.'],note:[G1,'Lay the patient flat on a firm surface instead.']},
   airway:{n:'Open the airway',c:'life',d:'Head back, chin up, look inside the mouth',need:'Gloves, suction or gauze',s:['Look into the mouth. Remove visible objects or fluid (suction, gauze).','One hand on the forehead, two fingers under the chin: tilt the head back and lift the chin.','Look, listen and feel for normal breathing — 10 seconds at most.','Breathing normally → keep the airway open and monitor.','Not normal, only gasping, or unsure → start CPR.'],note:['Neck injury suspected','Push the jaw forward with both hands instead of tilting the head.']},
   recovery:{n:'Airway watch / recovery position',c:'life',d:'Unresponsive but breathing normally',need:'Restraint, suction, pulse oximeter',s:['Confirm normal breathing (10 seconds).',UG+': keep the patient restrained, head tilted back, chin lifted. Fluids do not drain by themselves — clear the mouth with suction or gauze.',G1+': roll the person onto the side, upper knee bent, head tilted back, mouth pointing down so fluids run out.','Attach the pulse oximeter. Re-check breathing at least every minute.','Breathing stops or turns into gasping → CPR immediately.'],note:['Why','The side position relies on gravity to keep the airway clear. Without gravity you have to hold it open and clear it actively.']},
@@ -845,7 +849,7 @@ const TIPS = {
   danger:`<h4>What lies here</h4>Structures under the selected area that make a bleed dangerous, and what that means for stopping it.`,
   do:`<h4>Do now</h4>The most useful steps for this case, in order. Tap a row for the step-by-step guide.`,
   cat:`<h4>What to grab</h4>Only the procedures suggested for this case, with the equipment each needs. Tap one for its step-by-step guide.`,
-  tx:`<h4>Treatment</h4>Drugs and doses are always confirmed by the flight surgeon, who receives this report live.`,
+  tx:`<h4>Treatment</h4>Drugs and doses must be confirmed by the flight surgeon. No report is transmitted by this prototype.`,
 };
 
 /* =========================================================
@@ -858,11 +862,10 @@ const app = $('#app');
 const enc = s => encodeURIComponent(s);
 
 function fit(){
-  const w = Math.min(innerWidth, innerHeight*16/9), h = w*9/16;
-  app.style.width = w+'px'; app.style.height = h+'px';
-  document.documentElement.style.fontSize = (w/80)+'px';
+  // Keep readable text sizes; CSS reflows the layout instead of shrinking it.
+  if(typeof resize3D==='function' && renderer) resize3D();
 }
-addEventListener('resize', fit); fit();
+addEventListener('resize', fit);
 
 const t0 = Date.now(), met0 = ((143*24+6)*60+12)*60+40;
 const p2 = n => String(n).padStart(2,'0');
@@ -895,6 +898,7 @@ function startRoute(){
 }
 const curKey = () => S.route[S.idx]||'emergency';
 function go(n){
+  resetSubmission();
   S.idx=n; const key=curKey(), scr = key==='emergency'?1:key==='assess'?3:2;
   $$('.screen').forEach((s,i)=>s.classList.toggle('on', i+1===scr));
   if(scr===2){ renderS2(key); setTimeout(()=>{ if(typeof resize3D==='function') resize3D(); },50); }
@@ -911,6 +915,7 @@ function updateFooter(){
   $('#restart').classList.toggle('hide', key==='emergency');
   $('#need').classList.toggle('hide', !FLOWS[key]);
   next.classList.toggle('hide', key==='assess');
+  $('#sendReport').classList.toggle('hide', key!=='assess');
   next.classList.toggle('red', S.uncon);
   if(key==='emergency'){ next.textContent = S.uncon ? 'Unresponsive protocol →' : 'Continue →'; next.disabled = !(S.type||S.uncon); }
   else if(FLOWS[key]){
@@ -1058,7 +1063,7 @@ function assessFlow(f){
     return {tags:[optLabel2('other',ITEM),optLabel(f,'dur',sel.dur),optLabel(f,'sev',sel.sev)],
       records:[['Sleep, last 3 nights','5.2 h ↓',1],['Cabin CO₂, last 24 h','elevated ↑',1],['Fluid intake, last 3 days','below target ↓',1],['Last bowel movement','2 days ago',ITEM==='digest'?1:0]],
       midTitle:'Possible causes', midTip:'causes', mid:rank(sc.k,OT,[sel.dur,sel.sev]).map(c=>({...c,t:`<h4>${c.n}</h4>${c.w}${c.t?'<br><span class="m">'+c.t+'</span>':''}`})),
-      banner: sev?['Severe symptoms — the flight surgeon is reviewing live','calm']:null,
+      banner: sev?['Severe symptoms — contact the flight surgeon','calm']:null,
       rec:sc.rec, tx:sc.tx, flags:sc.flags,
       vit: ITEM==='dizzy'?{hr:104,spo2:96,sys:96,dia:58,rr:18,temp:36.7}:ITEM==='digest'?{hr:98,spo2:97,sys:118,dia:76,rr:17,temp:sev?38.1:37.2}:{hr:74,spo2:96,sys:122,dia:80,rr:15,temp:36.8}};
   }
@@ -1127,7 +1132,7 @@ let vitTimer=null;
 function vitHtml(v){
   const cls=(k,x)=>{ if(k==='hr') return x<=0||x<45||x>125?'crit':x>100||x<55?'warn':''; if(k==='spo2') return x<90?'crit':x<94?'warn':''; if(k==='sys') return x<=0||x<90?'crit':x<100||x>140?'warn':''; if(k==='rr') return x<8||x>26?'crit':x>20||x<11?'warn':''; return x>=39||x<35?'crit':x>=38?'warn':''; };
   const box=(k,l,val,u)=>`<div class="v ${cls(k,v[k])}"><span>${l}</span><b>${val}<u>${u}</u></b></div>`;
-  return `<div class="lv">LIVE<br>VITALS</div>`+box('hr','Heart rate',v.hr>0?v.hr:'—','bpm')+box('spo2','SpO₂',v.spo2,'%')+box('sys','Blood pressure',v.sys>0?v.sys+'/'+v.dia:'—','')+box('rr','Breathing',v.rr,'/min')+box('temp','Temp.',v.temp.toFixed(1),'°C');
+  return `<div class="lv">DEMO<br>VITALS</div>`+box('hr','Heart rate',v.hr>0?v.hr:'—','bpm')+box('spo2','SpO₂',v.spo2,'%')+box('sys','Blood pressure',v.sys>0?v.sys+'/'+v.dia:'—','')+box('rr','Breathing',v.rr,'/min')+box('temp','Temp.',v.temp.toFixed(1),'°C');
 }
 function startVitals(base){
   stopVitals();
@@ -1147,7 +1152,7 @@ function openGuide(id,i){
   steps.forEach(s=>{ if(s.img){ const im=new Image(); im.src=s.img; } });
   $('#gbox').innerHTML = `<div class="gtext">
       <div class="kicker">${CATS.find(c=>c[0]===p.c)[1]} · step-by-step guide</div>
-      <h2>${p.n}</h2><div class="hint">${p.d}</div>
+      <h2 id="guideTitle">${p.n}</h2><div class="hint">${p.d}</div>
       ${why?`<div class="why"><b>In this case:</b> ${why}</div>`:''}
       <div class="gneed"><b>You need:</b> ${p.need}</div>
       <ol class="gsteps" id="gsteps">${steps.map((s,k)=>`<li data-action="gstep" data-v="${k}"><span class="gn">${k+1}</span><div>${s.t?`<b>${s.t}</b>`:''}<span>${s.d}</span></div></li>`).join('')}</ol>
@@ -1155,6 +1160,7 @@ function openGuide(id,i){
     </div>
     <div class="gimg">
       <div class="gframe" id="gframe"></div>
+      <p class="gdescription" id="gdescription" aria-live="polite"></p>
       <div class="gnav"><button class="garr" id="gprev" data-action="gprev" aria-label="Previous step">‹</button><div class="gcap" id="gcap"></div><button class="garr" id="gnext" data-action="gnext" aria-label="Next step">›</button></div>
       <div class="gbar" id="gbar">${steps.map((_,k)=>`<i data-action="gstep" data-v="${k}"></i>`).join('')}</div>
       <div class="gfoot"><span class="kbd"><kbd>←</kbd> <kbd>→</kbd> switch steps</span><button class="btn ghost" data-action="closeguide">Close</button></div>
@@ -1167,6 +1173,7 @@ function setGStep(k,instant){
   $$('#gsteps li').forEach((li,j)=>{ li.classList.toggle('on',j===k); li.classList.toggle('past',j<k); });
   $$('#gbar i').forEach((b,j)=>b.classList.toggle('on',j<=k));
   $('#gframe').innerHTML = s.img ? `<img src="${s.img}" alt="${s.t||'Step '+(k+1)}" onerror="this.parentNode.innerHTML=PH">` : PH;
+  $('#gdescription').textContent = s.d;
   $('#gcap').innerHTML = `<span>STEP ${k+1} / ${n}</span><b>${s.t||G.steps[k].d.split(/[.:—]/)[0]}</b>`;
   $('#gprev').disabled = k===0; $('#gnext').disabled = k===n-1;
   const ol=$('#gsteps'), li=ol.children[k];
@@ -1197,6 +1204,50 @@ function hideTip(){ tip.classList.remove('on'); if(pinned) pinned.classList.remo
 document.addEventListener('mouseover',e=>{ const el=e.target.closest('.info'); if(el&&!pinned) showTip(el); });
 document.addEventListener('mouseout',e=>{ const el=e.target.closest('.info'); if(el&&!pinned&&!el.contains(e.relatedTarget)) tip.classList.remove('on'); });
 
+let submissionVersion=0;
+function resetSubmission(){
+  submissionVersion++;
+  $('#submissionStatus').classList.add('hide');
+  $('#submissionStatus').replaceChildren();
+  $('#submissionStatus').dataset.state='idle';
+  $('#sendReport').disabled=false;
+  $('#sendReport').textContent='Simulate sending data';
+  $('#deliveryStatus').textContent='PROTOTYPE · NO DATA SENT';
+}
+async function submitEmergencyData(){
+  // No submission service is configured. Only simulate a successful response.
+  await new Promise(resolve=>setTimeout(resolve,350));
+  return {ok:true, simulated:true};
+}
+async function sendReport(){
+  const button=$('#sendReport'), status=$('#submissionStatus');
+  if(button.disabled || curKey()!=='assess') return;
+  const version=submissionVersion;
+  button.disabled=true;
+  button.textContent='Simulating submission…';
+  status.classList.add('hide');
+  status.dataset.state='pending';
+  $('#deliveryStatus').textContent='PROTOTYPE · SIMULATING SUBMISSION';
+  try{
+    const result=await submitEmergencyData();
+    if(version!==submissionVersion) return;
+    if(!result.ok) throw new Error('Submission failed');
+    status.dataset.state='success';
+    status.innerHTML='<strong>Simulation only · no data transmitted</strong><p>The data has been sent to the flight surgeon.</p><small>This previews a successful submission. No flight surgeon received data.</small>';
+    status.classList.remove('hide');
+    $('#deliveryStatus').textContent='PROTOTYPE · SUBMISSION SIMULATED';
+    button.textContent='Submission simulated';
+    status.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }catch(error){
+    if(version!==submissionVersion) return;
+    status.dataset.state='error';
+    status.textContent='The data could not be sent. Please try again.';
+    status.classList.remove('hide');
+    $('#deliveryStatus').textContent='PROTOTYPE · SUBMISSION FAILED';
+    button.textContent='Retry simulated submission';
+    button.disabled=false;
+  }
+}
 function resetAll(){
   Object.assign(S,{type:null,uncon:false,flow:null,sig:null,route:['emergency','assess'],regions:[],sel:{},items:{}});
   $$('.tile').forEach(b=>b.classList.remove('sel')); setUncon(false);
@@ -1231,6 +1282,7 @@ document.addEventListener('click',e=>{
     case 'next': if(S.idx===0) startRoute(); go(S.idx+1); break;
     case 'back': go(S.idx-1); break;
     case 'restart': resetAll(); break;
+    case 'send': sendReport(); break;
   }
 });
 
@@ -1239,7 +1291,7 @@ document.addEventListener('click',e=>{
    ========================================================= */
 let renderer, scene, camera, pivot, pickables=[], regionMat={}, hovered=null;
 let rotY=0, rotX=0, tgtY=0, tgtX=0, look=.9, tgtLook=.9, dist=4.4, tgtDist=4.4, zoomMode='body';
-const SKIN=0xd9dfe7, FEAT=0xb4bfcd, HOV=0xb5cbef, SEL=0x2a6fdb;
+const SKIN=0xd9dfe7, FEAT=0xb4bfcd, HOV=0xb5cbef, SEL=0x0032A0;
 const FEATURES=new Set(['eyeL','eyeR','earL','earR','mouth']);
 const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -1347,7 +1399,7 @@ function buildBody(B){
   zone('chestL',1.235,1.55,0,PI/2); zone('chestR',1.235,1.55,-PI/2,PI/2); zone('upperBack',1.235,1.55,PI/2,PI);
 
   // zone outlines on the torso
-  const lm=new THREE.LineBasicMaterial({color:0x0B3D91,transparent:true,opacity:.28});
+  const lm=new THREE.LineBasicMaterial({color:0x0032A0,transparent:true,opacity:.28});
   const lineOn=(pts)=>B.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lm));
   const push=(y,th)=>{ const p=torsoFn(y,th); const o=V3(p.x,0,p.z).normalize().multiplyScalar(.0015); return p.add(o); };
   [.93,1.08,1.235].forEach(y=>lineOn(Array.from({length:121},(_,i)=>push(y,i/120*2*PI))));
@@ -1417,17 +1469,24 @@ function init3D(){
   const fill=new THREE.DirectionalLight(0xe6efff,.25); fill.position.set(-3,1,2); scene.add(fill);
   const rim=new THREE.DirectionalLight(0x9cc8ff,.4); rim.position.set(0,2.5,-4); scene.add(rim);
 
-  const ringM=new THREE.MeshBasicMaterial({color:0x0B3D91,transparent:true,opacity:.3,side:THREE.DoubleSide});
+  const ringM=new THREE.MeshBasicMaterial({color:0x0032A0,transparent:true,opacity:.3,side:THREE.DoubleSide});
   const ring=new THREE.Mesh(new THREE.RingGeometry(.44,.447,96),ringM); ring.rotation.x=-Math.PI/2; scene.add(ring);
   const ring2=new THREE.Mesh(new THREE.RingGeometry(.58,.583,96),ringM.clone()); ring2.material.opacity=.12; ring2.rotation.x=-Math.PI/2; scene.add(ring2);
-  const disc=new THREE.Mesh(new THREE.CircleGeometry(.44,64),new THREE.MeshBasicMaterial({color:0x0B3D91,transparent:true,opacity:.05})); disc.rotation.x=-Math.PI/2; scene.add(disc);
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(.44,64),new THREE.MeshBasicMaterial({color:0x0032A0,transparent:true,opacity:.05})); disc.rotation.x=-Math.PI/2; scene.add(disc);
 
-  pivot=new THREE.Group(); pivot.position.y=.9; scene.add(pivot);
-  const body=new THREE.Group(); body.position.y=-.9; pivot.add(body);
+  pivot=new THREE.Group(); scene.add(pivot);
+  const body=new THREE.Group(); pivot.add(body);
   buildBody(body);
+  const bounds=new THREE.Box3().setFromObject(body);
+  bodySize=bounds.getSize(new THREE.Vector3());
+  const center=bounds.getCenter(new THREE.Vector3());
+  body.position.sub(center);
+  pivot.position.y=center.y;
+  bodyLook=center.y;
+  look=tgtLook=bodyLook;
 
   bindPointer(canvas);
-  new ResizeObserver(resize3D).observe($('#vp'));
+  new ResizeObserver(resize3D).observe($('.model-stage'));
   resize3D(); loop();
 }
 
@@ -1435,16 +1494,19 @@ function paint3D(){
   if(!renderer) return;
   for(const id in regionMat){
     const m=regionMat[id], sel=S.regions.includes(id), hov=hovered===id;
-    const bl=S.flow==='bleeding'; m.color.setHex(sel?(bl?0xE23A1E:SEL):hov?HOV:(FEATURES.has(id)?FEAT:SKIN));
+    const bl=S.flow==='bleeding'; m.color.setHex(sel?(bl?0xD83933:SEL):hov?HOV:(FEATURES.has(id)?FEAT:SKIN));
     m.emissive.setHex(sel?(bl?0x5a1206:0x0b2f70):0x000000);
   }
 }
 let baseDist=4.4;
+let bodySize, bodyLook=.9;
 function resize3D(){
   if(!renderer) return;
-  const r=$('#vp').getBoundingClientRect(); if(!r.width) return;
+  const r=$('.model-stage').getBoundingClientRect(); if(!r.width || !r.height) return;
   renderer.setSize(r.width,r.height,false); camera.aspect=r.width/r.height;
-  baseDist = camera.aspect<.75 ? 4.4*.75/camera.aspect : 4.4;
+  const halfFov=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
+  const halfWidth=Math.hypot(bodySize.x,bodySize.z)/2;
+  baseDist=Math.max(bodySize.y/2/halfFov,halfWidth/(halfFov*camera.aspect))*1.2+bodySize.z/2;
   setZoom(zoomMode,true);
   camera.updateProjectionMatrix();
 }
@@ -1454,13 +1516,20 @@ function setView(v){
 }
 function setZoom(v,keep){
   zoomMode=v;
-  if(v==='head'){ tgtLook=1.69; tgtDist=1.0; } else { tgtLook=.9; tgtDist=baseDist; }
+  if(v==='head'){ tgtLook=1.69; tgtDist=1.0; } else { tgtLook=bodyLook; tgtDist=baseDist; }
+  if(keep){ look=tgtLook; dist=tgtDist; }
   $$('#zoom button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
 }
+let lastFrameTime=performance.now();
 function loop(){
-  rotY+=(tgtY-rotY)*.12; rotX+=(tgtX-rotX)*.12; look+=(tgtLook-look)*.12; dist+=(tgtDist-dist)*.12;
+  const now=performance.now(), easing=1-Math.exp(-12*Math.min((now-lastFrameTime)/1000,.1));
+  lastFrameTime=now;
+  if(!$('#s2').classList.contains('on') || $('#s2body').classList.contains('hide')){
+    requestAnimationFrame(loop); return;
+  }
+  rotY+=(tgtY-rotY)*easing; rotX+=(tgtX-rotX)*easing; look+=(tgtLook-look)*easing; dist+=(tgtDist-dist)*easing;
   pivot.rotation.y=rotY; pivot.rotation.x=rotX;
-  camera.position.set(0,look+.02*dist,dist); camera.lookAt(0,look,0);
+  camera.position.set(0,look,dist); camera.lookAt(0,look,0);
   const front=Math.cos(rotY)>=0;
   $('#facing').textContent='VIEW · '+(front?'FRONT':'BACK');
   $$('#view button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='front')===front));

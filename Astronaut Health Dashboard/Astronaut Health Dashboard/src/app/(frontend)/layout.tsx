@@ -4,9 +4,10 @@ import Script from 'next/script'
 import { BodyCustomCode, renderHeadCustomCode } from '@/lib/make-custom-code'
 import { makeSiteSettings, sanitizeHtmlAttribute } from '@/lib/make-site-settings'
 import './styles.css'
+import '../../../../../shared/dashboard.css'
 
-const defaultTitle = 'Astronaut Health Monitoring'
-const title = makeSiteSettings.title ?? defaultTitle
+const defaultTitle = 'HEALium'
+const title = defaultTitle
 const description =
   makeSiteSettings.description ??
   'Mission health, environmental monitoring, and simulated crew telemetry for long-duration spaceflight.'
