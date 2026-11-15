@@ -1,0 +1,137 @@
+/* Radiation exposure chart (features/physical-health/RadiationExposureChart). */
+
+/* Radiation exposure */
+.radiation-chart-card {
+  padding: 18px;
+  margin-bottom: 12px;
+  border: 1px solid #d5dfeb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgb(38 67 103 / 5%);
+}
+.radiation-chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.radiation-chart-head h3 {
+  color: #10224d;
+  font: 600 16px 'Space Grotesk';
+}
+.radiation-chart-head p {
+  color: #68788e;
+  font-size: 8px;
+  margin-top: 5px;
+}
+.radiation-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  color: #66778d;
+  font-size: 7px;
+}
+.radiation-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.radiation-legend i {
+  width: 14px;
+  height: 4px;
+  border-radius: 3px;
+  background: #7aa1df;
+}
+.radiation-legend i.cumulative {
+  height: 2px;
+  background: #244f9e;
+}
+.radiation-legend i.unusual {
+  background: #d97932;
+}
+.radiation-chart-wrap {
+  position: relative;
+  margin-top: 8px;
+}
+.radiation-chart-wrap svg {
+  width: 100%;
+  min-height: 230px;
+  overflow: visible;
+}
+.radiation-grid {
+  fill: none;
+  stroke: #dfe6ef;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.radiation-bar {
+  fill: #8eafe0;
+  transition: opacity 0.15s;
+}
+.radiation-bar.unusual {
+  fill: #d97932;
+}
+.radiation-hit {
+  fill: transparent;
+  stroke: transparent;
+  cursor: pointer;
+}
+.radiation-hit:hover,
+.radiation-hit:focus {
+  fill: rgb(40 88 183 / 12%);
+  stroke: #2858b7;
+  outline: none;
+}
+.radiation-cumulative-line {
+  fill: none;
+  stroke: #244f9e;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+.radiation-selected-point {
+  fill: #fff;
+  stroke: #244f9e;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.radiation-chart-wrap text {
+  fill: #718197;
+  font: 7px 'Inter';
+}
+.radiation-tooltip {
+  min-width: 150px;
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  padding: 9px 11px;
+  border: 1px solid #d5dfeb;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 8px 22px rgb(36 62 97 / 9%);
+}
+.radiation-tooltip span,
+.radiation-tooltip strong,
+.radiation-tooltip b {
+  display: block;
+}
+.radiation-tooltip span {
+  color: #718198;
+  font-size: 6px;
+}
+.radiation-tooltip strong {
+  color: #17376f;
+  font-size: 9px;
+  margin-top: 5px;
+}
+.radiation-tooltip b {
+  color: #53657d;
+  font-size: 7px;
+  margin-top: 4px;
+}
+.radiation-note {
+  padding-top: 10px;
+  color: #718096;
+  border-top: 1px solid #e2e8f0;
+  font-size: 7px;
+}

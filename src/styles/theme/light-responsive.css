@@ -1,0 +1,172 @@
+/* HEALium light workspace theme, part 4: responsive breakpoints. */
+
+@media (max-width: 1180px) {
+  .health-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .summary-status-block {
+    grid-column: 1 / -1;
+  }
+  .task-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 204px;
+  }
+  .main-content {
+    width: calc(100% - 204px);
+    margin-left: 204px;
+  }
+  .topbar {
+    height: auto;
+    min-height: 76px;
+    gap: 15px;
+    padding: 12px 18px;
+  }
+  .mission-time {
+    display: none;
+  }
+  .crew-selector {
+    min-width: 170px;
+  }
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .category-grid,
+  .environment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wide-widget {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    display: block;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+  }
+  .brand {
+    height: 64px;
+  }
+  .mission-chip,
+  .sidebar-checkin,
+  .sidebar-footer {
+    display: none;
+  }
+  .sidebar nav {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 8px 12px;
+  }
+  .nav-label {
+    display: none;
+  }
+  .nav-item {
+    width: auto;
+    flex: 0 0 auto;
+    padding: 9px 11px;
+  }
+  .nav-item span {
+    white-space: nowrap;
+  }
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+  .topbar {
+    position: static;
+  }
+  .topbar > div:first-child > p,
+  .demo-note,
+  .notification-button {
+    display: none;
+  }
+  .dashboard-content {
+    padding: 18px 14px;
+  }
+  .page-title {
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .page-title h2 {
+    font-size: 20px;
+  }
+  .health-summary {
+    grid-template-columns: 1fr;
+  }
+  .summary-status-block,
+  .summary-column {
+    grid-column: auto;
+    border-left: 0;
+    border-top: 1px solid #e2e8f0;
+  }
+  .summary-status-block {
+    border-top: 0;
+    border-left: 4px solid var(--orange);
+  }
+  .home-grid,
+  .category-grid,
+  .environment-grid,
+  .trend-summary,
+  .analysis-grid,
+  .source-type-grid,
+  .customize-layout,
+  .emergency-layout {
+    grid-template-columns: 1fr;
+  }
+  .wide-widget,
+  .widget-size-wide .primary-widget {
+    grid-column: span 1;
+  }
+  .task-layout {
+    display: block;
+  }
+  .task-detail {
+    margin-top: 12px;
+  }
+  .task-list > button {
+    grid-template-columns: 35px minmax(0, 1fr) auto;
+  }
+  .task-list > button > svg {
+    display: none;
+  }
+  .task-metrics,
+  .task-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .task-metrics > div {
+    border-top: 1px solid #e5ebf2;
+    border-left: 0;
+  }
+  .task-metrics > div:first-child {
+    border-top: 0;
+  }
+  .results-table,
+  .source-list,
+  .emergency-layout {
+    overflow-x: auto;
+  }
+  .results-header,
+  .result-row {
+    min-width: 760px;
+  }
+  .body-viewer-panel,
+  .emergency-record-panel {
+    min-height: auto;
+  }
+  .top-actions {
+    margin-left: auto;
+  }
+  .crew-selector {
+    min-width: 150px;
+  }
+}

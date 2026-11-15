@@ -1,52 +1,76 @@
-import { defineConfig } from 'vite'
+/**
+ * Vite configuration of the local preview.
+ *
+ * Two things are served / built:
+ *
+ * 1. The React dashboard (`index.html` -> `src/main.tsx`), bundled by Vite.
+ * 2. The emergency flow prototype (`emergency/`), a static page without a build step.
+ *    It is served unchanged under `/emergency/` in development and copied to
+ *    `dist/emergency/` on build. The dashboard embeds it in an iframe (Help button),
+ *    which isolates its styles, scripts, canvas and keyboard shortcuts.
+ */
+
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
-import { cp, mkdir, readFile } from 'node:fs/promises'
+import { cp, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
-const localActions = path.join(root, 'local/local-actions.ts')
+const emergencyDir = path.join(root, 'emergency')
+
+/** @type {Record<string, string>} */
+const contentTypes = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.jpg': 'image/jpeg',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+}
+
+/**
+ * Serves `emergency/` as static files in dev and copies it into the build output.
+ *
+ * @returns {import('vite').Plugin}
+ */
+function emergencyPrototype() {
+  return {
+    name: 'healium-emergency-prototype',
+    configureServer(server) {
+      server.middlewares.use('/emergency', async (req, res, next) => {
+        const urlPath = decodeURIComponent((req.url ?? '/').split('?')[0])
+        const file = path.join(emergencyDir, urlPath === '/' ? 'index.html' : urlPath)
+        // Never serve anything outside of the emergency folder.
+        if (!file.startsWith(emergencyDir + path.sep)) return next()
+        try {
+          if (!(await stat(file)).isFile()) return next()
+          res.setHeader(
+            'Content-Type',
+            contentTypes[path.extname(file).toLowerCase()] ?? 'application/octet-stream',
+          )
+          res.end(await readFile(file))
+        } catch {
+          next()
+        }
+      })
+    },
+    async closeBundle() {
+      await cp(emergencyDir, path.join(root, 'dist/emergency'), {
+        recursive: true,
+        filter: (source) => path.basename(source) !== 'README.md',
+      })
+    },
+  }
+}
 
 export default defineConfig({
   base: './',
   publicDir: false,
-  plugins: [
-    react(),
-    tailwindcss(),
-    {
-      name: 'standalone-emergency',
-      configureServer(server) {
-        server.middlewares.use((req, res, next) => {
-          if (req.url === '/') req.url = '/dashboard.html'
-          next()
-        })
-        // Serve the original prototype unchanged, including its relative images.
-        server.middlewares.use('/emergency', async (req, res, next) => {
-          if (req.url !== '/' && req.url !== '/index.html') return next()
-          res.setHeader('Content-Type', 'text/html; charset=utf-8')
-          res.end(await readFile(path.join(root, 'index.html')))
-        })
-        server.middlewares.use('/emergency/img', (req, res, next) => {
-          req.url = '/img' + req.url
-          next()
-        })
-      },
-      async closeBundle() {
-        const emergency = path.join(root, 'dist/emergency')
-        await mkdir(emergency, { recursive: true })
-        await cp(path.join(root, 'index.html'), path.join(emergency, 'index.html'))
-        await cp(path.join(root, 'img'), path.join(emergency, 'img'), { recursive: true })
-        await cp(path.join(root, 'dist/dashboard.html'), path.join(root, 'dist/index.html'))
-      },
-    },
-  ],
-  resolve: {
-    alias: [
-      { find: /^\.\/dashboard-actions$/, replacement: localActions },
-      { find: /^\.\/checkin-actions$/, replacement: localActions },
-    ],
+  plugins: [react(), tailwindcss(), emergencyPrototype()],
+  server: { open: true },
+  test: {
+    include: ['src/**/*.test.ts'],
   },
-  build: { rollupOptions: { input: path.join(root, 'dashboard.html') } },
-  server: { open: '/dashboard.html' },
 })

@@ -1,0 +1,159 @@
+/* Dashboard Settings page: widget canvas and options (features/customize). */
+
+.customize-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 12px;
+}
+.custom-canvas,
+.custom-controls section {
+  background: #0b181f;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.custom-toolbar {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid #1c3038;
+  color: #657a82;
+  font-size: 7px;
+}
+.custom-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #a2b4b7;
+  font-weight: 600;
+}
+.custom-grid {
+  padding: 13px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+}
+.custom-widget {
+  min-height: 105px;
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0f2027;
+  border: 1px dashed #35505a;
+  border-radius: 8px;
+  cursor: grab;
+}
+.custom-widget:active {
+  cursor: grabbing;
+}
+.custom-widget.essential {
+  border-style: solid;
+  border-color: #28534e;
+  background: #102522;
+}
+.grip {
+  color: #607b83;
+}
+.custom-widget > div {
+  flex: 1;
+}
+.custom-widget > div > span {
+  color: #57867f;
+  font-size: 6px;
+  letter-spacing: 0.12em;
+}
+.custom-widget h3 {
+  font-size: 10px;
+  margin-top: 5px;
+}
+.custom-widget p {
+  color: #647981;
+  font-size: 7px;
+  margin-top: 4px;
+}
+.custom-widget > svg {
+  color: #5f8c85;
+}
+.custom-widget > button {
+  color: #ac806d;
+  background: transparent;
+  border: 0;
+  font-size: 7px;
+}
+.custom-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.custom-controls section {
+  padding: 13px;
+}
+.custom-controls h3 {
+  font: 600 11px 'Space Grotesk';
+  margin-bottom: 10px;
+}
+.custom-controls section > button {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 9px;
+  color: #81949a;
+  background: #0e1e25;
+  border: 1px solid #20353d;
+  border-radius: 6px;
+  margin-top: 5px;
+  text-align: left;
+}
+.custom-controls section > button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.custom-controls section > button b,
+.custom-controls section > button span {
+  display: block;
+}
+.custom-controls section > button b {
+  font-size: 8px;
+  color: #a9b9bd;
+}
+.custom-controls section > button span {
+  font-size: 6px;
+  margin-top: 3px;
+}
+.chart-options,
+.size-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.chart-options button,
+.size-options button {
+  padding: 7px 3px;
+  color: #61777f;
+  background: #0d1b22;
+  border: 1px solid #20343c;
+  font-size: 7px;
+}
+.chart-options button:first-child,
+.size-options button:first-child {
+  border-radius: 5px 0 0 5px;
+}
+.chart-options button:last-child,
+.size-options button:last-child {
+  border-radius: 0 5px 5px 0;
+}
+.chart-options button.active,
+.size-options button.active {
+  color: var(--teal);
+  background: #12302d;
+  border-color: #28544f;
+}
+.custom-controls section > p {
+  color: #566d75;
+  font-size: 7px;
+  margin-top: 8px;
+}

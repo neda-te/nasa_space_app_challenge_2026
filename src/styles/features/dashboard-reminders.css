@@ -1,0 +1,127 @@
+/* Health reminders panel (features/dashboard/DashboardReminders). */
+
+/* Dashboard reminders */
+.dashboard-reminders {
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid #d5dfeb;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgb(38 67 103 / 5%);
+}
+.reminder-heading {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.reminder-heading h3 {
+  color: #10224d;
+  font: 600 15px 'Space Grotesk';
+}
+.reminder-heading > span {
+  color: #687b95;
+  font-size: 7px;
+}
+.reminder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.reminder-grid article {
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 15px;
+  border-top: 1px solid #e7ecf2;
+  border-left: 1px solid #e7ecf2;
+}
+.reminder-grid article:nth-child(-n + 2) {
+  border-top: 0;
+}
+.reminder-grid article:nth-child(odd) {
+  border-left: 0;
+}
+.reminder-grid article.overdue {
+  background: #fff9f4;
+  box-shadow: inset 3px 0 #d97932;
+}
+.reminder-grid article.completed {
+  background: #f8fbfa;
+}
+.reminder-check {
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #fff;
+  border: 1px solid #bccadd;
+  border-radius: 6px;
+  background: #fff;
+}
+.completed .reminder-check {
+  border-color: #3e8b73;
+  background: #3e8b73;
+}
+.reminder-grid article > div:nth-child(2) > span {
+  display: block;
+  color: #72839b;
+  font:
+    700 6px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.reminder-link {
+  display: block;
+  padding: 0;
+  margin-top: 5px;
+  color: #214d9b;
+  border: 0;
+  background: transparent;
+  font: 600 9px 'Space Grotesk';
+  text-align: left;
+}
+.reminder-link:hover {
+  text-decoration: underline;
+}
+.reminder-grid article p {
+  overflow: hidden;
+  color: #6d7d91;
+  font-size: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+.completed .reminder-link,
+.completed article p {
+  color: #68798c;
+}
+.reminder-due {
+  min-width: 76px;
+  text-align: right;
+}
+.reminder-due span,
+.reminder-due b {
+  display: block;
+}
+.reminder-due span {
+  color: #708096;
+  font-size: 6px;
+  letter-spacing: 0.09em;
+}
+.reminder-due b {
+  color: #344963;
+  font-size: 7px;
+  margin-top: 5px;
+}
+.overdue .reminder-due span,
+.overdue .reminder-due b {
+  color: #ba5d26;
+}

@@ -1,0 +1,121 @@
+/* HEALium light workspace theme, part 2: cards and dashboard widgets. */
+
+.primary-widget,
+.wide-widget,
+.category-card,
+.environment-card,
+.metric-trend-widget,
+.chart-panel,
+.trend-summary > div,
+.source-type-grid > div,
+.source-list,
+.custom-canvas,
+.custom-controls section,
+.body-viewer-panel,
+.emergency-record-panel,
+.empty-records,
+.results-table,
+.page-tabs,
+.breathing-control-panel > section {
+  border-color: #d8e1ec;
+  background: #fff;
+  box-shadow: 0 7px 24px rgb(38 67 103 / 4%);
+}
+.primary-widget,
+.featured-metric,
+.secondary-metric {
+  background: #fff;
+}
+.featured-metric {
+  border-color: #b8cce7;
+  box-shadow: 0 8px 28px rgb(42 85 160 / 7%);
+}
+.primary-widget::before,
+.featured-metric::before {
+  background: #4d78c4;
+  box-shadow: none;
+}
+.clickable-widget:hover,
+.clickable-widget:focus-visible {
+  border-color: #9bb6da;
+  box-shadow: 0 12px 30px rgb(37 67 110 / 10%);
+}
+.widget-icon,
+.widget-icon.blue {
+  color: #2858b7;
+  background: #eaf1fd;
+}
+.widget-icon.orange {
+  color: #c96728;
+  background: #fff0e3;
+}
+.primary-widget > p,
+.reaction-title-row > p {
+  color: #718198;
+}
+.big-metric,
+.wide-widget h3,
+.physical-quick h3 {
+  color: #10224d;
+}
+.big-metric small,
+.compare-row,
+.sleep-facts,
+.last-update {
+  color: #74849a;
+}
+.compare-row b,
+.sleep-facts b,
+.change-list b {
+  color: #31425b;
+}
+.sparkline path,
+.week-bars,
+.cause-note {
+  stroke: #d9e3ef;
+  border-color: #e0e7ef;
+}
+.card-link {
+  color: #315d9f;
+  border-color: #dce4ee;
+  background: #f8fafd;
+}
+.gauge {
+  background: #e4eaf1;
+}
+.health-status,
+.optional-widget,
+.physical-quick {
+  background: #fff;
+  border-color: #d8e1ec;
+}
+.status-orb {
+  border-color: #b9cee8;
+  background: #edf4ff;
+  box-shadow: none;
+}
+.status-orb span {
+  color: #2858b7;
+}
+.wide-widget p,
+.change-list span,
+.physical-quick p {
+  color: #68788e;
+}
+.health-status > button,
+.optional-widget button {
+  color: #345d98;
+  border-color: #ccd8e6;
+  background: #f8fafc;
+}
+.widget-section-title > span {
+  color: #9a671d;
+  background: #fff5dc;
+}
+.quick-icon {
+  color: #2858b7;
+  background: #eaf1fd;
+}
+.physical-quick span {
+  color: #4269ad;
+}

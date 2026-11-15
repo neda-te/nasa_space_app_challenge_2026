@@ -1,0 +1,338 @@
+/* Emergency Data page: body viewer and record list (features/emergency-data). */
+
+.emergency-scope-note {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 13px;
+  margin-bottom: 12px;
+  color: #6e838b;
+  border: 1px solid #2b3944;
+  border-radius: 8px;
+  background: #101c24;
+  font-size: 8px;
+}
+.emergency-scope-note svg {
+  color: #988abc;
+}
+.emergency-layout {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.85fr) minmax(570px, 1.35fr);
+  gap: 12px;
+}
+.body-viewer-panel,
+.emergency-record-panel {
+  min-height: 620px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #0b181f;
+  overflow: hidden;
+}
+.viewer-heading,
+.record-detail-head {
+  min-height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #1c3038;
+}
+.viewer-heading h3,
+.record-detail-head h3 {
+  font: 600 13px 'Space Grotesk';
+  text-transform: capitalize;
+}
+.view-toggle {
+  display: flex;
+  padding: 3px;
+  border: 1px solid #263d45;
+  border-radius: 6px;
+  background: #0d1b22;
+}
+.view-toggle button {
+  padding: 5px 8px;
+  color: #61777f;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 7px;
+}
+.view-toggle button.active {
+  color: var(--teal);
+  background: #15312e;
+}
+.astronaut-body {
+  height: 480px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  perspective: 700px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgb(39 97 105 / 14%), transparent 50%),
+    linear-gradient(#0c1b22, #09151b);
+}
+.astronaut-body::before,
+.astronaut-body::after {
+  content: '';
+  position: absolute;
+  background: #203940;
+  opacity: 0.65;
+}
+.astronaut-body::before {
+  width: 1px;
+  height: 84%;
+  left: 50%;
+}
+.astronaut-body::after {
+  width: 84%;
+  height: 1px;
+  top: 50%;
+}
+.astronaut-body svg {
+  width: 230px;
+  height: 410px;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.35s ease;
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 30%));
+}
+.astronaut-body.side-view svg {
+  transform: rotateY(48deg) scaleX(0.78);
+}
+.body-part {
+  stroke: rgb(235 195 174 / 42%);
+  stroke-width: 0.9;
+  transition:
+    fill 0.2s,
+    filter 0.2s;
+}
+.astronaut-body.female .body-part {
+  fill: url('#humanSkin-female');
+}
+.astronaut-body.male .body-part {
+  fill: url('#humanSkin-male');
+}
+.astronaut-body.female .body-part.active,
+.astronaut-body.male .body-part.active {
+  fill: #d37b50;
+  stroke: #ffc29f;
+  filter: drop-shadow(0 0 9px rgb(237 167 97 / 60%));
+}
+.human-neck-shape {
+  fill: url('#limbShade');
+  stroke: rgb(233 240 241 / 28%);
+  stroke-width: 0.8;
+}
+.human-hair {
+  fill: #727b7e;
+  opacity: 0.82;
+}
+.human-ear,
+.human-foot {
+  fill: url('#limbShade');
+  stroke: rgb(233 240 241 / 24%);
+  stroke-width: 0.7;
+}
+.anatomy-detail {
+  fill: none;
+  stroke: rgb(238 243 244 / 34%);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+.anatomy-detail.center {
+  opacity: 0.42;
+}
+.anatomy-detail.navel {
+  fill: rgb(86 55 58 / 72%);
+  stroke: none;
+}
+.natural-human.female svg {
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 30%)) saturate(0.82);
+}
+.natural-human.male svg {
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 30%)) saturate(0.78);
+}
+.body-orbit {
+  position: absolute;
+  z-index: 1;
+  border: 1px solid #28515b;
+  border-radius: 50%;
+  transform: rotateX(64deg);
+}
+.orbit-one {
+  width: 320px;
+  height: 140px;
+}
+.orbit-two {
+  width: 230px;
+  height: 90px;
+  border-style: dashed;
+}
+.body-axis {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  color: #405c65;
+  font-size: 6px;
+  letter-spacing: 0.13em;
+}
+.body-region-label {
+  min-height: 73px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 16px;
+  border-top: 1px solid #1d3139;
+}
+.body-region-label span {
+  color: #5d747c;
+  font-size: 6px;
+  letter-spacing: 0.12em;
+}
+.body-region-label strong {
+  color: #e7aa80;
+  font: 600 13px 'Space Grotesk';
+  text-transform: capitalize;
+  margin-top: 5px;
+}
+.record-detail-head > div > span {
+  color: #5c9690;
+  font-size: 7px;
+  letter-spacing: 0.1em;
+}
+.record-detail-head h3 {
+  margin-top: 4px;
+}
+.record-summary {
+  min-height: 53px;
+  padding: 14px 16px;
+  color: #82969c;
+  border-bottom: 1px solid #192d35;
+  font-size: 8px;
+  line-height: 1.55;
+}
+.record-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #1a2d35;
+  border-bottom: 1px solid #1a2d35;
+}
+.record-metrics > div {
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 12px;
+  background: #0e1d24;
+}
+.record-metrics span,
+.record-provenance span {
+  color: #587079;
+  font-size: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.record-metrics b {
+  font: 600 14px 'Space Grotesk';
+  margin-top: 7px;
+}
+.record-metrics small {
+  color: #6f858d;
+  font: 500 7px 'Inter';
+}
+.record-provenance {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 13px 16px;
+  border-bottom: 1px solid #1b3038;
+}
+.record-provenance b {
+  display: block;
+  color: #9eafb3;
+  font-size: 7px;
+  margin-top: 5px;
+}
+.record-list-heading {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+  color: #5d747c;
+  font-size: 6px;
+  letter-spacing: 0.1em;
+}
+.record-list-heading b {
+  color: #72888f;
+}
+.emergency-record-list {
+  padding: 0 12px 12px;
+}
+.emergency-record-list button {
+  width: 100%;
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 7px 1fr auto 16px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  color: #6f858d;
+  text-align: left;
+  border: 1px solid transparent;
+  border-top-color: #1b3038;
+  background: transparent;
+}
+.emergency-record-list button.active {
+  border-color: #2e5653;
+  border-radius: 7px;
+  background: #102622;
+}
+.emergency-record-list button > i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #758a90;
+}
+.emergency-record-list button.active > i {
+  background: var(--teal);
+  box-shadow: 0 0 7px var(--teal);
+}
+.emergency-record-list b,
+.emergency-record-list span {
+  display: block;
+}
+.emergency-record-list b {
+  color: #afbec1;
+  font-size: 8px;
+  text-transform: capitalize;
+}
+.emergency-record-list span {
+  font-size: 7px;
+  margin-top: 4px;
+  text-transform: capitalize;
+}
+.emergency-record-list time {
+  font-size: 7px;
+}
+.empty-records {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #587079;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #0b181f;
+}
+.empty-records h3 {
+  color: #a8b8bc;
+  font: 600 13px 'Space Grotesk';
+  margin-top: 12px;
+}
+.empty-records p {
+  font-size: 8px;
+  margin-top: 5px;
+}

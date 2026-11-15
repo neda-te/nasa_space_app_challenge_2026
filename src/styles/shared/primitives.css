@@ -1,0 +1,146 @@
+/* Shared UI primitives: eyebrow, page title, buttons, source tags, status badges, simulated-data banner. */
+
+.eyebrow {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 0.17em;
+  color: #5fb9b1;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.page-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title h2 {
+  font: 600 24px 'Space Grotesk';
+}
+.page-title p {
+  color: #6c828a;
+  font-size: 9px;
+  margin-top: 6px;
+}
+.title-actions,
+.legend-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.primary-button,
+.secondary-button {
+  border-radius: 7px;
+  padding: 9px 13px;
+  font-size: 8px;
+  font-weight: 700;
+}
+.primary-button {
+  color: #06231f;
+  border: 1px solid var(--teal);
+  background: var(--teal);
+  box-shadow: 0 0 16px rgb(69 219 197 / 12%);
+}
+.secondary-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #a0b3b8;
+  border: 1px solid #2a4149;
+  background: #0f1f26;
+}
+.source-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: #67c7ba;
+  background: #12302e;
+  border: 1px solid #214b46;
+  font-size: 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.source-lab {
+  color: #7ebbd3;
+  background: #142b36;
+  border-color: #254756;
+}
+.source-self {
+  color: #baa4e3;
+  background: #272239;
+  border-color: #41375c;
+}
+.source-research {
+  color: #c4a877;
+  background: #30291d;
+  border-color: #51452e;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+  font-size: 6px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.status i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+.status-normal {
+  color: #64cbbb;
+}
+.status-normal i {
+  background: var(--teal);
+  box-shadow: 0 0 6px rgb(67 219 194 / 50%);
+}
+.status-monitor {
+  color: #d1b35c;
+}
+.status-monitor i {
+  background: var(--yellow);
+}
+.status-attention {
+  color: #dc9c5e;
+}
+.status-attention i {
+  background: var(--orange);
+}
+.simulated-banner {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 13px;
+  margin-bottom: 12px;
+  border-radius: 7px;
+  background: #0d1d24;
+  border: 1px solid #223640;
+}
+.simulated-banner span {
+  padding: 4px 7px;
+  color: #8fb5bd;
+  background: #17303a;
+  border-radius: 4px;
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+.simulated-banner p {
+  flex: 1;
+  color: #647981;
+  font-size: 8px;
+}
+.simulated-banner button {
+  color: #809aa2;
+  background: transparent;
+  border: 0;
+  font-size: 7px;
+  text-decoration: underline;
+}

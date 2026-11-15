@@ -1,0 +1,622 @@
+/* Guided breathing exercise page (features/breathing). */
+
+.breathing-page {
+  position: relative;
+}
+.breathing-session-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  color: #789098;
+  border: 1px solid #294048;
+  border-radius: 16px;
+  background: #0e1d24;
+  font-size: 7px;
+}
+.breathing-session-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #61757c;
+}
+.breathing-session-status i.active {
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+}
+.breathing-immersive-layout {
+  display: grid;
+  grid-template-columns: minmax(620px, 1.55fr) minmax(315px, 0.72fr);
+  gap: 12px;
+  align-items: stretch;
+}
+.breathing-stage {
+  height: 660px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #29424b;
+  border-radius: 16px;
+  background: #0c1a20;
+  isolation: isolate;
+  box-shadow: inset 0 0 80px rgb(0 0 0 / 25%);
+}
+.breathing-photo-layer,
+.breathing-vignette {
+  position: absolute;
+  inset: 0;
+}
+.breathing-photo-layer {
+  z-index: -3;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.54;
+  transform: scale(1.03);
+  transition:
+    background-image 0.4s ease,
+    opacity 0.4s ease;
+}
+.breathing-theme-forest .breathing-photo-layer {
+  background-image: url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=82&w=1600');
+}
+.breathing-theme-waves .breathing-photo-layer {
+  background-image: url('https://images.unsplash.com/photo-1468581264429-2548ef9eb732?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=82&w=1600');
+}
+.breathing-theme-galaxy .breathing-photo-layer {
+  background-image: url('https://images.unsplash.com/photo-1610209455607-89e8b3e0e393?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=82&w=1600');
+}
+.breathing-theme-ball .breathing-photo-layer {
+  background-image: radial-gradient(circle at 50% 42%, #245b62, #102a34 34%, #071219 72%);
+  opacity: 1;
+}
+.breathing-vignette {
+  z-index: -2;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(5 15 20 / 52%),
+      transparent 30%,
+      transparent 68%,
+      rgb(5 13 18 / 88%)
+    ),
+    radial-gradient(circle at 50% 45%, transparent 10%, rgb(5 14 19 / 62%) 74%);
+  backdrop-filter: saturate(0.8);
+}
+.breathing-theme-forest .breathing-vignette {
+  background-color: rgb(6 33 24 / 28%);
+}
+.breathing-theme-waves .breathing-vignette {
+  background-color: rgb(5 32 48 / 28%);
+}
+.breathing-theme-galaxy .breathing-vignette {
+  background-color: rgb(20 12 48 / 22%);
+}
+.breathing-stage-top {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  color: rgb(220 242 240 / 66%);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+.human-guide {
+  position: absolute;
+  inset: 30px 0 64px;
+  display: grid;
+  place-items: center;
+}
+.human-breathing-figure {
+  width: 330px;
+  height: 500px;
+  opacity: 0.64;
+  filter: drop-shadow(0 18px 30px rgb(0 0 0 / 38%));
+}
+.human-head,
+.human-neck,
+.human-torso {
+  fill: url('#skinSilhouette');
+  stroke: rgb(242 218 202 / 27%);
+  stroke-width: 1;
+}
+.human-shoulder-line,
+.human-center-line,
+.human-rib {
+  fill: none;
+  stroke: rgb(226 244 239 / 18%);
+  stroke-width: 1.3;
+}
+.human-chest-glow {
+  fill: url('#chestGlow');
+  transform-origin: 140px 240px;
+}
+.breath-center {
+  fill: #b9f3e5;
+  opacity: 0.75;
+  filter: drop-shadow(0 0 8px #93e7d8);
+}
+.human-breathing-figure.active.phase-0 .human-chest-glow,
+.human-breathing-figure.active.phase-0 .human-rib {
+  animation: human-inhale 4s ease-out forwards;
+  transform-origin: 140px 240px;
+}
+.human-breathing-figure.active.phase-2 .human-chest-glow,
+.human-breathing-figure.active.phase-2 .human-rib {
+  animation: human-exhale 6s ease-in forwards;
+  transform-origin: 140px 240px;
+}
+.breath-pulse {
+  width: 230px;
+  height: 230px;
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(193 247 235 / 36%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(14 42 44 / 72%) 0 46%,
+    rgb(55 132 125 / 24%) 47% 61%,
+    rgb(96 196 181 / 8%) 62%
+  );
+  box-shadow:
+    0 0 80px rgb(69 219 197 / 12%),
+    inset 0 0 30px rgb(181 246 235 / 7%);
+  backdrop-filter: blur(3px);
+}
+.breath-pulse::before,
+.breath-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -18px;
+  border: 1px solid rgb(184 239 229 / 16%);
+  border-radius: 50%;
+}
+.breath-pulse::after {
+  inset: -38px;
+  opacity: 0.45;
+}
+.breath-pulse.active.phase-0 {
+  animation: guide-inhale 4s ease-out forwards;
+}
+.breath-pulse.active.phase-1 {
+  transform: scale(1.15);
+}
+.breath-pulse.active.phase-2 {
+  animation: guide-exhale 6s ease-in forwards;
+}
+.breath-pulse > div {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.breath-pulse span {
+  color: #d8f7f1;
+  font: 600 15px 'Space Grotesk';
+}
+.breath-pulse strong {
+  color: white;
+  font: 500 46px 'Space Grotesk';
+  line-height: 1;
+  margin-top: 9px;
+  text-shadow: 0 0 20px rgb(175 241 229 / 28%);
+}
+.breath-pulse small {
+  color: rgb(213 238 234 / 60%);
+  font-size: 7px;
+  margin-top: 9px;
+}
+.breathing-stage-bottom {
+  height: 54px;
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 13px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 100px 1fr 65px;
+  align-items: center;
+  gap: 14px;
+  padding: 0 13px;
+  border: 1px solid rgb(135 184 182 / 18%);
+  border-radius: 9px;
+  background: rgb(7 19 24 / 64%);
+  backdrop-filter: blur(12px);
+}
+.breathing-stage-bottom > div:first-child span,
+.breathing-stage-bottom > div:last-child span {
+  display: block;
+  color: #76908f;
+  font-size: 6px;
+  letter-spacing: 0.1em;
+}
+.breathing-stage-bottom b {
+  display: block;
+  font: 600 10px 'Space Grotesk';
+  margin-top: 4px;
+}
+.session-progress {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgb(111 148 148 / 20%);
+}
+.session-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #70cfc1, #b2efe3);
+  box-shadow: 0 0 8px rgb(112 207 193 / 40%);
+}
+.theme-credit {
+  position: absolute;
+  right: 23px;
+  bottom: 74px;
+  color: rgb(213 233 230 / 42%);
+  font-size: 6px;
+}
+.breathing-control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.breathing-control-panel > section {
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #0c1920;
+}
+.control-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.control-title h3 {
+  font: 600 10px 'Space Grotesk';
+}
+.control-title .eyebrow {
+  margin-bottom: 4px;
+}
+.breathing-theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.breathing-theme-grid button {
+  min-height: 47px;
+  display: grid;
+  grid-template-columns: 28px 1fr 14px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 8px;
+  color: #82969c;
+  text-align: left;
+  border: 1px solid #20343c;
+  border-radius: 7px;
+  background: #0e1d24;
+}
+.breathing-theme-grid button.active {
+  color: #d8ece9;
+  border-color: #35635e;
+  background: #122824;
+}
+.breathing-theme-grid button > span {
+  font-size: 8px;
+  font-weight: 600;
+}
+.breathing-theme-grid small {
+  display: block;
+  color: #566e75;
+  font-size: 6px;
+  margin-top: 3px;
+}
+.breathing-theme-grid button > svg {
+  color: var(--teal);
+}
+.theme-thumb {
+  width: 27px;
+  height: 27px;
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+}
+.theme-thumb.forest {
+  background-image:
+    linear-gradient(rgb(5 49 33 / 22%), rgb(5 28 20 / 38%)),
+    url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=65&w=160');
+}
+.theme-thumb.waves {
+  background-image: url('https://images.unsplash.com/photo-1468581264429-2548ef9eb732?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=65&w=160');
+}
+.theme-thumb.galaxy {
+  background-image: url('https://images.unsplash.com/photo-1610209455607-89e8b3e0e393?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=65&w=160');
+}
+.theme-thumb.ball {
+  background: radial-gradient(circle, #5faea8, #15323b 55%, #09171e);
+}
+.breathing-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+.breathing-mode-grid button {
+  padding: 8px 5px;
+  color: #667c84;
+  border: 1px solid #20343c;
+  border-radius: 5px;
+  background: #0d1b22;
+  font-size: 7px;
+}
+.breathing-mode-grid button.active {
+  color: #bde9e1;
+  border-color: #315c57;
+  background: #122b28;
+}
+.session-length-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+}
+.session-length-row > span {
+  color: #596f77;
+  font-size: 6px;
+  letter-spacing: 0.1em;
+}
+.session-length-row > div {
+  display: flex;
+  gap: 3px;
+}
+.session-length-row button {
+  padding: 5px 7px;
+  color: #637981;
+  border: 1px solid #20343c;
+  background: #0d1b22;
+  font-size: 6px;
+}
+.session-length-row button:first-child {
+  border-radius: 5px 0 0 5px;
+}
+.session-length-row button:last-child {
+  border-radius: 0 5px 5px 0;
+}
+.session-length-row button.active {
+  color: var(--teal);
+  border-color: #315d57;
+  background: #13302d;
+}
+.sound-master {
+  padding: 5px 8px;
+  color: #6c8087;
+  border: 1px solid #283c44;
+  border-radius: 11px;
+  background: #0e1b22;
+  font-size: 6px;
+}
+.sound-master.active {
+  color: var(--teal);
+  border-color: #315c56;
+  background: #122a27;
+}
+.sound-row {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #192c34;
+}
+.sound-row > div:nth-child(2) {
+  flex: 1;
+}
+.sound-row b,
+.sound-row span {
+  display: block;
+}
+.sound-row b {
+  color: #a5b6ba;
+  font-size: 7px;
+}
+.sound-row span {
+  color: #526971;
+  font-size: 6px;
+  margin-top: 3px;
+}
+.sound-icon {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  color: var(--blue);
+  border-radius: 6px;
+  background: #142d38;
+}
+.sound-icon.voice {
+  color: #af9bd4;
+  background: #27223a;
+}
+.sound-row > button {
+  padding: 4px 7px;
+  color: #60767e;
+  border: 1px solid #263b43;
+  border-radius: 5px;
+  background: #0e1c23;
+  font-size: 6px;
+}
+.sound-row > button.playing {
+  color: var(--teal);
+  border-color: #315a55;
+}
+.volume-control {
+  display: grid;
+  grid-template-columns: 45px 1fr 32px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: #5e747c;
+  font-size: 6px;
+}
+.volume-control input {
+  width: 100%;
+  accent-color: var(--teal);
+}
+.volume-control b {
+  color: #8fa1a6;
+  text-align: right;
+}
+.session-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: auto;
+}
+.breathing-primary {
+  min-height: 41px;
+  flex: 1;
+  color: #08221f;
+  border: 1px solid #70d8c7;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7de0d0, #4bb8aa);
+  font-size: 8px;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgb(69 219 197 / 10%);
+}
+.breathing-primary.pause {
+  color: #d7ece8;
+  background: #15312e;
+  border-color: #35635d;
+}
+.breathing-end {
+  min-width: 63px;
+  color: #ae8781;
+  border: 1px solid #49383a;
+  border-radius: 8px;
+  background: #231b20;
+  font-size: 7px;
+}
+.breathing-support-row {
+  min-height: 75px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.25fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  margin-top: 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #0c1920;
+}
+.support-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.support-tip > i {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--teal);
+  border-radius: 50%;
+  background: #14312e;
+  font-size: 7px;
+  font-style: normal;
+}
+.support-tip b,
+.support-tip span {
+  display: block;
+}
+.support-tip b {
+  color: #a7b8bc;
+  font-size: 8px;
+}
+.support-tip span {
+  color: #5c737b;
+  font-size: 6px;
+  margin-top: 3px;
+}
+.mood-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-left: 12px;
+  border-left: 1px solid #1f333b;
+}
+.mood-check > span {
+  color: #61777f;
+  font-size: 6px;
+  letter-spacing: 0.08em;
+}
+.mood-check > div {
+  display: flex;
+  gap: 3px;
+}
+.mood-check button {
+  width: 25px;
+  height: 25px;
+  color: #60767e;
+  border: 1px solid #253a42;
+  border-radius: 50%;
+  background: #0e1d24;
+  font-size: 7px;
+}
+.mood-check button.active {
+  color: var(--teal);
+  border-color: #37665f;
+  background: #15312e;
+}
+.breathing-disclaimer {
+  max-width: 155px;
+  color: #516870;
+  font-size: 6px;
+  line-height: 1.45;
+  text-align: right;
+}
+@keyframes guide-inhale {
+  from {
+    transform: scale(0.82);
+  }
+  to {
+    transform: scale(1.15);
+  }
+}
+@keyframes guide-exhale {
+  from {
+    transform: scale(1.15);
+  }
+  to {
+    transform: scale(0.82);
+  }
+}
+@keyframes human-inhale {
+  from {
+    transform: scale(0.86);
+    opacity: 0.35;
+  }
+  to {
+    transform: scale(1.13);
+    opacity: 0.82;
+  }
+}
+@keyframes human-exhale {
+  from {
+    transform: scale(1.13);
+    opacity: 0.82;
+  }
+  to {
+    transform: scale(0.86);
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .breath-pulse,
+  .human-chest-glow,
+  .human-rib {
+    animation: none !important;
+    transition: none !important;
+  }
+}

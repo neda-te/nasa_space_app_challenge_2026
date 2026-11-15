@@ -1,0 +1,42 @@
+/**
+ * HEALium dashboard stylesheet – entry point.
+ *
+ * The styles are split into one file per concern. IMPORT ORDER = CASCADE ORDER:
+ * later files intentionally override earlier ones, so do not reorder the imports.
+ *
+ * The stylesheet has two generations:
+ *   1. base component styles (base/, layout/, shared/, features/)
+ *   2. the light "HEALium workspace" theme (theme/) layered on top of them,
+ *      followed by the features that were built after the theme.
+ *
+ * New feature styles belong in a new file under features/, imported at the end.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import 'tailwindcss';
+
+@import './base/tokens-and-base.css';
+@import './layout/app-shell.css';
+@import './shared/primitives.css';
+@import './features/check-in.css';
+@import './features/breathing-break.css';
+@import './features/dashboard-widgets.css';
+@import './shared/page-elements.css';
+@import './features/physical-health.css';
+@import './features/lab-data.css';
+@import './features/environment.css';
+@import './features/trends.css';
+@import './features/data-sources.css';
+@import './features/customize.css';
+@import './features/breathing-exercise.css';
+@import './features/emergency-data.css';
+@import './layout/footer-and-responsive.css';
+@import './theme/light-shell.css';
+@import './features/dashboard-health-summary.css';
+@import './theme/light-widgets.css';
+@import './features/dashboard-mission-readiness.css';
+@import './theme/light-pages.css';
+@import './theme/light-responsive.css';
+@import './features/dashboard-reminders.css';
+@import './features/radiation-chart.css';
+@import './features/check-in-discomfort.css';
+@import './features/account-and-journal.css';

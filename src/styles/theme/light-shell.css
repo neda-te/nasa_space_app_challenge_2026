@@ -1,0 +1,238 @@
+/* HEALium light workspace theme, part 1: tokens, app shell and shared primitives.
+   The theme files override the base component styles above and must stay after them. */
+
+/* HEALium light workspace */
+:root {
+  color-scheme: light;
+  --bg: #edf2f8;
+  --surface: #ffffff;
+  --surface-2: #f7f9fc;
+  --surface-3: #eef4fb;
+  --line: #d9e2ed;
+  --line-bright: #c7d4e3;
+  --text: #0e1b3d;
+  --muted: #64748b;
+  --muted-2: #8997aa;
+  --teal: #2858b7;
+  --blue: #4a8ed8;
+  --orange: #d97932;
+  --yellow: #b88620;
+}
+
+@layer base {
+  * {
+    scrollbar-color: #b9c7d8 transparent;
+  }
+  body {
+    min-width: 320px;
+    background: var(--bg);
+    color: var(--text);
+  }
+  button:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #5b8ee1;
+    outline-offset: 2px;
+  }
+}
+
+.app-shell {
+  background: var(--bg);
+}
+.sidebar {
+  border-color: #dbe4ee;
+  background: #f9fbfe;
+  box-shadow: 8px 0 30px rgb(31 57 96 / 4%);
+}
+.brand {
+  border-color: #e0e7f0;
+  background: #fff;
+}
+.brand-mark {
+  border-color: #9eb6d8;
+  background: #eef5ff;
+}
+.brand-mark .planet {
+  background: #2d5bb5;
+  box-shadow: none;
+}
+.brand-mark .orbit {
+  border-color: #5f83bd;
+}
+.brand strong {
+  color: #10275a;
+  letter-spacing: 0.05em;
+}
+.brand small,
+.mission-chip small,
+.nav-label,
+.sidebar-checkin small,
+.connection small,
+.mission-name small {
+  color: #7d8ca1;
+}
+.mission-chip {
+  border-color: #d6e1ef;
+  background: #edf4ff;
+}
+.mission-chip > span,
+.connection > span {
+  background: #3f73cb;
+  box-shadow: none;
+}
+.mission-chip > b {
+  color: #2d5bb5;
+}
+.mission-chip strong i {
+  color: #8391a4;
+}
+.sidebar-checkin,
+.mission-name {
+  color: #44546b;
+  border-color: #d7e0eb;
+  background: #fff;
+}
+.sidebar-checkin:hover,
+.nav-item:hover {
+  color: #17356f;
+  border-color: #b9cbe3;
+  background: #eef4fc;
+}
+.checkin-plus,
+.sidebar-checkin.breathing .checkin-plus {
+  color: #2858b7;
+  background: #e9f1ff;
+}
+.nav-item {
+  color: #5f6e82;
+}
+.nav-item.active {
+  color: #173c84;
+  background: #e9f1ff;
+  box-shadow: inset 3px 0 #3266c5;
+}
+.nav-item.active svg {
+  color: #3266c5;
+  filter: none;
+}
+.sidebar-footer {
+  border-color: #e0e7f0;
+}
+.connection strong,
+.mission-name strong {
+  color: #334155;
+}
+.mission-avatar {
+  color: #234a98;
+  background: #e4edfb;
+}
+.topbar {
+  background: rgb(255 255 255 / 94%);
+  border-color: #dbe4ee;
+  box-shadow: 0 4px 22px rgb(30 57 91 / 4%);
+}
+.title-line h1,
+.mission-time strong {
+  color: #10224d;
+}
+.demo-note {
+  color: #536b8d;
+  border-color: #cfdaea;
+  background: #f3f6fa;
+}
+.topbar > div:first-child > p,
+.mission-time span,
+.mission-time small {
+  color: #76859a;
+}
+.mission-time {
+  border-color: #dce4ed;
+}
+.crew-selector,
+.notification-button {
+  border-color: #d7e0eb;
+  background: #fff;
+}
+.crew-avatar {
+  color: #234b98;
+  background: #e8effa;
+}
+.crew-copy small {
+  color: #8795a8;
+}
+.crew-copy select {
+  color: #263853;
+}
+.crew-copy option {
+  background: #fff;
+}
+.notification-button {
+  color: #5f6f85;
+}
+.notification-button span {
+  background: #d97932;
+  box-shadow: 0 0 0 3px #fff;
+}
+.page-title h2 {
+  color: #0d1e46;
+}
+.page-title p {
+  color: #68778d;
+}
+.eyebrow {
+  color: #4269ad;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+.primary-button {
+  color: #fff;
+  border-color: #2858b7;
+  background: #2858b7;
+  box-shadow: none;
+}
+.secondary-button {
+  color: #334966;
+  border-color: #cbd7e6;
+  background: #fff;
+}
+.source-tag,
+.source-lab,
+.source-self,
+.source-research {
+  color: #3563ad;
+  border-color: #c9d8ed;
+  background: #edf4ff;
+}
+.source-self {
+  color: #765b9a;
+  border-color: #ded3ec;
+  background: #f6f1fb;
+}
+.source-research {
+  color: #8c671f;
+  border-color: #eadab8;
+  background: #fff9e9;
+}
+.status-normal {
+  color: #2d7b63;
+}
+.status-normal i {
+  background: #3d9a7d;
+  box-shadow: none;
+}
+.status-monitor {
+  color: #9a6a12;
+}
+.status-attention {
+  color: #bb5f24;
+}
+.simulated-banner {
+  border-color: #d7e0eb;
+  background: #f7f9fc;
+}
+.simulated-banner span {
+  color: #4c668a;
+  background: #e9eff7;
+}
+.simulated-banner p,
+.simulated-banner button {
+  color: #68788e;
+}

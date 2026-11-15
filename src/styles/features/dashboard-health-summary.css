@@ -1,0 +1,86 @@
+/* Today's health summary banner (features/dashboard/HealthSummary). */
+
+.health-summary {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.18fr 1fr 1fr;
+  gap: 0;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid #d5dfeb;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 32px rgb(40 70 110 / 6%);
+}
+.summary-status-block,
+.summary-column {
+  min-height: 148px;
+  padding: 23px;
+}
+.summary-status-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  background: linear-gradient(135deg, #fff8ef, #fff);
+  border-left: 4px solid var(--orange);
+}
+.summary-status-icon {
+  width: 43px;
+  height: 43px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: #c96528;
+  border-radius: 50%;
+  background: #ffead7;
+}
+.summary-status-block h3 {
+  color: #10224d;
+  font: 600 19px 'Space Grotesk';
+}
+.summary-status-block p,
+.summary-column p {
+  color: #65758b;
+  font-size: 9px;
+  line-height: 1.6;
+  margin-top: 7px;
+}
+.summary-column {
+  border-left: 1px solid #e2e8f0;
+}
+.summary-column > span {
+  display: block;
+  color: #73839a;
+  font:
+    700 7px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.12em;
+}
+.summary-column > strong {
+  display: block;
+  color: #172b57;
+  font: 600 12px 'Space Grotesk';
+  margin-top: 10px;
+}
+.summary-column button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  margin-top: 10px;
+  color: #2858b7;
+  border: 0;
+  background: transparent;
+  font-size: 8px;
+  font-weight: 700;
+}
+.summary-updated {
+  grid-column: 1 / -1;
+  padding: 8px 16px;
+  color: #8491a3;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 7px;
+}

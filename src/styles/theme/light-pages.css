@@ -1,0 +1,220 @@
+/* HEALium light workspace theme, part 3: feature pages, modals and emergency data. */
+
+.page-tabs {
+  box-shadow: none;
+}
+.page-tabs button {
+  color: #68788e;
+}
+.page-tabs button.active,
+.filter-row button.active,
+.range-tabs button.active,
+.chart-options button.active,
+.size-options button.active {
+  color: #2858b7;
+  background: #e9f1ff;
+  border-color: #b8cce8;
+  box-shadow: none;
+}
+.privacy-note,
+.research-caution,
+.emergency-scope-note,
+.lab-banner,
+.transparency-note,
+.explain-box {
+  color: #63748a;
+  border-color: #d9e2ed;
+  background: #f8fafc;
+}
+.category-summary,
+.environment-card > button,
+.trend-widget-summary {
+  color: #10224d;
+  background: #fff;
+}
+.category-summary h3,
+.environment-card h3,
+.trend-widget-summary > div:nth-child(2) span {
+  color: #41526a;
+}
+.category-summary p,
+.environment-detail p,
+.trend-widget-summary > p,
+.trend-summary p {
+  color: #6a7a8f;
+}
+.category-details,
+.trend-widget-detail,
+.environment-detail {
+  border-color: #e0e7ef;
+  background: #f9fbfd;
+}
+.detail-fields div,
+.trend-context-row,
+.source-notes {
+  border-color: #dde5ef;
+  background: #fff;
+}
+.detail-fields span,
+.detail-meta,
+.trend-context-row {
+  color: #708095;
+}
+.detail-fields b,
+.environment-detail p b {
+  color: #34465f;
+}
+.filter-row button,
+.range-tabs button,
+.chart-options button,
+.size-options button,
+.custom-controls section > button,
+.view-toggle {
+  color: #65768c;
+  border-color: #d7e0eb;
+  background: #fff;
+}
+.results-header {
+  color: #66778d;
+  background: #f3f6fa;
+}
+.result-row {
+  color: #617289;
+  border-color: #e2e8f0;
+}
+.result-row:hover {
+  background: #f8fafc;
+}
+.result-row > div:first-child b,
+.result-row > strong,
+.source-list h3 {
+  color: #263954;
+}
+.metric-grid,
+.grid-lines path {
+  stroke: #dbe3ed;
+}
+.metric-point.teal,
+.metric-point.blue,
+.metric-point.orange {
+  fill: #fff;
+}
+.source-list article,
+.source-list article.expanded {
+  border-color: #e0e7ef;
+  background: #fff;
+}
+.custom-toolbar {
+  color: #66778d;
+  border-color: #e0e7ef;
+}
+.custom-widget,
+.custom-widget.essential {
+  border-color: #b8c9df;
+  background: #f5f8fc;
+}
+.custom-controls section > button b,
+.custom-widget h3 {
+  color: #2c3f5b;
+}
+.wellness-modal {
+  border-color: #cdd9e7;
+  background: #fff;
+  box-shadow: 0 30px 80px rgb(28 50 80 / 22%);
+}
+.modal-header,
+.modal-footer,
+.checkin-progress {
+  border-color: #dce4ee;
+  background: #f7f9fc;
+}
+.modal-symbol,
+.modal-symbol.blue,
+.question-number,
+.summary-success > span {
+  color: #2858b7;
+  border-color: #c7d7eb;
+  background: #eaf1fd;
+}
+.modal-close,
+.fatigue-scale button,
+.large-answer-scale button,
+.evening-slider button,
+.checkin-history-preview,
+.evening-slider-list,
+.evening-slider,
+.checkin-summary-grid > div,
+.checkin-trend-card,
+.checkin-privacy,
+.privacy-callout {
+  color: #5f7188;
+  border-color: #d8e1ec;
+  background: #fff;
+}
+.checkin-flow-cards > button {
+  color: #5e7087;
+  border-color: #d5dfeb;
+  background: #fff;
+}
+.checkin-flow-cards b,
+.measured-sleep b,
+.large-answer-scale button.active,
+.summary-success h3,
+.single-question h3 {
+  color: #183054;
+}
+.measured-sleep {
+  color: #356a9e;
+  border-color: #c7d9ec;
+  background: #eef6fd;
+}
+.large-answer-scale button.active,
+.fatigue-scale button.active {
+  color: #204e9f;
+  border-color: #8fb0df;
+  background: #eaf2ff;
+  box-shadow: none;
+}
+.evening-slider button.active {
+  color: #fff;
+  border-color: #2858b7;
+  background: #2858b7;
+}
+.checkin-trend-lines .trend-grid {
+  stroke: #dbe4ee;
+}
+.record-detail-head,
+.viewer-heading,
+.record-summary,
+.record-provenance,
+.record-metrics {
+  border-color: #dce4ed;
+}
+.record-summary,
+.record-provenance b,
+.emergency-record-list button {
+  color: #617289;
+}
+.record-metrics {
+  background: #dfe6ef;
+}
+.record-metrics > div {
+  background: #fff;
+}
+.record-metrics b,
+.emergency-record-list b,
+.empty-records h3 {
+  color: #2d405c;
+}
+.emergency-record-list button {
+  border-top-color: #e0e7ef;
+}
+.emergency-record-list button.active {
+  border-color: #b9cde6;
+  background: #edf4ff;
+}
+.app-footer {
+  color: #7b899c;
+  border-color: #dbe4ee;
+  background: #f7f9fc;
+}

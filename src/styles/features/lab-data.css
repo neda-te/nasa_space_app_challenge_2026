@@ -1,0 +1,121 @@
+/* Tests & Lab Data page: banner, filters and results table (features/lab-data). */
+
+.lab-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: #0f1d24;
+  border: 1px solid #22363f;
+  border-radius: 8px;
+}
+.lab-banner > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.lab-banner b {
+  color: #9aadb1;
+  font-size: 8px;
+}
+.lab-banner p {
+  color: #637981;
+  font-size: 7px;
+}
+.filter-row {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.filter-row button,
+.range-tabs button {
+  padding: 7px 9px;
+  color: #657b83;
+  background: #0d1a21;
+  border: 1px solid #1f323a;
+  border-radius: 6px;
+  font-size: 7px;
+  white-space: nowrap;
+}
+.filter-row button.active,
+.range-tabs button.active {
+  color: var(--teal);
+  background: #12302e;
+  border-color: #29554f;
+}
+.results-table {
+  border: 1px solid var(--line);
+  background: #0b171e;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.results-header,
+.result-row {
+  display: grid;
+  grid-template-columns: 1.3fr 0.8fr 0.85fr 1fr 0.85fr 1.1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 0 14px;
+}
+.results-header {
+  min-height: 37px;
+  color: #60777f;
+  background: #0e1e25;
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.result-row {
+  min-height: 78px;
+  border-top: 1px solid #1a2d35;
+  color: #7a8e95;
+  font-size: 8px;
+}
+.result-row:hover {
+  background: #0d1c23;
+}
+.result-row > div:first-child small,
+.result-row > div:first-child b,
+.result-row > div:first-child span {
+  display: block;
+}
+.result-row > div:first-child small {
+  color: #5e9992;
+  font-size: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.result-row > div:first-child b {
+  color: #bdc9cc;
+  font-size: 9px;
+  margin-top: 4px;
+}
+.result-row > div:first-child span {
+  color: #506870;
+  font-size: 6px;
+  margin-top: 3px;
+}
+.result-row > strong {
+  font: 600 12px 'Space Grotesk';
+  color: #d6e0e1;
+}
+.result-row em {
+  display: block;
+  color: #b9915c;
+  font: 500 6px 'Inter';
+  margin-top: 4px;
+}
+.result-row .sparkline {
+  height: 30px;
+  margin: 0;
+}
+.result-row.missing {
+  background: rgb(80 58 33 / 8%);
+}
+.no-trend {
+  color: #526971;
+  font-size: 7px;
+}

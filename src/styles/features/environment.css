@@ -1,0 +1,98 @@
+/* Environmental Monitoring page (features/environment). */
+
+.live-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border-radius: 15px;
+  color: #6eb8ae;
+  background: #102a27;
+  border: 1px solid #234a45;
+  font-size: 7px;
+}
+.live-chip i,
+.live-dot {
+  width: 5px;
+  height: 5px;
+  display: inline-block;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 7px var(--teal);
+}
+.research-caution svg {
+  color: #b89d71;
+}
+.environment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.environment-card {
+  background: #0c1a21;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.environment-card.expanded {
+  border-color: #31525b;
+}
+.environment-card > button {
+  width: 100%;
+  min-height: 145px;
+  padding: 13px;
+  text-align: left;
+  color: inherit;
+  background: linear-gradient(145deg, #102028, #0b181f);
+  border: 0;
+}
+.environment-card-top,
+.env-type {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.env-number {
+  color: #3f5962;
+  font: 600 9px 'Space Grotesk';
+}
+.environment-card h3 {
+  font-size: 10px;
+  color: #9fb2b7;
+  margin-top: 17px;
+}
+.environment-card > button > strong {
+  display: block;
+  font: 600 18px 'Space Grotesk';
+  margin-top: 8px;
+}
+.env-type {
+  margin-top: 17px;
+}
+.env-type svg {
+  color: #4e6871;
+}
+.expanded .env-type svg {
+  color: var(--teal);
+  transform: rotate(90deg);
+}
+.environment-detail {
+  padding: 0 13px 13px;
+  border-top: 1px solid #1d323a;
+}
+.environment-detail .sparkline {
+  height: 48px;
+}
+.environment-detail p {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-top: 1px solid #182c34;
+  color: #5e747c;
+  font-size: 7px;
+}
+.environment-detail p b {
+  color: #a2b4b8;
+  font-weight: 500;
+}

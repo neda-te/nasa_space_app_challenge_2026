@@ -1,0 +1,109 @@
+/* Data Sources & Transparency page (features/data-sources). */
+
+.source-type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+  margin-bottom: 13px;
+}
+.source-type-grid > div {
+  min-height: 85px;
+  padding: 12px;
+  background: #0d1b22;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.source-type-grid p {
+  color: #637880;
+  font-size: 7px;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+.source-list {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.source-list article {
+  min-height: 69px;
+  display: grid;
+  grid-template-columns: 42px 1.4fr 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: #0c1920;
+  border-top: 1px solid #192d35;
+}
+.source-list article.expanded {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #0e1d24;
+}
+.source-list article:first-child {
+  border-top: 0;
+}
+.nasa-mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #183b52;
+  color: #c6e8f7;
+  font: 700 7px 'Space Grotesk';
+  letter-spacing: 0.08em;
+}
+.source-list h3 {
+  color: #afbec1;
+  font-size: 9px;
+}
+.source-list p,
+.source-list > article > span {
+  color: #5e747c;
+  font-size: 7px;
+  margin-top: 4px;
+}
+.source-list button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6e8d91;
+  background: transparent;
+  border: 0;
+  font-size: 7px;
+}
+.source-list article.expanded > button svg {
+  transform: rotate(90deg);
+}
+.source-notes {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  margin-bottom: 2px;
+  border: 1px solid #233a43;
+  border-radius: 7px;
+  background: #101f26;
+}
+.source-notes p {
+  flex: 1;
+  margin: 0;
+  line-height: 1.5;
+}
+.transparency-note {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #2a4048;
+  border-radius: 9px;
+  background: #0f1d24;
+}
+.transparency-note h3 {
+  font: 600 11px 'Space Grotesk';
+}
+.transparency-note p {
+  color: #667b83;
+  font-size: 8px;
+  line-height: 1.6;
+  margin-top: 6px;
+}

@@ -1,0 +1,119 @@
+/* Physical Health page: category cards and details (features/physical-health). */
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.category-card {
+  background: #0c1a21;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.category-card.expanded {
+  border-color: #31515a;
+}
+.category-summary {
+  width: 100%;
+  min-height: 142px;
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+  padding: 13px;
+  color: inherit;
+  background: linear-gradient(145deg, #102028, #0c1920);
+  border: 0;
+}
+.category-summary > div {
+  min-width: 0;
+}
+.category-summary h3 {
+  font-size: 10px;
+  color: #a9babf;
+  margin-top: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.category-summary strong {
+  display: block;
+  font: 600 16px 'Space Grotesk';
+  margin-top: 12px;
+}
+.category-summary p {
+  color: #647982;
+  font-size: 7px;
+  margin-top: 5px;
+}
+.expand-control {
+  color: #557079;
+  transition: transform 0.2s;
+}
+.expanded .expand-control {
+  transform: rotate(90deg);
+  color: var(--teal);
+}
+.category-details {
+  padding: 0 13px 13px;
+  border-top: 1px solid #1c3139;
+  background: #0d1b22;
+}
+.detail-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+  color: #5f747c;
+  font-size: 7px;
+}
+.detail-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.detail-fields div {
+  padding: 8px;
+  background: #112129;
+  border-radius: 6px;
+}
+.detail-fields span,
+.detail-fields b {
+  display: block;
+}
+.detail-fields span {
+  color: #587079;
+  font-size: 6px;
+}
+.detail-fields b {
+  color: #adbdc1;
+  font-size: 7px;
+  margin-top: 4px;
+}
+.clinical-note {
+  color: #4f6971;
+  font-size: 6px;
+  margin-top: 9px;
+}
+
+.sample-stamp {
+  text-align: right;
+  padding: 8px 11px;
+  border: 1px solid #29414a;
+  background: #0f1e25;
+  border-radius: 7px;
+}
+.sample-stamp span,
+.sample-stamp b {
+  display: block;
+}
+.sample-stamp span {
+  color: #5d7880;
+  font-size: 6px;
+  letter-spacing: 0.12em;
+}
+.sample-stamp b {
+  font-size: 8px;
+  margin-top: 3px;
+}

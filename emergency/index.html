@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HEALium – Emergency Flow Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/emergency.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0B3D91" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M3 12h4l2-4 3 8 2-5 1.5 1H21" stroke="#2E96F5"/></svg>
+      <div>HEAL<span>ium</span></div>
+    </div>
+    <div class="stepper" id="stepper"></div>
+    <div class="hdr-r">
+      <div class="crew"><b>Bob · CM-2</b><span id="met">MET 143d 06:12:40</span></div>
+      <div class="alarmbox">
+        <div class="alarm">EMERGENCY <span id="elapsed">00:00</span></div>
+        <div class="live">LIVE · BEING SENT TO FLIGHT SURGEON</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- SCREEN 1 -->
+    <section class="screen on" id="s1">
+      <div class="kicker" id="s1kick">Triggered via wrist device · step 1 of 3</div>
+      <h1>What is the emergency? <span class="info" data-tip="s1">i</span></h1>
+      <button class="uncon" id="uncon" data-action="uncon" aria-pressed="false">
+        <span class="cb">✓</span>
+        <span><b>Person is unconscious / not responding</b><small>No reaction when you speak loudly and tap both shoulders</small></span>
+        <span class="st" id="unconSt">TAP TO CHECK</span>
+      </button>
+      <div class="tiles">
+        <button class="tile" data-action="type" data-v="pain"><span class="k">01</span>
+          <svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          <div><b>Pain</b><small>Localised pain anywhere in the body</small></div></button>
+        <button class="tile" data-action="type" data-v="bleeding"><span class="k">02</span>
+          <svg viewBox="0 0 24 24"><path d="M12 2.5s-6.5 7.2-6.5 11.8a6.5 6.5 0 0 0 13 0C18.5 9.7 12 2.5 12 2.5z"/></svg>
+          <div><b>Bleeding</b><small>Visible or suspected blood loss</small></div></button>
+        <button class="tile" data-action="type" data-v="breathing"><span class="k">03</span>
+          <svg viewBox="0 0 24 24"><path d="M12 4v8M12 12c-1.5 0-3-1-4-3-1.3-2.6-4-1.5-4 2v6c0 2 1.6 3 3.5 2.4L12 18M12 12c1.5 0 3-1 4-3 1.3-2.6 4-1.5 4 2v6c0 2-1.6 3-3.5 2.4L12 18"/></svg>
+          <div><b>Breathing trouble</b><small>Shortness of breath, choking, bad air</small></div></button>
+        <button class="tile" data-action="type" data-v="injury"><span class="k">04</span>
+          <svg viewBox="0 0 24 24"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M10.5 10.5h.01M13.5 13.5h.01M13.5 10.5h.01M10.5 13.5h.01"/></svg>
+          <div><b>Injury</b><small>Impact, cut, burn, sprain or fracture</small></div></button>
+        <button class="tile" data-action="type" data-v="other"><span class="k">05</span>
+          <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>
+          <div><b>Other</b><small>Digestive issues, dizziness, fatigue …</small></div></button>
+      </div>
+      <div class="vitals">
+        <div>Heart rate<b class="warn">112 bpm</b></div>
+        <div>SpO₂<b>97 %</b></div>
+        <div>Blood pressure<b>138/88</b></div>
+        <div>Skin temp.<b>36.9 °C</b></div>
+        <div class="src">Live · wrist device</div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2 -->
+    <section class="screen" id="s2">
+      <div class="ustrip hide" id="ustrip">UNCONSCIOUS · keep the airway open · re-check breathing every minute</div>
+      <div class="s2grid" id="s2body">
+        <div class="panel viewport" id="vp">
+          <canvas id="gl"></canvas>
+          <div class="vp-top">
+            <div><div class="kicker" id="vpTitle">Location</div><div class="hint">Drag to rotate · tap a body part to select</div></div>
+            <div class="vp-ctrl">
+              <div class="seg" id="view"><button class="on" data-action="view" data-v="front">FRONT</button><button data-action="view" data-v="back">BACK</button></div>
+              <div class="seg" id="zoom"><button class="on" data-action="zoom" data-v="body">BODY</button><button data-action="zoom" data-v="head">HEAD</button></div>
+            </div>
+          </div>
+          <div class="vp-bot"><span id="facing">VIEW · FRONT</span><span>Multiple areas allowed</span></div>
+          <div id="hover"></div>
+        </div>
+        <div class="side">
+          <div class="panel" style="flex:none">
+            <div class="row"><span class="lbl">Selected area</span><span class="info hide" id="anatInfo" data-tip="anat">i</span></div>
+            <div class="chips" id="chips"></div>
+          </div>
+          <div id="bodyGroups" style="display:contents"></div>
+        </div>
+      </div>
+      <div class="s2grid hide" id="s2list">
+        <div class="panel listpanel">
+          <div class="kicker" id="listKicker"></div>
+          <h2 id="listQ"></h2>
+          <div class="hint" id="listHint"></div>
+          <div class="opts" id="listOpts"></div>
+          <div class="sub hide" id="listSoon"></div>
+        </div>
+        <div class="side"><div id="listGroups" style="display:contents"></div></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3 -->
+    <section class="screen" id="s3">
+      <div class="summary">
+        <h1>Priors &amp; suggestions</h1>
+        <div class="tags" id="tags"></div>
+        <div class="vit" id="vit"></div>
+      </div>
+      <div class="grid3">
+        <div class="panel a-causes">
+          <div class="row"><span class="lbl" id="midTitle">Possible causes</span><span class="info" id="midInfo" data-tip="causes">i</span></div>
+          <div id="causes" style="margin-top:.3rem"></div>
+        </div>
+        <div class="panel a-do">
+          <div class="row"><span class="lbl" id="doLbl">Do now · suggested for this case</span><div id="banner" style="flex:1"></div><span class="info" data-tip="do">i</span></div>
+          <div id="recs"></div>
+        </div>
+        <div class="a-side">
+          <div class="panel flags"><h2>Alert flight surgeon now if</h2><div class="tx" id="flags"></div></div>
+          <div class="panel"><div class="row"><span class="lbl">Then · treatment</span><span class="info" data-tip="tx">i</span></div><div class="tx" id="tx"></div></div>
+        </div>
+        <div class="panel a-records">
+          <div class="row"><span class="lbl">Priors · judging by records</span><span class="info" data-tip="records">i</span></div>
+          <div class="rec" id="records"></div>
+        </div>
+        <div class="panel a-cat">
+          <div class="row"><span class="lbl">On board for this case · what to grab · tap for the guide</span><span class="info" data-tip="cat">i</span></div>
+          <div id="catalog"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="fl"><span class="disc">PROTOTYPE · not a medical device · demo data</span><button class="link hide" id="restart" data-action="restart">↺ Restart demo</button></div>
+    <div class="btns">
+      <div class="need hide" id="need"></div>
+      <button class="btn ghost hide" id="back" data-action="back">← Back</button>
+      <button class="btn pri" id="next" data-action="next" disabled>Continue →</button>
+    </div>
+  </footer>
+
+  <div id="guide"><div class="gbox" id="gbox"></div></div>
+  <div id="tip"></div>
+  <div id="toast"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+
+<!-- Classic scripts sharing one global scope. ORDER MATTERS: data first, then logic, main.js last. -->
+<script src="js/data/regions-and-pain.js"></script>
+<script src="js/data/flows.js"></script>
+<script src="js/data/procedures.js"></script>
+<script src="js/data/bleeding.js"></script>
+<script src="js/data/injury.js"></script>
+<script src="js/data/breathing.js"></script>
+<script src="js/data/other.js"></script>
+<script src="js/data/unconscious.js"></script>
+<script src="js/data/tooltips.js"></script>
+<script src="js/app/state.js"></script>
+<script src="js/app/navigation.js"></script>
+<script src="js/app/screen-questions.js"></script>
+<script src="js/app/assessment.js"></script>
+<script src="js/app/vitals.js"></script>
+<script src="js/app/guide.js"></script>
+<script src="js/app/interaction.js"></script>
+<script src="js/app/body-3d.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

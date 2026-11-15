@@ -1,0 +1,52 @@
+/* Design tokens (CSS custom properties) and base element styles. */
+
+:root {
+  color-scheme: dark;
+  --bg: #071015;
+  --surface: #0b171e;
+  --surface-2: #0e1d25;
+  --surface-3: #11242d;
+  --line: #1d313b;
+  --line-bright: #294650;
+  --text: #f2f7f8;
+  --muted: #82969e;
+  --muted-2: #5a717a;
+  --teal: #45dbc5;
+  --blue: #6ac8ee;
+  --orange: #eda761;
+  --yellow: #d5be62;
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #29414b transparent;
+  }
+  body {
+    margin: 0;
+    min-width: 1180px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  button,
+  select {
+    font: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+  h1,
+  h2,
+  h3,
+  strong {
+    letter-spacing: -0.015em;
+  }
+}
