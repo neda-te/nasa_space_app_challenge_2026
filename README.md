@@ -1,118 +1,153 @@
-# HEALium – local dashboard and emergency mode
+# HEALium
 
-## Run locally
+Link: https://github.com/neda-te/nasa_space_app_challenge_2026
+Demo: https://drive.google.com/file/d/1m9H6MrEr5AyhFo0CfGU89dtGyAsCJG-C/view
 
-From this folder, using Node.js 22.12+ (or 24):
+### Astronaut health monitoring and emergency support prototype
 
-```powershell
-npm install
+HEALium brings routine crew health monitoring and guided emergency assessment into one browser experience. It combines a customizable dashboard, interactive 3D body models, procedure guides, and a synchronized telemetry scenario to explore how astronauts could review their health and respond to concerns during a mission.
+
+The current application runs without a database, sign-in, sensor connection, or API key.
+
+> **Prototype status:** Health readings and alerts are fictional or labeled sample data. Assessments, check-ins, and report sharing are demonstrations. HEALium is not a validated medical device or a substitute for professional medical care. Simulated reports are not transmitted to a flight surgeon.
+
+## Features
+
+- **Crew health dashboard:** Explore physical health, blood and urine results, cabin environment, trends, and data sources, with customizable dashboard widgets.
+- **Live telemetry demo:** Follow heart rate, oxygen saturation, blood pressure, skin temperature, respiratory rate, and cabin CO₂ during a five-minute scenario. Live charts include a readable values table.
+- **Emergency assessment:** Open **Help** beside Notifications for a full-screen flow with body-region selection, symptom review, and simulated report submission. Return with the dashboard page, crew selection, and settings preserved.
+- **Interactive body models:** Dashboard previews and emergency mode share a Three.js renderer and female/male schematic model preferences. Region buttons provide a fallback when Three.js is unavailable.
+- **Procedure guides:** Browse step-by-step instructions, including 18 blood draw photos and four illustrations each for ECG and eye exams. Guides without supplied images, including ultrasound, use text-only steps.
+- **Voice assistance:** Use English symptom dictation and spoken guidance in supported browsers. Keyword-based symptom suggestions are presented for user review.
+- **Wellbeing tools:** Try guided breathing scenes, daily check-ins, journal entries, and reminder completion. Opening emergency mode pauses the breathing exercise.
+- **Personal preferences:** Save dark mode, height, weight, and body model selection in browser storage.
+- **Responsive interface:** Layouts and browser tests cover desktop, tablet, mobile, narrow mobile, and landscape viewports.
+
+## Getting started
+
+### Requirements
+
+- Node.js **22.12+** or **24**, with npm.
+- A modern browser; WebGL support enables the interactive 3D body model.
+- Google Chrome installed locally to run the configured end-to-end tests.
+
+From the repository root:
+
+```bash
+npm ci
 npm run dev
 ```
 
-Open the local URL printed in the terminal (normally http://127.0.0.1:5173/).
-The launcher opens the dashboard automatically. Click **Help** beside Notifications
-for the full-screen emergency flow. **Back to dashboard** returns to the same
-page, crew selection, and dashboard settings. Closing emergency mode resets its
-prototype flow the next time it is opened.
+Open the URL printed in the terminal, normally [http://127.0.0.1:5173](http://127.0.0.1:5173). The development server opens the dashboard automatically.
 
-## Production build
+Collaborators need access to the private GitHub repository to clone it. No application credentials or environment variables are required for the local launcher.
 
-```powershell
+### Production build
+
+```bash
 npm run build
 npm run preview
 ```
 
-Open the URL printed by the preview server. The `dist` folder contains the
-combined app. The dashboard is available at `/` and `/dashboard.html`, and the
-original emergency prototype is available at `/emergency/index.html`.
+The combined application is written to `dist/`. Open the preview URL printed in the terminal.
 
-## What is preserved
+| Route | Purpose |
+| --- | --- |
+| `/` | Main dashboard |
+| `/dashboard.html` | Explicit dashboard entry point |
+| `/emergency/index.html` | Standalone emergency prototype |
 
-- The dashboard components and styles remain in
-  `Astronaut Health Dashboard/Astronaut Health Dashboard/src/app/(frontend)`.
-- `index.html` and `img/` contain the emergency prototype sources.
-  The launcher serves them in an iframe to isolate their CSS, scripts, canvas,
-  and keyboard controls. The build copies them into `dist/emergency/`.
-- `local/main.tsx` mounts the existing dashboard without the Figma server runtime.
-- Sign-in has been removed from the app. Legacy `/login`, `/signin`, `/sign-in`,
-  `/register`, and `/signup` URLs redirect to the dashboard in the local servers.
-- `local/local-actions.ts` supports reminders and journal entries in memory for
-  the current session. Reloading clears these records. Check-ins and sharing
-  are explicitly simulated; no authentication or delivery service is implied.
-  Emergency Data starts empty locally; connecting or importing records is a
-  separate backend integration.
-- The original Next.js/Payload configuration and backend files are retained.
-  This local launcher does not need their platform-owned credentials.
+For the integrated experience, enter emergency mode from the dashboard. The local development and preview servers redirect legacy sign-in and registration URLs to the dashboard.
 
-`shared/tokens.css` defines both modes' typography and palette. Responsive layout
-styles live in `shared/dashboard.css` and `shared/emergency.css`. Three.js is
-bundled locally; fonts still load from Google Fonts. The prototype includes a
-region-button fallback when Three.js is unavailable.
+## Try the five-minute demo
 
-The shared theme uses `#F4F6FB` for the background, `#FFFFFF` for cards,
-`#D83933` for emergency states, `#0032A0` for primary controls, and `#14234A`
-for primary text. Headings use Inter, body text uses Public Sans, and technical
-readings and timestamps use DM Mono. Warning and success states keep distinct
-semantic colors.
+1. Open the dashboard and review the telemetry readings.
+2. Use **Pause demo**, **Resume demo**, or **Restart demo** to control playback.
+3. Watch the readings progress through the scenario stages below.
+4. Open **Help** to explore emergency assessment with the same telemetry clock.
+5. Complete an assessment and select **Simulate sending data** to see the demonstration confirmation.
+6. Return to the dashboard or select **Replay demo** after playback ends.
 
-Dashboard Settings also saves dark mode, height (cm), weight (kg), and the
-female/male schematic body model selection in this browser's local storage.
-These preferences restore after reload and synchronize across same-origin tabs
-and the emergency iframe. They are separate from session-only journals and
-check-ins; they are not sent to a backend. If browser storage is unavailable,
-the settings form reports a save error.
+The fixture contains **60 fictional samples at five-second intervals** in `data/demo-telemetry.json`. Playback stops at **5:00** and does not loop automatically.
 
-The dashboard's body preview and emergency mode share the same interactive 3D
-renderer. Breathing opens a full-screen view with a reserved safety toolbar for
-Emergency and Go back; opening emergency mode pauses the exercise. The alerts
-panel and CO₂ history show explicitly labeled sample data. Circled information
-icons support hover, keyboard focus, and tap, with viewport-bounded tooltips.
+| Time | Scenario stage |
+| --- | --- |
+| 0:00–1:00 | Stable |
+| 1:00–2:00 | Rising readings |
+| 2:00–3:00 | Scripted alert |
+| 3:00–4:00 | Recovery |
+| 4:00–5:00 | Stable again |
 
-The emergency assessment has a **Simulate sending data** button. The requested
-confirmation appears only after the simulated response succeeds, alongside an
-explicit **Simulation only · no data transmitted** status. No report reaches a
-flight surgeon. Failed submissions show an error and allow a retry.
+The alert is a presentation event, not a clinical threshold or diagnosis. Live charts reveal captured samples as playback advances. Lab results, sleep records, readiness context, and long-term charts remain separate sample history.
 
-## Browser verification
+## Data and persistence
 
-```powershell
-npm run test:e2e
+| Data or action | Current behavior |
+| --- | --- |
+| Live telemetry | Replayed from the bundled JSON fixture; no live sensor feed |
+| Demo clock | Shared between dashboard and emergency mode; synchronized across reloads and same-origin tabs through browser storage |
+| Appearance and body preferences | Saved in this browser's local storage and synchronized across same-origin tabs and the emergency frame |
+| Journal entries and reminder completion | Kept in memory for the current page session; cleared on reload |
+| Daily check-ins | Validated locally with a simulated submission response |
+| Emergency report sharing | Simulated success or failure; no report delivery |
+| Emergency Data | Starts empty; connecting or importing records requires backend integration |
+
+If storage is blocked, the current page and its emergency frame can still share an in-memory demo clock. Preference save failures are reported in Settings. If telemetry cannot load, the interface offers a retry instead of inventing readings. Closing emergency mode resets its assessment flow for the next opening.
+
+Google Fonts requires network access. Voice recognition availability, microphone permission, and speech processing depend on the browser and its speech service; voice features should not be assumed to work offline. HEALium does not store recorded audio.
+
+## Technology and architecture
+
+The local app uses **React 19**, **TypeScript/JavaScript**, **Vite 7**, **Tailwind CSS 4**, and **Three.js**. Tests use **Vitest** and **Playwright**. CSV ingestion uses **csv-parse**.
+
+```text
+.
+├── local/                       # React launcher and session-only action adapters
+├── shared/                      # Telemetry, preferences, voice, body integration, styles
+├── data/demo-telemetry.json      # Fictional telemetry fixture
+├── index.html                   # Emergency prototype source document
+├── dashboard.html               # Vite dashboard entry document
+├── img/                         # Branding and procedure guide images
+├── src/ingestion/               # Source adapters, validation, units, reading sinks
+├── tests/                       # Browser tests and voice unit tests
+├── Astronaut Health Dashboard/
+│   └── Astronaut Health Dashboard/
+│       └── src/                 # Original dashboard and Next.js/Payload sources
+└── vite.config.js               # Local routing, action aliases, build packaging
 ```
 
-This builds the production app and tests it in headless Google Chrome (Chrome
-must be installed). Tests cover desktop, tablet, mobile, narrow mobile, and
-landscape sizes, including navigation, text overflow, actual WebGL body alignment
-and resizing, and simulated submission success/failure. Screenshots and failure
-traces are written to `.cache/browser-tests/`.
+`local/main.tsx` mounts the existing dashboard components from `Astronaut Health Dashboard/Astronaut Health Dashboard/src/app/(frontend)`. Vite aliases the dashboard's action imports to `local/local-actions.ts`, allowing the interface to run without the original backend credentials.
 
-## Five-minute live demo
+The emergency document runs in an iframe to isolate scripts, styles, canvas, and keyboard controls. Shared modules coordinate telemetry and preferences between both modes. The production build packages the emergency document, images, data, shared assets, and Three.js alongside the dashboard.
 
-The app replays 60 fictional telemetry samples from `data/demo-telemetry.json`,
-one every five seconds. No database server, sensor connection, or API key is needed.
-Use **Pause demo**, **Resume demo**, **Restart demo**, or **Replay demo** above the
-page content. Emergency mode has the same controls. Playback stops at 5:00;
-it does not silently loop. Restart demo begins a fresh run.
+`shared/tokens.css` defines the common typography and palette; `shared/dashboard.css` and `shared/emergency.css` adapt the two interfaces. Three.js is bundled locally.
 
-Timeline: 0:00–1:00 stable, 1:00–2:00 rising, 2:00–3:00 scripted alert,
-3:00–4:00 recovery, 4:00–5:00 stable again. The alert is a scripted presentation
-event, not a clinical threshold or diagnosis. The notification bell and live
-telemetry panel show the scenario stage.
+The original Next.js/Payload configuration is retained. **Use the root Vite launcher for local development.**
 
-Dashboard and emergency mode share the same readings and clock. Playback also
-continues across navigation and reloads; controls synchronize across tabs using
-browser storage. If storage is blocked, the current page and its emergency frame
-still share an in-memory clock. If the JSON cannot load, the app shows a retry
-control rather than fabricating readings.
+### Ingestion module
 
-Heart rate, SpO₂, blood pressure, skin temperature, respiratory rate, and cabin
-CO₂ update from the feed. Live charts reveal only captured samples and provide
-a readable values table. Lab results, sleep records, readiness context, and
-long-term charts remain labeled sample history, separate from live playback.
-`shared/telemetry.js` owns playback; `shared/live-telemetry.tsx` renders the dashboard
-controls, readings, alert, and charts. The build includes the JSON in `dist/data`.
+`src/ingestion` provides a separate gateway for reading validation, unit handling, source adapters, and an in-memory sink. Its simulated adapter reads the same fixture but does not drive the browser playback clock. Other source adapters remain explicitly disconnected; there is no connected sensor service or file-upload interface.
 
-## Refactor integration and guide assets
+Programmatic CSV imports require `metric,value,unit,recordedAt` headers, with optional `subject,location,sensorId` fields. Reading identity includes source, metric, subject, location, sensor, and timestamp to support idempotent imports.
 
-The current local HEALium dashboard remains the application entry point: no sign-in, working notifications, session-only check-ins/reminders, shared settings, and synchronized five-minute playback. The coworker’s ingestion module is retained under `src/ingestion`, independently of the older refactored UI. Its simulated adapter uses the same JSON fixture; it does not replace the browser playback clock. CSV imports use `csv-parse`; reading identity includes location and sensor ID. Run `npm test` for regression coverage. See `src/ingestion/README.md` for the integration boundary.
+See the [ingestion documentation](src/ingestion/README.md) for the integration boundary and import details.
 
-Blood draw uses all 18 supplied photos; ECG and eye exam each use their four supplied illustrations in step order. The supplied ECG/eye images are labeled prototype illustrations rather than placement diagrams or live transmission status. Guides without supplied images (including ultrasound) clearly show text-only steps. Missing-image failures preserve written instructions and step navigation. `tests/guides.spec.js` opens every procedure and verifies every step, image decoding, navigation, and fallback states.
+## Development commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the local Vite development server |
+| `npm run build` | Build the combined dashboard and emergency app |
+| `npm run preview` | Serve the production build locally |
+| `npm test` | Run ingestion regression tests and voice unit tests |
+| `npm run test:e2e` | Build the app and run Playwright tests in installed Google Chrome |
+
+Browser coverage includes navigation, responsive overflow, WebGL body alignment and resizing, procedure images and fallbacks, telemetry, voice controls, and simulated submission success and failure. Screenshots and retained failure traces are written to `.cache/browser-tests/`.
+
+## Current limits
+
+The prototype demonstrates interface behavior and a fictional mission scenario. Production use would require authenticated access, persistent health records, connected and validated data sources, a real report delivery service, and clinical review of assessment logic and procedure content.
+
+Procedure imagery includes prototype illustrations and should not be treated as validated placement diagrams. Voice keyword suggestions require user confirmation and do not diagnose symptoms.
+
+The repository's private visibility controls access to the source; it does not add authentication or health-data security to the running application.
